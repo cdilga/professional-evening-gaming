@@ -80,7 +80,7 @@ function animate(now) {
 
 function toggle() {
   running = !running;
-  button.textContent = running ? "Pause bounce" : "Start bouncing";
+  button.textContent = running ? "Pause it, yeah?" : "Make it bounce, mate";
 
   if (running) {
     lastFrame = 0;

@@ -3,37 +3,43 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Postgres Playground API | Professional Evening Gaming</title>
+    <title>Postgres Playground API | Professional Evening Gaming (nah yeah)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Kalam:wght@300;400;700&family=Patrick+Hand&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
     <main class="page-shell project-page">
-      <a class="back-link" href="/">Back to Professional Evening Gaming</a>
+      <a class="back-link" href="/">← Back to Professional Evening Gaming</a>
       <section class="hero-card">
-        <p class="eyebrow">FastAPI + Postgres example</p>
+        <p class="eyebrow">FastAPI + Postgres ripper</p>
         <h1>Postgres Playground API</h1>
-        <p class="lede">This project is the reference service for the hybrid architecture: FastAPI app code in its own folder, a dedicated Postgres schema, Docker deployment on the shared platform, and a health endpoint for Traefik or direct host routing.</p>
+        <p class="lede">This here's the reference service for the hybrid architecture: FastAPI app code in its own folder, a dedicated Postgres schema, Docker deployment on the shared platform, and a health endpoint for Traefik or direct host routing. Proper backend stuff, none of that static site business.</p>
       </section>
 
       <section class="project-detail-grid">
         <article class="playground-card">
           <div class="playground-copy">
             <h2>Why it exists</h2>
-            <p>An example service that proves the repo can host a non-trivial backend project with its own tooling, schema, and deploy path.</p>
-            <p>The main site stays easy to publish, while project services can live on shared host infrastructure with Traefik, cloudflared, and one Postgres instance carved into project schemas.</p>
+            <p>An example service proving the repo can host a non-trivial backend project with its own tooling, schema, and deploy path. It's got endpoints and everything. Very fancy.</p>
+            <p>Main site stays easy to publish, while project services can live on shared infrastructure with Traefik, cloudflared, and one Postgres instance carved into neat little schemas. Bloody beautiful.</p>
+            <p class="footnote">Warning: May contain traces of SQL. Not suitable for people allergic to databases.</p>
           </div>
         </article>
         <article class="playground-card">
           <div class="playground-copy">
             <h2>Project details</h2>
-            <dl class="detail-list"><div class="detail-row"><dt>Project kind</dt><dd>service</dd></div><div class="detail-row"><dt>Database schema</dt><dd>postgres_playground</dd></div><div class="detail-row"><dt>Container port</dt><dd>8000</dd></div></dl>
+            <dl class="detail-list"><div class="detail-row"><dt>Project kind</dt><dd>service (the real deal)</dd></div><div class="detail-row"><dt>Database schema</dt><dd>postgres_playground</dd></div><div class="detail-row"><dt>Container port</dt><dd>8000 (the good one)</dd></div></dl>
             <ul class="tooling-list"><li>fastapi</li><li>psycopg</li><li>docker compose</li></ul>
           </div>
         </article>
       </section>
+      
+      <div class="easter-egg">
+        🦶 "SELECT * FROM sanity WHERE status = 'gone walkabout'" — Sassy <br>
+        <span style="font-size: 0.7rem;">This one actually has a database. Tables and everything. Very grown up.</span>
+      </div>
     </main>
   </body>
 </html>

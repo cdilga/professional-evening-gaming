@@ -1,30 +1,36 @@
 :root {
-  --bg: #07111a;
-  --bg-top: #122739;
-  --panel: rgba(8, 18, 27, 0.84);
-  --panel-strong: rgba(10, 22, 33, 0.94);
-  --line: rgba(171, 221, 255, 0.16);
-  --text: #edf7ff;
-  --muted: #bfd2de;
-  --mint: #7df9c1;
-  --gold: #ffc857;
-  --cyan: #67e8f9;
-  --shadow: rgba(0, 0, 0, 0.34);
+  /* Sassy's Crayon Box - Earthy + Mint */
+  --paper-cream: #f5f0e6;
+  --paper-aged: #e8e0d0;
+  --paper-texture: #faf7f0;
+  --earth-brown: #5c4033;
+  --earth-dark: #3d2b1f;
+  --earth-light: #8b6f47;
+  --crayon-mint: #7df9c1;
+  --crayon-orange: #ff8c42;
+  --crayon-pink: #ff6b9d;
+  --crayon-blue: #4ecdc4;
+  --crayon-yellow: #ffe66d;
+  --crayon-purple: #9b59b6;
+  --scribble-black: #2c2c2c;
+  --shadow-sketch: rgba(44, 44, 44, 0.15);
 }
 
 * {
   box-sizing: border-box;
 }
 
+/* Paper texture background */
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: "Space Grotesk", sans-serif;
-  color: var(--text);
-  background:
-    radial-gradient(circle at top, rgba(125, 249, 193, 0.12), transparent 32%),
-    radial-gradient(circle at 80% 20%, rgba(255, 200, 87, 0.16), transparent 24%),
-    linear-gradient(180deg, var(--bg-top), var(--bg));
+  font-family: 'Kalam', cursive;
+  color: var(--scribble-black);
+  background-color: var(--paper-cream);
+  background-image: 
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, var(--paper-cream) 0%, var(--paper-aged) 100%);
+  background-blend-mode: overlay, normal;
 }
 
 a {
@@ -32,54 +38,124 @@ a {
   text-decoration: none;
 }
 
+/* Sketchy page container */
 .page-shell {
   width: min(1120px, calc(100vw - 32px));
   margin: 0 auto;
   padding: 28px 0 56px;
 }
 
+/* Wobbly hand-drawn borders for cards */
 .topbar,
 .hero-card,
 .playground-card,
 .project-card {
-  border: 1px solid var(--line);
-  border-radius: 28px;
-  box-shadow: 0 20px 80px var(--shadow);
-  backdrop-filter: blur(18px);
+  border: 2px solid var(--earth-brown);
+  background: var(--paper-texture);
+  box-shadow: 
+    3px 4px 0 var(--earth-brown),
+    6px 8px 0 var(--shadow-sketch);
 }
 
-.topbar,
-.hero-card,
-.playground-card {
-  background: var(--panel);
-}
-
+/* Each card gets a slightly different wobble */
 .topbar {
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  padding: 18px 22px;
+  margin-bottom: 24px;
   display: flex;
   justify-content: space-between;
   gap: 20px;
-  padding: 18px 22px;
-  margin-bottom: 24px;
 }
 
+.hero-card {
+  border-radius: 20px 255px 20px 25px / 255px 20px 225px 20px;
+  padding: 36px;
+}
+
+.playground-card {
+  border-radius: 25px 20px 255px 20px / 20px 255px 20px 225px;
+  padding: 28px;
+}
+
+.project-card {
+  border-radius: 15px 225px 15px 255px / 255px 15px 225px 15px;
+  padding: 24px;
+}
+
+/* Hand-drawn typography */
 .brand-lockup,
 .eyebrow,
 .project-kicker,
 .architecture-kicker,
 .back-link {
   margin: 0;
-  color: var(--mint);
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.82rem;
+  color: var(--earth-dark);
+  font-family: 'Patrick Hand', cursive;
+  font-size: 0.95rem;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.1em;
+  font-weight: 600;
 }
 
+/* Sassy's special mint accent on eyebrows */
+.eyebrow,
+.project-kicker {
+  color: var(--crayon-mint);
+  text-shadow: 1px 1px 0 var(--earth-brown);
+}
+
+h1, h2, h3 {
+  margin: 0;
+  line-height: 1.1;
+  font-family: 'Permanent Marker', cursive;
+  color: var(--earth-dark);
+}
+
+h1 {
+  max-width: 14ch;
+  font-size: clamp(2.8rem, 7vw, 5rem);
+  transform: rotate(-1deg);
+}
+
+h2 {
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  transform: rotate(0.5deg);
+}
+
+h3 {
+  font-size: 1.6rem;
+  transform: rotate(-0.5deg);
+}
+
+/* Body text in Kalam for that handwritten feel */
+.lede,
+.playground-copy p,
+.helper,
+li,
+.project-summary,
+.architecture-note,
+.detail-row dd,
+p {
+  color: var(--earth-brown);
+  line-height: 1.7;
+  font-family: 'Kalam', cursive;
+  font-size: 1.1rem;
+}
+
+.lede {
+  max-width: 60ch;
+  margin: 18px 0 0;
+  font-size: 1.15rem;
+}
+
+/* Navigation with sketchy style */
 .site-nav {
   display: flex;
   align-items: center;
   gap: 18px;
-  color: var(--muted);
+  color: var(--earth-brown);
+  font-family: 'Patrick Hand', cursive;
+  font-size: 1.1rem;
 }
 
 .submenu {
@@ -89,12 +165,14 @@ a {
 .submenu summary {
   list-style: none;
   cursor: pointer;
+  font-weight: 600;
 }
 
 .submenu summary::-webkit-details-marker {
   display: none;
 }
 
+/* Sketchy dropdown */
 .submenu-list {
   position: absolute;
   top: calc(100% + 10px);
@@ -102,11 +180,13 @@ a {
   min-width: 220px;
   margin: 0;
   padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  background: var(--panel-strong);
+  border: 2px solid var(--earth-brown);
+  border-radius: 20px 255px 20px 25px / 255px 20px 225px 20px;
+  background: var(--paper-texture);
+  box-shadow: 3px 4px 0 var(--earth-brown);
   display: grid;
   gap: 8px;
+  z-index: 10;
 }
 
 .submenu-list li {
@@ -117,49 +197,15 @@ a {
   display: block;
   padding: 8px 10px;
   border-radius: 12px;
+  font-family: 'Kalam', cursive;
 }
 
 .submenu-list a:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(125, 249, 193, 0.2);
+  transform: rotate(1deg);
 }
 
-.hero-card {
-  padding: 36px;
-}
-
-h1,
-h2,
-h3 {
-  margin: 0;
-  line-height: 1;
-}
-
-h1 {
-  max-width: 11ch;
-  font-size: clamp(3rem, 7vw, 5.4rem);
-}
-
-h2 {
-  font-size: clamp(1.8rem, 4vw, 2.8rem);
-}
-
-.lede,
-.playground-copy p,
-.helper,
-li,
-.project-summary,
-.architecture-note,
-.detail-row dd {
-  color: var(--muted);
-  line-height: 1.6;
-}
-
-.lede {
-  max-width: 60ch;
-  margin: 18px 0 0;
-  font-size: 1.05rem;
-}
-
+/* Action area */
 .actions {
   margin-top: 28px;
   display: flex;
@@ -168,38 +214,56 @@ li,
   gap: 16px;
 }
 
+/* Sketchy hand-drawn buttons - crossed out and rewritten style */
 .primary-button,
 .project-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 0;
-  border-radius: 999px;
-  padding: 14px 22px;
-  background: linear-gradient(135deg, var(--mint), var(--cyan));
-  color: #08202b;
-  font: inherit;
-  font-weight: 700;
+  border: 2px solid var(--earth-dark);
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  padding: 14px 26px;
+  background: var(--crayon-mint);
+  color: var(--earth-dark);
+  font-family: 'Permanent Marker', cursive;
+  font-size: 1.1rem;
   cursor: pointer;
-  box-shadow: 0 16px 36px rgba(97, 240, 255, 0.24);
-  transition: transform 180ms ease, box-shadow 180ms ease;
+  box-shadow: 
+    2px 3px 0 var(--earth-dark),
+    inset 0 0 0 1px var(--earth-dark);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+  position: relative;
+  transform: rotate(-1deg);
+}
+
+/* The "crossed out and rewritten" look */
+.primary-button::before,
+.project-link::before {
+  content: '';
+  position: absolute;
+  top: 45%;
+  left: 8%;
+  right: 8%;
+  height: 2px;
+  background: var(--crayon-pink);
+  opacity: 0.6;
+  transform: rotate(-2deg);
 }
 
 .primary-button:hover,
 .project-link:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 22px 42px rgba(97, 240, 255, 0.28);
+  transform: translateY(-2px) rotate(0deg);
+  box-shadow: 
+    4px 6px 0 var(--earth-dark),
+    inset 0 0 0 1px var(--earth-dark);
+  background: var(--crayon-yellow);
 }
 
+/* Vision card layout */
 .vision-card,
 .playground-card,
 .project-detail-grid {
   margin-top: 24px;
-}
-
-.playground-card,
-.project-detail-grid {
-  padding: 28px;
 }
 
 .vision-card {
@@ -209,12 +273,21 @@ li,
   align-items: start;
 }
 
+/* Architecture note - sketchy highlight box */
 .architecture-note {
   padding: 22px;
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.04);
+  border: 2px dashed var(--earth-light);
+  border-radius: 25px 20px 255px 20px / 20px 255px 20px 225px;
+  background: rgba(255, 230, 109, 0.15);
+  transform: rotate(1deg);
 }
 
+.architecture-kicker {
+  color: var(--crayon-orange);
+  font-size: 1rem;
+}
+
+/* Project grid */
 .project-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -222,20 +295,12 @@ li,
   margin-top: 24px;
 }
 
-.project-card {
-  padding: 24px;
-  background: rgba(7, 17, 26, 0.88);
-}
-
 .project-card-header {
   display: grid;
   gap: 10px;
 }
 
-.project-card h3 {
-  font-size: 1.8rem;
-}
-
+/* Tooling tags - crayon style */
 .tooling-list {
   display: flex;
   flex-wrap: wrap;
@@ -246,19 +311,37 @@ li,
 
 .tooling-list li {
   list-style: none;
-  padding: 8px 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
+  padding: 6px 14px;
+  border: 1px solid var(--earth-light);
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  background: var(--paper-cream);
+  font-family: 'Patrick Hand', cursive;
+  font-size: 0.95rem;
+  color: var(--earth-brown);
+  transform: rotate(-1deg);
 }
 
+.tooling-list li:nth-child(even) {
+  transform: rotate(1deg);
+  background: rgba(125, 249, 193, 0.2);
+}
+
+/* Accent colors with sketchy borders */
 .accent-mint {
-  box-shadow: inset 0 0 0 1px rgba(125, 249, 193, 0.1), 0 20px 80px var(--shadow);
+  border-color: var(--crayon-mint);
+  box-shadow: 
+    3px 4px 0 var(--crayon-mint),
+    6px 8px 0 var(--shadow-sketch);
 }
 
 .accent-gold {
-  box-shadow: inset 0 0 0 1px rgba(255, 200, 87, 0.12), 0 20px 80px var(--shadow);
+  border-color: var(--crayon-orange);
+  box-shadow: 
+    3px 4px 0 var(--crayon-orange),
+    6px 8px 0 var(--shadow-sketch);
 }
 
+/* Bouncing ball stage - sketchy playground */
 .stage-wrap {
   position: relative;
   min-height: 360px;
@@ -270,45 +353,51 @@ li,
   position: absolute;
   inset: 18% 12%;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(97, 240, 255, 0.16), transparent 70%);
-  filter: blur(16px);
+  background: radial-gradient(circle, rgba(125, 249, 193, 0.3), transparent 70%);
+  filter: blur(20px);
 }
 
+/* Sketchy stage for the ball */
 .stage {
   position: relative;
   width: min(100%, 520px);
   aspect-ratio: 4 / 3;
-  border-radius: 30px;
+  border: 3px solid var(--earth-brown);
+  border-radius: 25px 20px 255px 20px / 20px 255px 20px 225px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.12);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 26%),
-    radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.18), transparent 32%),
-    linear-gradient(180deg, #10283c 0%, #08131c 100%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.3), transparent 26%),
+    radial-gradient(circle at 50% 12%, rgba(125, 249, 193, 0.3), transparent 32%),
+    linear-gradient(180deg, var(--paper-cream) 0%, var(--paper-aged) 100%);
+  box-shadow: 
+    inset 4px 4px 0 rgba(255, 255, 255, 0.5),
+    4px 5px 0 var(--earth-brown);
 }
 
-.stage::before,
-.stage::after {
+/* Sketchy floor line */
+.stage::before {
   content: "";
   position: absolute;
   inset: auto 0 0 0;
-}
-
-.stage::before {
   height: 22%;
-  background: linear-gradient(180deg, rgba(255, 200, 87, 0.04), rgba(255, 200, 87, 0.18));
+  background: linear-gradient(180deg, transparent, rgba(93, 64, 51, 0.1));
+  border-top: 2px dashed var(--earth-light);
 }
 
+/* Grid lines - hand-drawn feel */
 .stage::after {
+  content: "";
+  position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(93, 64, 51, 0.08) 2px, transparent 2px),
+    linear-gradient(90deg, rgba(93, 64, 51, 0.08) 2px, transparent 2px);
   background-size: 48px 48px;
-  opacity: 0.35;
+  opacity: 0.5;
   pointer-events: none;
 }
 
+/* The ball - crayon style with sketchy highlight */
 .ball,
 .shadow {
   position: absolute;
@@ -320,26 +409,41 @@ li,
   width: 58px;
   height: 58px;
   border-radius: 50%;
-  background: radial-gradient(circle at 30% 28%, #ffffff, #d0fff2 32%, #7df9c1 58%, #1a8f8b 100%);
-  box-shadow: inset -10px -12px 18px rgba(0, 0, 0, 0.18);
+  background: 
+    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.9) 0%, transparent 35%),
+    radial-gradient(circle at 30% 28%, #ffffff, var(--crayon-mint) 32%, #4ecdc4 58%, var(--crayon-blue) 100%);
+  border: 2px solid var(--earth-brown);
+  box-shadow: 
+    inset -4px -4px 8px rgba(0, 0, 0, 0.1),
+    2px 3px 0 var(--earth-brown);
   will-change: transform;
 }
 
+/* Sketchy shadow */
 .shadow {
   width: 84px;
   height: 28px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(0, 0, 0, 0.36), transparent 70%);
-  filter: blur(4px);
-  opacity: 0.5;
+  background: radial-gradient(circle, rgba(44, 44, 44, 0.25), transparent 70%);
+  filter: blur(3px);
+  opacity: 0.4;
   will-change: transform, opacity;
 }
 
+/* Floating button on stage */
 .floating-button {
   position: absolute;
   bottom: 24px;
+  background: var(--crayon-pink);
+  transform: rotate(2deg);
 }
 
+.floating-button:hover {
+  background: var(--crayon-yellow);
+  transform: translateY(-2px) rotate(-1deg);
+}
+
+/* Project page styles */
 .project-page h1 {
   max-width: 100%;
 }
@@ -347,6 +451,7 @@ li,
 .back-link {
   display: inline-block;
   margin-bottom: 16px;
+  color: var(--crayon-blue);
 }
 
 .project-detail-grid {
@@ -365,14 +470,59 @@ li,
   justify-content: space-between;
   gap: 16px;
   padding: 12px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px dashed var(--earth-light);
 }
 
 .detail-row dt {
-  color: var(--text);
+  color: var(--earth-dark);
   font-weight: 600;
+  font-family: 'Patrick Hand', cursive;
 }
 
+/* Cheeky footnote style */
+.footnote {
+  font-size: 0.9rem;
+  color: var(--earth-light);
+  font-style: italic;
+  margin-top: 8px;
+  transform: rotate(-0.5deg);
+}
+
+/* Sassy's scribble decoration */
+.sassy-scribble {
+  display: inline-block;
+  position: relative;
+}
+
+.sassy-scribble::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: -4px;
+  right: -4px;
+  height: 8px;
+  background: linear-gradient(180deg, transparent 40%, var(--crayon-yellow) 40%, var(--crayon-yellow) 70%, transparent 70%);
+  opacity: 0.6;
+  z-index: -1;
+  transform: rotate(-1deg);
+}
+
+/* Easter egg hidden message */
+.easter-egg {
+  opacity: 0.3;
+  font-size: 0.8rem;
+  text-align: center;
+  margin-top: 40px;
+  font-family: 'Patrick Hand', cursive;
+  transform: rotate(1deg);
+}
+
+.easter-egg:hover {
+  opacity: 1;
+  color: var(--crayon-pink);
+}
+
+/* Responsive adjustments */
 @media (max-width: 960px) {
   .vision-card,
   .project-grid,
@@ -395,6 +545,10 @@ li,
     left: 0;
     right: auto;
   }
+  
+  h1 {
+    transform: rotate(0deg);
+  }
 }
 
 @media (max-width: 560px) {
@@ -407,7 +561,13 @@ li,
   .playground-card,
   .project-card,
   .topbar {
-    border-radius: 22px;
+    border-radius: 20px 255px 20px 25px / 255px 20px 225px 20px;
     padding: 20px;
+  }
+  
+  .primary-button,
+  .project-link {
+    padding: 12px 20px;
+    font-size: 1rem;
   }
 }

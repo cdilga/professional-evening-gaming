@@ -1,0 +1,219 @@
+:root {
+  --bg: #08131c;
+  --bg-top: #112436;
+  --card: rgba(8, 18, 27, 0.84);
+  --line: rgba(171, 221, 255, 0.16);
+  --text: #edf7ff;
+  --muted: #b5cad8;
+  --accent: #7df9c1;
+  --accent-2: #ffc857;
+  --shadow: rgba(0, 0, 0, 0.34);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Space Grotesk", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top, rgba(125, 249, 193, 0.12), transparent 32%),
+    radial-gradient(circle at 80% 20%, rgba(255, 200, 87, 0.16), transparent 24%),
+    linear-gradient(180deg, var(--bg-top), var(--bg));
+}
+
+.page-shell {
+  width: min(1080px, calc(100vw - 32px));
+  margin: 0 auto;
+  padding: 40px 0 56px;
+}
+
+.hero-card,
+.playground-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  box-shadow: 0 20px 80px var(--shadow);
+  backdrop-filter: blur(18px);
+}
+
+.hero-card {
+  padding: 36px;
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  color: var(--accent);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.86rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+h1,
+h2 {
+  margin: 0;
+  line-height: 1;
+}
+
+h1 {
+  max-width: 11ch;
+  font-size: clamp(3rem, 7vw, 5.4rem);
+}
+
+.lede,
+.playground-copy p,
+.helper,
+li {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.lede {
+  max-width: 58ch;
+  margin: 18px 0 0;
+  font-size: 1.05rem;
+}
+
+.actions {
+  margin-top: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+.primary-button {
+  border: 0;
+  border-radius: 999px;
+  padding: 14px 22px;
+  background: linear-gradient(135deg, var(--accent), #61f0ff);
+  color: #08202b;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 16px 36px rgba(97, 240, 255, 0.24);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.primary-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 22px 42px rgba(97, 240, 255, 0.28);
+}
+
+.playground-card {
+  margin-top: 24px;
+  padding: 28px;
+  display: grid;
+  grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: center;
+}
+
+.playground-copy ul {
+  margin: 18px 0 0;
+  padding-left: 18px;
+}
+
+.stage-wrap {
+  position: relative;
+  min-height: 360px;
+  display: grid;
+  place-items: center;
+}
+
+.stage-glow {
+  position: absolute;
+  inset: 18% 12%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(97, 240, 255, 0.16), transparent 70%);
+  filter: blur(16px);
+}
+
+.stage {
+  position: relative;
+  width: min(100%, 520px);
+  aspect-ratio: 4 / 3;
+  border-radius: 30px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 26%),
+    radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.18), transparent 32%),
+    linear-gradient(180deg, #10283c 0%, #08131c 100%);
+}
+
+.stage::before,
+.stage::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+}
+
+.stage::before {
+  height: 22%;
+  background: linear-gradient(180deg, rgba(255, 200, 87, 0.04), rgba(255, 200, 87, 0.18));
+}
+
+.stage::after {
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.ball,
+.shadow {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.ball {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 28%, #ffffff, #d0fff2 32%, #7df9c1 58%, #1a8f8b 100%);
+  box-shadow: inset -10px -12px 18px rgba(0, 0, 0, 0.18);
+  will-change: transform;
+}
+
+.shadow {
+  width: 84px;
+  height: 28px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.36), transparent 70%);
+  filter: blur(4px);
+  opacity: 0.5;
+  will-change: transform, opacity;
+}
+
+@media (max-width: 860px) {
+  .playground-card {
+    grid-template-columns: 1fr;
+  }
+
+  h1 {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 560px) {
+  .page-shell {
+    width: min(100vw - 20px, 100%);
+    padding-top: 20px;
+  }
+
+  .hero-card,
+  .playground-card {
+    border-radius: 22px;
+    padding: 20px;
+  }
+}

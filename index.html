@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Professional Evening Gaming</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="hero-card">
+        <p class="eyebrow">Professional Evening Gaming</p>
+        <h1>A tiny after-hours lab for serious play.</h1>
+        <p class="lede">
+          Professional Evening Gaming is where polished engineering energy meets low-stakes game ideas.
+          It is intentionally small, a bit playful, and built so Astacus can keep shipping visible changes.
+        </p>
+        <div class="actions">
+          <button id="bounce-toggle" class="primary-button" type="button">Start bouncing</button>
+          <p class="helper">Astacus can keep iterating on this site through GitHub and deploys.</p>
+        </div>
+      </section>
+
+      <section class="playground-card">
+        <div class="playground-copy">
+          <h2>Micro demo</h2>
+          <p>
+            Press the button and a shiny ball starts bouncing around a simple pseudo-3D arena. Nothing
+            life-changing, just enough motion to prove the whole pipeline works.
+          </p>
+          <ul>
+            <li>Static site, easy to edit</li>
+            <li>Fast deploy target for sandbox commits</li>
+            <li>Good place to grow weird little game ideas</li>
+          </ul>
+        </div>
+
+        <div class="stage-wrap">
+          <div class="stage-glow"></div>
+          <div class="stage">
+            <div class="shadow"></div>
+            <div id="ball" class="ball"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

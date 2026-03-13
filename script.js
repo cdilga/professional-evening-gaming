@@ -17,6 +17,9 @@ const state = {
 };
 
 function layoutBall() {
+  if (!ball || !shadow || !stage) {
+    return;
+  }
   const size = 58;
   const shadowX = state.x - 13;
   const floorY = state.y + 42;
@@ -33,7 +36,7 @@ function layoutBall() {
 }
 
 function animate(now) {
-  if (!running) {
+  if (!running || !stage) {
     return;
   }
 
@@ -87,7 +90,8 @@ function toggle() {
   }
 }
 
-button.addEventListener("click", toggle);
-window.addEventListener("resize", layoutBall);
-
-layoutBall();
+if (button) {
+  button.addEventListener("click", toggle);
+  window.addEventListener("resize", layoutBall);
+  layoutBall();
+}

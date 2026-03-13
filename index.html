@@ -6,51 +6,96 @@
     <title>Professional Evening Gaming</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
     <main class="page-shell">
+      <header class="topbar">
+        <p class="brand-lockup">Professional Evening Gaming</p>
+        <nav class="site-nav" aria-label="Primary">
+          <a href="#vision">Vision</a>
+          <details class="submenu">
+            <summary>Projects</summary>
+            <ul class="submenu-list"><li><a href="/projects/bounce/">Bounce</a></li><li><a href="/projects/postgres-playground/">Postgres API</a></li></ul>
+          </details>
+        </nav>
+      </header>
+
       <section class="hero-card">
         <p class="eyebrow">Professional Evening Gaming</p>
         <h1>A tiny after-hours lab for serious play.</h1>
-        <p class="lede">
-          Professional Evening Gaming is where polished engineering energy meets low-stakes game ideas.
-          It is intentionally small, a bit playful, and built so Astacus can keep shipping visible changes. Sandbox commit verification at 09:13 UTC.
-        </p>
+        <p class="lede">Professional Evening Gaming is the polished front door for small game ideas, playful infrastructure experiments, and project-sized systems that can grow without getting rebuilt from scratch every time.</p>
         <div class="actions">
-          <button id="bounce-toggle" class="primary-button" type="button">Start bouncing</button>
-          <p class="helper">Astacus can keep iterating on this site through GitHub and deploys.</p>
+          <a class="primary-button" href="#projects">Explore the projects</a>
+          <p class="helper">The front-end stays tiny. The architecture behind it no longer has to.</p>
         </div>
+      </section>
+
+      <section id="vision" class="playground-card vision-card">
+        <div class="playground-copy">
+          <h2>Rediscovered vision</h2>
+          <p>
+            The original direction was not just a cute static page. It was a calm front door for a
+            growing collection of experiments, backed by one repeatable platform: shared ingress,
+            per-project boundaries, and a cheap path from local tinkering to something more durable.
+          </p>
+          <ul>
+            <li>One main site with clear project submenus</li>
+            <li>One repo that can host mixed project tooling without collapsing</li>
+            <li>One Postgres instance with project-specific schemas</li>
+            <li>One example service proving the pattern end to end</li>
+          </ul>
+        </div>
+        <div class="architecture-note">
+          <p class="architecture-kicker">Hybrid PPaaS</p>
+          <p>The main site stays easy to publish, while project services can live on shared host infrastructure with Traefik, cloudflared, and one Postgres instance carved into project schemas.</p>
+        </div>
+      </section>
+
+      <section id="projects" class="project-grid">
+        
+    <article class="project-card accent-mint">
+      <div class="project-card-header">
+        <p class="project-kicker">Playable prototype</p>
+        <h3>Bounce</h3>
+      </div>
+      <p class="project-summary">The original browser game experiment stays visible as the playful north star: a small, tactile prototype with room to get weirder.</p>
+      <ul class="tooling-list"><li>static site</li><li>vanilla js</li><li>github pages</li></ul>
+      <a class="project-link" href="/projects/bounce/">Open Bounce</a>
+    </article>
+    
+    <article class="project-card accent-gold">
+      <div class="project-card-header">
+        <p class="project-kicker">FastAPI + Postgres example</p>
+        <h3>Postgres Playground API</h3>
+      </div>
+      <p class="project-summary">An example service that proves the repo can host a non-trivial backend project with its own tooling, schema, and deploy path.</p>
+      <ul class="tooling-list"><li>fastapi</li><li>psycopg</li><li>docker compose</li></ul>
+      <a class="project-link" href="/projects/postgres-playground/">Open Postgres API</a>
+    </article>
+    
       </section>
 
       <section class="playground-card">
         <div class="playground-copy">
           <h2>Micro demo</h2>
           <p>
-            Press the button and a shiny ball starts bouncing around a simple pseudo-3D arena. Nothing
-            life-changing, just enough motion to prove the whole pipeline works.
+            The original bouncing ball stays here as the small visible proof that deploys are real.
+            It is still intentionally tiny. The difference now is that the site can sit beside real
+            project infrastructure instead of pretending to be the whole system.
           </p>
-          <ul>
-            <li>Static site, easy to edit</li>
-            <li>Fast deploy target for sandbox commits</li>
-            <li>Good place to grow weird little game ideas</li>
-          </ul>
         </div>
-
         <div class="stage-wrap">
           <div class="stage-glow"></div>
           <div class="stage">
             <div class="shadow"></div>
             <div id="ball" class="ball"></div>
           </div>
+          <button id="bounce-toggle" class="primary-button floating-button" type="button">Start bouncing</button>
         </div>
       </section>
     </main>
-
     <script src="./script.js"></script>
   </body>
 </html>

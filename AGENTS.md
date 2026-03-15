@@ -22,6 +22,7 @@ Before doing anything substantial, read `ASTACUS_MEMORY.md` for the sandbox brie
 - `templates/static-site-project/`, `templates/python-fastapi-postgres/`, `templates/node-fastify-service/` - reference starter lanes
 - `infra/shared-postgres/` - optional shared private Postgres cluster for multi-service schema isolation
 - `docs/platform-architecture.md` - architectural intent
+- `docs/truenas-deploy-runbook.md` - exact private-host and Cloudflare deployment checklist
 
 ## Rules for adding or editing projects
 

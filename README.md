@@ -34,9 +34,12 @@ Reference projects currently included:
 If you want multiple PEG APIs to share one private Postgres cluster:
 
 - deploy `infra/shared-postgres/`
-- set `USE_SHARED_POSTGRES=true` in the service `.env`
+- Astacus Bot already defaults to `USE_SHARED_POSTGRES=true`
+- set `USE_SHARED_POSTGRES=true` in any other service `.env`
 - point `DATABASE_URL` at `peg-shared-postgres`
 - keep each project in its own schema, such as `astacus_bot` or `session_hub`
+
+See `docs/truenas-deploy-runbook.md` for the exact host, secrets, tunnel, and rollout setup.
 
 ## Architecture
 

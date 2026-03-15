@@ -24,6 +24,7 @@ Professional Evening Gaming is not one app. It is a shared control plane for:
 - additional examples now exist in `projects/peg-nightly-landing/`, `projects/peg-session-hub/`, and `projects/peg-live-lobby/`
 - shared private Postgres lives in `infra/shared-postgres/`
 - targeted deploy workflows live in `.github/workflows/deploy-private-manual.yml` and `.github/workflows/deploy-private-branch.yml`
+- `docs/truenas-deploy-runbook.md` is the exact deployment runbook
 
 ## How projects work
 
@@ -95,7 +96,7 @@ Every service-backed PEG project follows the same pattern:
 For shared database mode:
 
 - deploy `infra/shared-postgres/`
-- set `USE_SHARED_POSTGRES=true`
+- Astacus Bot now defaults to `USE_SHARED_POSTGRES=true`
 - point `DATABASE_URL` at `peg-shared-postgres`
 - keep migrations scoped to the project's schema
 

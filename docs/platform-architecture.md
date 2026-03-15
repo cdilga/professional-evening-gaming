@@ -83,6 +83,8 @@ Example shared-cluster URLs:
 - `postgresql://astacus:secret@peg-shared-postgres:5432/peg`
 - `postgresql://session_hub:secret@peg-shared-postgres:5432/peg`
 
+`astacus-bot` is the reference project that now defaults to this shared-cluster mode.
+
 The point is not one giant app database; it is one private cluster with per-project schemas and independent app deploys.
 
 ### Targeted deploys

@@ -28,6 +28,7 @@ jobs:
           TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
           CF_ACCESS_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
           CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+          RUNTIME_ENV: ${{ secrets.PEG_SHARED_POSTGRES_ENV }}
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_KEY" > ~/.ssh/deploy_key
@@ -51,6 +52,9 @@ jobs:
           scp -F ~/.ssh/config infra/shared-postgres/.env.example deploy-target:~/professional-evening-gaming/shared-postgres/.env.example
           scp -F ~/.ssh/config infra/shared-postgres/scripts/setup-target.sh deploy-target:~/professional-evening-gaming/shared-postgres/setup-target.sh
           scp -F ~/.ssh/config infra/shared-postgres/scripts/deploy.sh deploy-target:~/professional-evening-gaming/shared-postgres/deploy.sh
+          if [ -n "$RUNTIME_ENV" ]; then
+            printf '%s\n' "$RUNTIME_ENV" | ssh -F ~/.ssh/config deploy-target "cat > ~/professional-evening-gaming/shared-postgres/.env"
+          fi
           ssh -F ~/.ssh/config deploy-target "chmod +x ~/professional-evening-gaming/shared-postgres/setup-target.sh ~/professional-evening-gaming/shared-postgres/deploy.sh && ~/professional-evening-gaming/shared-postgres/setup-target.sh && ~/professional-evening-gaming/shared-postgres/deploy.sh"
 
           kill $TUNNEL_PID 2>/dev/null || true

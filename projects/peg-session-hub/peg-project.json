@@ -9,7 +9,7 @@
   "links": {
     "page": "/projects/peg-session-hub/",
     "repoPath": "projects/peg-session-hub",
-    "apiBase": "https://api.professionaleveninggaming.com/session-hub"
+    "apiBase": "https://api.professional-evening-gaming.dilger.dev/session-hub"
   },
   "stack": {
     "frontend": "Static clients or HTMX-ready consumers",

@@ -32,6 +32,10 @@ on:
         required: false
         type: string
         default: ""
+      runtime_env_secret_name:
+        required: false
+        type: string
+        default: ""
 
 env:
   REGISTRY: ghcr.io
@@ -91,6 +95,7 @@ jobs:
           TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
           CF_ACCESS_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
           CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+          RUNTIME_ENV: ${{ inputs.runtime_env_secret_name != '' && secrets[inputs.runtime_env_secret_name] || '' }}
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_KEY" > ~/.ssh/deploy_key
@@ -117,6 +122,9 @@ jobs:
           scp -F ~/.ssh/config ${{ inputs.env_example_path }} deploy-target:${{ inputs.deploy_dir }}/.env.example
           scp -F ~/.ssh/config ${{ inputs.deploy_script_path }} deploy-target:${{ inputs.deploy_dir }}/deploy.sh
           scp -F ~/.ssh/config ${{ inputs.setup_target_path }} deploy-target:${{ inputs.deploy_dir }}/setup-target.sh
+          if [ -n "$RUNTIME_ENV" ]; then
+            printf '%s\n' "$RUNTIME_ENV" | ssh -F ~/.ssh/config deploy-target "cat > ${{ inputs.deploy_dir }}/.env"
+          fi
           ssh -F ~/.ssh/config deploy-target "chmod +x ${{ inputs.deploy_dir }}/deploy.sh ${{ inputs.deploy_dir }}/setup-target.sh && ${{ inputs.deploy_dir }}/setup-target.sh && ${{ inputs.deploy_dir }}/deploy.sh ${{ github.sha }}"
 
           kill $TUNNEL_PID 2>/dev/null || true

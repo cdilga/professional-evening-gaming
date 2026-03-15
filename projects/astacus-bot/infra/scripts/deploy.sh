@@ -45,8 +45,13 @@ fi
 echo "Running migrations"
 "${COMPOSE_ARGS[@]}" run --rm api python -m app.migrate
 
-echo "Restarting api and tunnel"
-"${COMPOSE_ARGS[@]}" up -d api cloudflared --remove-orphans
+SERVICES=(api)
+if [ "${ENABLE_TUNNEL:-false}" = "true" ] && [ -n "${TUNNEL_TOKEN:-}" ]; then
+  SERVICES+=(cloudflared)
+fi
+
+echo "Restarting ${SERVICES[*]}"
+"${COMPOSE_ARGS[@]}" up -d "${SERVICES[@]}" --remove-orphans
 
 echo "Waiting for health check"
 for _ in $(seq 1 30); do

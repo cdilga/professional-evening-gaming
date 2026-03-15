@@ -25,8 +25,9 @@ Reference projects currently included:
 - `.github/workflows/deploy-astacus-api.yml`, `.github/workflows/deploy-peg-nightly-landing.yml`, `.github/workflows/deploy-peg-session-hub.yml`, and `.github/workflows/deploy-peg-live-lobby.yml` wire concrete projects into that pipeline
 - `.github/workflows/deploy-shared-postgres.yml` deploys the optional shared private Postgres cluster
 - `.github/workflows/deploy-private-manual.yml` and `.github/workflows/deploy-private-branch.yml` provide explicit target selection like PPaaS
-- the reusable workflow copies `.env.example` and `setup-target.sh`, verifies the host has Docker/Compose access, seeds `.env` if missing, then deploys and health-checks the project
-- first-time service deploys still need real values filled into `~/professional-evening-gaming/<slug>/.env`; the workflow bootstraps the file location, but it cannot invent secrets
+- the reusable workflow copies `.env.example` and `setup-target.sh`, verifies the host has Docker/Compose access, seeds `.env` if missing, and can replace `.env` from a project-specific GitHub secret
+- shared infra credentials can come from the `ppaas` parent repo, while runtime credentials stay project-specific in PEG
+- first-time service deploys can now be fully bootstrapped from repo secrets such as `PEG_SHARED_POSTGRES_ENV` and `ASTACUS_BOT_RUNTIME_ENV`
 
 ## Shared database mode
 

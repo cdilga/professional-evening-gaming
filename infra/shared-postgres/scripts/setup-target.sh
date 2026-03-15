@@ -15,6 +15,8 @@ fi
 
 mkdir -p "$APP_DIR"
 
+docker network inspect peg-services >/dev/null 2>&1 || docker network create peg-services >/dev/null
+
 if [ ! -f "$APP_DIR/.env" ]; then
   cp "$APP_DIR/.env.example" "$APP_DIR/.env"
   echo "Created $APP_DIR/.env - fill real Postgres credentials before deploys."

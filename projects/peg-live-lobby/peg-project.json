@@ -9,7 +9,7 @@
   "links": {
     "page": "/projects/peg-live-lobby/",
     "repoPath": "projects/peg-live-lobby",
-    "apiBase": "https://api.professionaleveninggaming.com/live-lobby"
+    "apiBase": "https://api.professional-evening-gaming.dilger.dev/live-lobby"
   },
   "stack": {
     "frontend": "Realtime consumers",

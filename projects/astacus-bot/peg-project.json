@@ -9,7 +9,7 @@
   "links": {
     "page": "/projects/astacus-bot/",
     "repoPath": "projects/astacus-bot",
-    "apiBase": "https://api.professional-evening-gaming.dilger.dev/v1"
+    "apiBase": "https://peg-api.dilger.dev/v1"
   },
   "stack": {
     "frontend": "GitHub Pages",

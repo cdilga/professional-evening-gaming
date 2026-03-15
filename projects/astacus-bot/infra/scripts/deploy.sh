@@ -26,6 +26,8 @@ fi
 
 if [ -n "${GHCR_USERNAME:-}" ] && [ -n "${GHCR_TOKEN:-}" ]; then
   echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
+else
+  docker logout ghcr.io >/dev/null 2>&1 || true
 fi
 
 echo "Pulling ghcr.io/cdilga/professional-evening-gaming-astacus-api:${ASTACUS_IMAGE_TAG}"

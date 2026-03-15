@@ -17,6 +17,8 @@ set +a
 
 if [ -n "${GHCR_USERNAME:-}" ] && [ -n "${GHCR_TOKEN:-}" ]; then
   echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
+else
+  docker logout ghcr.io >/dev/null 2>&1 || true
 fi
 
 export SESSION_HUB_IMAGE_TAG="$IMAGE_TAG"

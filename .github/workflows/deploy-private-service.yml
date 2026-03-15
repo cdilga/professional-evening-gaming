@@ -43,8 +43,6 @@ on:
         required: true
       TRUENAS_SSH_KEY:
         required: false
-      TRITON_SSH_KEY:
-        required: false
 
 env:
   REGISTRY: ghcr.io

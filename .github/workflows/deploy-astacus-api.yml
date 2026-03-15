@@ -28,4 +28,3 @@ jobs:
       CF_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
       DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
       TRUENAS_SSH_KEY: ${{ secrets.TRUENAS_SSH_KEY }}
-      TRITON_SSH_KEY: ${{ secrets.TRITON_SSH_KEY }}

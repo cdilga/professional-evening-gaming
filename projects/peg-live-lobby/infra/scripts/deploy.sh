@@ -17,13 +17,22 @@ set +a
 
 if [ -n "${GHCR_USERNAME:-}" ] && [ -n "${GHCR_TOKEN:-}" ]; then
   echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
+else
+  docker logout ghcr.io >/dev/null 2>&1 || true
 fi
 
 export LIVE_LOBBY_IMAGE_TAG="$IMAGE_TAG"
 STATE_FILE="$APP_DIR/.deploy-state"
 
 docker pull "ghcr.io/cdilga/professional-evening-gaming-live-lobby:${LIVE_LOBBY_IMAGE_TAG}"
-docker compose up -d app cloudflared --remove-orphans
+
+SERVICES=(app)
+if [ "${ENABLE_TUNNEL:-false}" = "true" ] && [ -n "${TUNNEL_TOKEN:-}" ]; then
+  SERVICES+=(cloudflared)
+fi
+
+docker compose rm -sf app >/dev/null 2>&1 || true
+docker compose up -d "${SERVICES[@]}" --remove-orphans
 
 for _ in $(seq 1 30); do
   if curl -sf "http://127.0.0.1:${LIVE_LOBBY_PORT:-8202}/health" >/dev/null 2>&1; then

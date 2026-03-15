@@ -42,8 +42,14 @@ if [ "${USE_SHARED_POSTGRES:-false}" != "true" ]; then
 fi
 
 "${COMPOSE_ARGS[@]}" run --rm api python -m app.migrate
+
+SERVICES=(api)
+if [ "${ENABLE_TUNNEL:-false}" = "true" ] && [ -n "${TUNNEL_TOKEN:-}" ]; then
+  SERVICES+=(cloudflared)
+fi
+
 "${COMPOSE_ARGS[@]}" rm -sf api >/dev/null 2>&1 || true
-"${COMPOSE_ARGS[@]}" up -d api cloudflared --remove-orphans
+"${COMPOSE_ARGS[@]}" up -d "${SERVICES[@]}" --remove-orphans
 
 for _ in $(seq 1 30); do
   if curl -sf "http://127.0.0.1:${SESSION_HUB_PORT:-8201}/health" >/dev/null 2>&1; then

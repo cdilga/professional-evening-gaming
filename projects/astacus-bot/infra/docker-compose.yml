@@ -37,7 +37,7 @@ services:
     image: cloudflare/cloudflared:latest
     container_name: peg-astacus-cloudflared
     restart: unless-stopped
-    command: tunnel run
+    command: tunnel --no-autoupdate --url http://api:8000 run
     environment:
       TUNNEL_TOKEN: ${TUNNEL_TOKEN}
     extra_hosts:

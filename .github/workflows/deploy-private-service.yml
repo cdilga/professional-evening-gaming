@@ -32,10 +32,19 @@ on:
         required: false
         type: string
         default: ""
-      runtime_env_secret_name:
+    secrets:
+      runtime_env:
         required: false
-        type: string
-        default: ""
+      CF_CLIENT_ID:
+        required: true
+      CF_CLIENT_SECRET:
+        required: true
+      DEPLOY_USER:
+        required: true
+      TRUENAS_SSH_KEY:
+        required: false
+      TRITON_SSH_KEY:
+        required: false
 
 env:
   REGISTRY: ghcr.io
@@ -95,7 +104,7 @@ jobs:
           TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
           CF_ACCESS_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
           CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
-          RUNTIME_ENV: ${{ inputs.runtime_env_secret_name != '' && secrets[inputs.runtime_env_secret_name] || '' }}
+          RUNTIME_ENV: ${{ secrets.runtime_env }}
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_KEY" > ~/.ssh/deploy_key

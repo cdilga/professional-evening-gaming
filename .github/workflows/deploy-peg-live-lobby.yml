@@ -20,4 +20,9 @@ jobs:
       env_example_path: projects/peg-live-lobby/infra/.env.example
       deploy_script_path: projects/peg-live-lobby/infra/scripts/deploy.sh
       setup_target_path: projects/peg-live-lobby/infra/scripts/setup-target.sh
-    secrets: inherit
+    secrets:
+      CF_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
+      CF_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      TRUENAS_SSH_KEY: ${{ secrets.TRUENAS_SSH_KEY }}
+      TRITON_SSH_KEY: ${{ secrets.TRITON_SSH_KEY }}

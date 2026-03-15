@@ -22,5 +22,10 @@ jobs:
       deploy_script_path: projects/astacus-bot/infra/scripts/deploy.sh
       setup_target_path: projects/astacus-bot/infra/scripts/setup-target.sh
       validate_command: python3 -m compileall projects/astacus-bot/api/app
-      runtime_env_secret_name: ASTACUS_BOT_RUNTIME_ENV
-    secrets: inherit
+    secrets:
+      runtime_env: ${{ secrets.ASTACUS_BOT_RUNTIME_ENV }}
+      CF_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
+      CF_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      TRUENAS_SSH_KEY: ${{ secrets.TRUENAS_SSH_KEY }}
+      TRITON_SSH_KEY: ${{ secrets.TRITON_SSH_KEY }}

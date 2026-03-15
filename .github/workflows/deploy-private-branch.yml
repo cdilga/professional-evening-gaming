@@ -141,10 +141,24 @@ jobs:
           TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
           CF_ACCESS_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
           CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+          ASTACUS_BOT_RUNTIME_ENV: ${{ secrets.ASTACUS_BOT_RUNTIME_ENV }}
+          PEG_NIGHTLY_LANDING_RUNTIME_ENV: ${{ secrets.PEG_NIGHTLY_LANDING_RUNTIME_ENV }}
+          PEG_SESSION_HUB_RUNTIME_ENV: ${{ secrets.PEG_SESSION_HUB_RUNTIME_ENV }}
+          PEG_LIVE_LOBBY_RUNTIME_ENV: ${{ secrets.PEG_LIVE_LOBBY_RUNTIME_ENV }}
+          PEG_SHARED_POSTGRES_ENV: ${{ secrets.PEG_SHARED_POSTGRES_ENV }}
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
+
+          case "${{ needs.resolve.outputs.project }}" in
+            astacus-bot) RUNTIME_ENV="$ASTACUS_BOT_RUNTIME_ENV" ;;
+            peg-nightly-landing) RUNTIME_ENV="$PEG_NIGHTLY_LANDING_RUNTIME_ENV" ;;
+            peg-session-hub) RUNTIME_ENV="$PEG_SESSION_HUB_RUNTIME_ENV" ;;
+            peg-live-lobby) RUNTIME_ENV="$PEG_LIVE_LOBBY_RUNTIME_ENV" ;;
+            shared-postgres) RUNTIME_ENV="$PEG_SHARED_POSTGRES_ENV" ;;
+            *) RUNTIME_ENV="" ;;
+          esac
 
           cloudflared access tcp --hostname ${TUNNEL_HOSTNAME} --url localhost:2222 &
           TUNNEL_PID=$!
@@ -167,6 +181,9 @@ jobs:
           scp -F ~/.ssh/config ${{ needs.resolve.outputs.env_example }} deploy-target:${{ needs.resolve.outputs.deploy_dir }}/.env.example
           scp -F ~/.ssh/config ${{ needs.resolve.outputs.setup_path }} deploy-target:${{ needs.resolve.outputs.deploy_dir }}/setup-target.sh
           scp -F ~/.ssh/config ${{ needs.resolve.outputs.deploy_path }} deploy-target:${{ needs.resolve.outputs.deploy_dir }}/deploy.sh
+          if [ -n "$RUNTIME_ENV" ]; then
+            printf '%s\n' "$RUNTIME_ENV" | ssh -F ~/.ssh/config deploy-target "cat > ${{ needs.resolve.outputs.deploy_dir }}/.env"
+          fi
           ssh -F ~/.ssh/config deploy-target "chmod +x ${{ needs.resolve.outputs.deploy_dir }}/setup-target.sh ${{ needs.resolve.outputs.deploy_dir }}/deploy.sh && ${{ needs.resolve.outputs.deploy_dir }}/setup-target.sh && ${{ needs.resolve.outputs.deploy_dir }}/deploy.sh ${{ github.sha }}"
 
           kill $TUNNEL_PID 2>/dev/null || true

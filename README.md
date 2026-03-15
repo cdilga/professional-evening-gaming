@@ -25,9 +25,24 @@ Reference projects currently included:
 - `.github/workflows/deploy-astacus-api.yml`, `.github/workflows/deploy-peg-nightly-landing.yml`, `.github/workflows/deploy-peg-session-hub.yml`, and `.github/workflows/deploy-peg-live-lobby.yml` wire concrete projects into that pipeline
 - `.github/workflows/deploy-shared-postgres.yml` deploys the optional shared private Postgres cluster
 - `.github/workflows/deploy-private-manual.yml` and `.github/workflows/deploy-private-branch.yml` provide explicit target selection like PPaaS
-- the reusable workflow copies `.env.example` and `setup-target.sh`, verifies the host has Docker/Compose access, seeds `.env` if missing, and can replace `.env` from a project-specific GitHub secret
+- `.github/workflows/service-healthcheck.yml` runs periodic host-local health checks
+- `.github/workflows/deployment-drift.yml` checks for drift between repo deployment files and what is on the host
+- the reusable workflow copies `.env.example` and `setup-target.sh`, verifies the host has Docker/Compose access, seeds `.env` if missing, and then rewrites `.env` from the matching project GitHub secret when one is configured
 - shared infra credentials can come from the `ppaas` parent repo, while runtime credentials stay project-specific in PEG
 - first-time service deploys can now be fully bootstrapped from repo secrets such as `PEG_SHARED_POSTGRES_ENV` and `ASTACUS_BOT_RUNTIME_ENV`
+
+Recommended runtime env secrets:
+
+- `PEG_SHARED_POSTGRES_ENV`
+- `ASTACUS_BOT_RUNTIME_ENV`
+- `PEG_SESSION_HUB_RUNTIME_ENV`
+- `PEG_NIGHTLY_LANDING_RUNTIME_ENV`
+- `PEG_LIVE_LOBBY_RUNTIME_ENV`
+
+The periodic audits are intentionally lightweight:
+
+- healthcheck verifies local service endpoints and shared Postgres readiness on the active host
+- drift audit compares deployed compose/scripts/env-example files against the repo and checks recorded image tags against the running containers
 
 ## Shared database mode
 

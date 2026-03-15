@@ -42,8 +42,10 @@ Before doing anything substantial, read `ASTACUS_MEMORY.md` for the sandbox brie
 - the avatar currently uses a local placeholder at `site/assets/img/astacus-avatar.svg`; replace it with a Discord-hosted image when a stable URL is available
 - service workflows copy `setup-target.sh` and `.env.example`, then run host bootstrap before deploy
 - every service project still needs real values in `~/professional-evening-gaming/<slug>/.env` before deploys can succeed
+- future deploys should treat GitHub runtime-env secrets as the source of truth for remote `.env` files
 - for schema-per-project on one cluster, deploy `infra/shared-postgres/` first and set `USE_SHARED_POSTGRES=true` in the service env
 - manual targeted deploys use `.github/workflows/deploy-private-manual.yml`; branch-targeted deploys use `deploy/<target>/<project>`
+- periodic automation now includes `.github/workflows/service-healthcheck.yml` and `.github/workflows/deployment-drift.yml`
 
 ## Content and vibe guidance
 

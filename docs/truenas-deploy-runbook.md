@@ -13,12 +13,9 @@ Secrets:
 - `TRITON_SSH_KEY`
 - `PEG_SHARED_POSTGRES_ENV` for `infra/shared-postgres/.env`
 - `ASTACUS_BOT_RUNTIME_ENV` for `projects/astacus-bot/.env`
-
-Recommended additional runtime secrets:
-
-- `PEG_SESSION_HUB_RUNTIME_ENV`
-- `PEG_NIGHTLY_LANDING_RUNTIME_ENV`
-- `PEG_LIVE_LOBBY_RUNTIME_ENV`
+- `PEG_SESSION_HUB_RUNTIME_ENV` for `projects/peg-session-hub/.env`
+- `PEG_NIGHTLY_LANDING_RUNTIME_ENV` for `projects/peg-nightly-landing/.env`
+- `PEG_LIVE_LOBBY_RUNTIME_ENV` for `projects/peg-live-lobby/.env`
 
 Variables:
 
@@ -145,6 +142,13 @@ Branch-targeted deploys:
 - `deploy/truenas/peg-live-lobby`
 
 Use `triton` instead of `truenas` to target the other host.
+
+## Ongoing automation
+
+- push/manual/branch deploys rewrite remote `.env` from the matching GitHub secret when that secret is set
+- `.github/workflows/service-healthcheck.yml` runs every 30 minutes against the active host
+- `.github/workflows/deployment-drift.yml` runs nightly and checks remote deployment files against repo copies
+- service deploy scripts write `.deploy-state` so drift checks can compare the recorded tag to the running container image
 
 ## Rollout order
 

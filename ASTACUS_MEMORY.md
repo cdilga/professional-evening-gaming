@@ -25,6 +25,8 @@ Professional Evening Gaming is not one app. It is a shared control plane for:
 - shared private Postgres lives in `infra/shared-postgres/`
 - targeted deploy workflows live in `.github/workflows/deploy-private-manual.yml` and `.github/workflows/deploy-private-branch.yml`
 - `docs/truenas-deploy-runbook.md` is the exact deployment runbook
+- remote `.env` files are meant to be reconciled from project-specific GitHub secrets on deploy
+- periodic audits live in `.github/workflows/service-healthcheck.yml` and `.github/workflows/deployment-drift.yml`
 
 ## How projects work
 

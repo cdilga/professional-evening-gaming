@@ -17,6 +17,7 @@ set -a
 set +a
 
 export ASTACUS_IMAGE_TAG="$IMAGE_TAG"
+STATE_FILE="$APP_DIR/.deploy-state"
 
 COMPOSE_ARGS=(docker compose -f docker-compose.yml)
 if [ "${USE_SHARED_POSTGRES:-false}" = "true" ]; then
@@ -50,12 +51,19 @@ if [ "${ENABLE_TUNNEL:-false}" = "true" ] && [ -n "${TUNNEL_TOKEN:-}" ]; then
   SERVICES+=(cloudflared)
 fi
 
+"${COMPOSE_ARGS[@]}" rm -sf api >/dev/null 2>&1 || true
+
 echo "Restarting ${SERVICES[*]}"
 "${COMPOSE_ARGS[@]}" up -d "${SERVICES[@]}" --remove-orphans
 
 echo "Waiting for health check"
 for _ in $(seq 1 30); do
   if curl -sf "http://127.0.0.1:${API_PORT:-8100}/health" >/dev/null 2>&1; then
+    cat > "$STATE_FILE" <<EOF
+IMAGE_TAG=${ASTACUS_IMAGE_TAG}
+DEPLOYED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+USE_SHARED_POSTGRES=${USE_SHARED_POSTGRES:-false}
+EOF
     echo "Astacus API is healthy"
     exit 0
   fi

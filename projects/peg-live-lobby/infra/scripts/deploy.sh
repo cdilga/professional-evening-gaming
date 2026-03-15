@@ -20,12 +20,17 @@ if [ -n "${GHCR_USERNAME:-}" ] && [ -n "${GHCR_TOKEN:-}" ]; then
 fi
 
 export LIVE_LOBBY_IMAGE_TAG="$IMAGE_TAG"
+STATE_FILE="$APP_DIR/.deploy-state"
 
 docker pull "ghcr.io/cdilga/professional-evening-gaming-live-lobby:${LIVE_LOBBY_IMAGE_TAG}"
 docker compose up -d app cloudflared --remove-orphans
 
 for _ in $(seq 1 30); do
   if curl -sf "http://127.0.0.1:${LIVE_LOBBY_PORT:-8202}/health" >/dev/null 2>&1; then
+    cat > "$STATE_FILE" <<EOF
+IMAGE_TAG=${LIVE_LOBBY_IMAGE_TAG}
+DEPLOYED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+EOF
     echo "PEG Live Lobby is healthy"
     exit 0
   fi

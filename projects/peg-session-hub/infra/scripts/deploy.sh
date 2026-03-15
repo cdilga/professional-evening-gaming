@@ -20,6 +20,7 @@ if [ -n "${GHCR_USERNAME:-}" ] && [ -n "${GHCR_TOKEN:-}" ]; then
 fi
 
 export SESSION_HUB_IMAGE_TAG="$IMAGE_TAG"
+STATE_FILE="$APP_DIR/.deploy-state"
 
 COMPOSE_ARGS=(docker compose -f docker-compose.yml)
 if [ "${USE_SHARED_POSTGRES:-false}" = "true" ]; then
@@ -39,10 +40,16 @@ if [ "${USE_SHARED_POSTGRES:-false}" != "true" ]; then
 fi
 
 "${COMPOSE_ARGS[@]}" run --rm api python -m app.migrate
+"${COMPOSE_ARGS[@]}" rm -sf api >/dev/null 2>&1 || true
 "${COMPOSE_ARGS[@]}" up -d api cloudflared --remove-orphans
 
 for _ in $(seq 1 30); do
   if curl -sf "http://127.0.0.1:${SESSION_HUB_PORT:-8201}/health" >/dev/null 2>&1; then
+    cat > "$STATE_FILE" <<EOF
+IMAGE_TAG=${SESSION_HUB_IMAGE_TAG}
+DEPLOYED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+USE_SHARED_POSTGRES=${USE_SHARED_POSTGRES:-false}
+EOF
     echo "PEG Session Hub is healthy"
     exit 0
   fi

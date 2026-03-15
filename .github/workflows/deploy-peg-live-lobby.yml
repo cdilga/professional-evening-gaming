@@ -1,0 +1,23 @@
+name: Deploy PEG Live Lobby
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "projects/peg-live-lobby/**"
+      - ".github/workflows/deploy-peg-live-lobby.yml"
+      - ".github/workflows/deploy-private-service.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy-private-service.yml
+    with:
+      image_name: cdilga/professional-evening-gaming-live-lobby
+      docker_context: ./projects/peg-live-lobby/app
+      deploy_dir: ~/professional-evening-gaming/peg-live-lobby
+      compose_path: projects/peg-live-lobby/infra/docker-compose.yml
+      env_example_path: projects/peg-live-lobby/infra/.env.example
+      deploy_script_path: projects/peg-live-lobby/infra/scripts/deploy.sh
+      setup_target_path: projects/peg-live-lobby/infra/scripts/setup-target.sh
+    secrets: inherit

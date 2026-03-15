@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PEG Nightly Landing</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b1320;
+        --panel: rgba(17, 27, 40, 0.88);
+        --text: #f5f7fa;
+        --muted: #c6d0db;
+        --accent: #ff8a3d;
+        --mint: #79f2da;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        font-family: "Segoe UI", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(255, 138, 61, 0.2), transparent 24%),
+          radial-gradient(circle at 80% 0%, rgba(121, 242, 218, 0.18), transparent 20%),
+          linear-gradient(180deg, #122136, var(--bg));
+      }
+      main {
+        width: min(900px, calc(100vw - 24px));
+        padding: 32px;
+        border-radius: 28px;
+        background: var(--panel);
+        border: 1px solid rgba(255,255,255,0.1);
+      }
+      .tag {
+        color: var(--accent);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 0.8rem;
+      }
+      h1 { font-size: clamp(2.5rem, 7vw, 4.8rem); margin: 12px 0; line-height: 0.95; }
+      p, li { color: var(--muted); line-height: 1.6; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 24px; }
+      .card { padding: 18px; border-radius: 18px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); }
+      strong { color: var(--mint); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="tag">Independent static lane</p>
+      <h1>PEG Nightly Landing</h1>
+      <p>
+        This is a deliberately separate static project. It proves PEG can spin up a standalone microsite without
+        touching the main GitHub Pages shell or inheriting any backend stack it does not need.
+      </p>
+      <div class="grid">
+        <section class="card">
+          <strong>Use it for</strong>
+          <p>event teasers, temporary campaigns, sign-up pages, or one-off experiments with zero database baggage.</p>
+        </section>
+        <section class="card">
+          <strong>Deploy path</strong>
+          <p>GitHub Actions builds a small nginx image, publishes to GHCR, then rolls it out to the private host.</p>
+        </section>
+        <section class="card">
+          <strong>Why it matters</strong>
+          <p>PEG projects do not need to be trapped inside one root build. Static can stay static.</p>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

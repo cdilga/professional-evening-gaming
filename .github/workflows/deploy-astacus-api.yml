@@ -1,0 +1,25 @@
+name: Deploy Astacus API
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "projects/astacus-bot/**"
+      - ".github/workflows/deploy-astacus-api.yml"
+      - ".github/workflows/deploy-private-service.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy-private-service.yml
+    with:
+      image_name: cdilga/professional-evening-gaming-astacus-api
+      docker_context: ./projects/astacus-bot/api
+      deploy_dir: ~/professional-evening-gaming/astacus-bot
+      compose_path: projects/astacus-bot/infra/docker-compose.yml
+      extra_compose_path: projects/astacus-bot/infra/docker-compose.shared-db.yml
+      env_example_path: projects/astacus-bot/infra/.env.example
+      deploy_script_path: projects/astacus-bot/infra/scripts/deploy.sh
+      setup_target_path: projects/astacus-bot/infra/scripts/setup-target.sh
+      validate_command: python3 -m compileall projects/astacus-bot/api/app
+    secrets: inherit

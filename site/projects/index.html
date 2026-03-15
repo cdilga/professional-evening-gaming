@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Projects | Professional Evening Gaming</title>
+    <meta
+      name="description"
+      content="Browse Professional Evening Gaming projects, each with its own contract, stack, and deployment path."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/assets/css/site.css" />
+  </head>
+  <body data-page="projects">
+    <div class="page-aura page-aura-left"></div>
+    <div class="page-aura page-aura-right"></div>
+    <header class="site-header shell">
+      <a class="brand" href="/">
+        <span class="brand-kicker">PEG</span>
+        <span class="brand-name">Professional Evening Gaming</span>
+      </a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="/">Home</a>
+        <a href="/projects/" aria-current="page">Projects</a>
+        <a href="/#platform">Platform</a>
+      </nav>
+    </header>
+
+    <main class="shell page-main">
+      <section class="panel page-intro">
+        <p class="eyebrow">Project index</p>
+        <h1>Every project gets its own lane.</h1>
+        <p class="lede">
+          The site nav always keeps this page reachable. Add a new project contract under `projects/`, run the
+          site build, and it appears here without hand-editing the homepage.
+        </p>
+      </section>
+
+      <section class="project-grid" data-project-grid></section>
+    </main>
+
+    <footer class="site-footer shell">
+      <p>Professional Evening Gaming <span data-year></span></p>
+      <a href="/">Back to the front door</a>
+    </footer>
+
+    <script src="/assets/js/site.js" defer></script>
+  </body>
+</html>

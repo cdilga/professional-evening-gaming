@@ -1,0 +1,23 @@
+{
+  "slug": "peg-nightly-landing",
+  "name": "PEG Nightly Landing",
+  "summary": "Standalone static microsite for upcoming sessions, teases, and inside jokes.",
+  "tagline": "A static-only project that deploys independently from the main Pages shell while still being indexed by PEG.",
+  "status": "ready to deploy",
+  "featured": true,
+  "order": 20,
+  "links": {
+    "page": "/projects/peg-nightly-landing/",
+    "repoPath": "projects/peg-nightly-landing"
+  },
+  "stack": {
+    "frontend": "Static HTML/CSS/JS in nginx",
+    "database": "None",
+    "deploy": "GitHub Actions -> GHCR -> cloudflared SSH -> docker compose"
+  },
+  "deployment": {
+    "workflow": ".github/workflows/deploy-peg-nightly-landing.yml",
+    "composePath": "projects/peg-nightly-landing/infra/docker-compose.yml",
+    "healthcheck": "/"
+  }
+}

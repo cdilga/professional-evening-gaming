@@ -1,0 +1,29 @@
+{
+  "slug": "astacus-bot",
+  "name": "Astacus Bot",
+  "summary": "Discord-driven operations bot with a real API lane and durable state.",
+  "tagline": "A basic FastAPI service and private Postgres stack so Discord asks can land in something sturdier than a webhook.",
+  "status": "foundation live",
+  "featured": true,
+  "order": 10,
+  "links": {
+    "page": "/projects/astacus-bot/",
+    "repoPath": "projects/astacus-bot",
+    "apiBase": "https://api.professionaleveninggaming.com/v1"
+  },
+  "stack": {
+    "frontend": "GitHub Pages",
+    "api": "FastAPI",
+    "database": "PostgreSQL schema astacus_bot",
+    "deploy": "GitHub Actions -> GHCR -> cloudflared SSH -> docker compose"
+  },
+  "database": {
+    "schema": "astacus_bot",
+    "sharedClusterReady": true
+  },
+  "deployment": {
+    "workflow": ".github/workflows/deploy-astacus-api.yml",
+    "composePath": "projects/astacus-bot/infra/docker-compose.yml",
+    "healthcheck": "/health"
+  }
+}

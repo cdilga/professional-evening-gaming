@@ -1,0 +1,53 @@
+services:
+  api:
+    image: ghcr.io/cdilga/professional-evening-gaming-astacus-api:${ASTACUS_IMAGE_TAG:-latest}
+    container_name: peg-astacus-api
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+    ports:
+      - "127.0.0.1:${API_PORT:-8100}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - peg-astacus
+
+  postgres:
+    image: postgres:16-bookworm
+    container_name: peg-astacus-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - peg-astacus-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - peg-astacus
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: peg-astacus-cloudflared
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - peg-astacus
+
+volumes:
+  peg-astacus-data:
+
+networks:
+  peg-astacus:
+    driver: bridge

@@ -1,0 +1,17 @@
+services:
+  api:
+    depends_on: []
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+    networks:
+      - peg-session-hub
+      - peg-services
+
+  cloudflared:
+    networks:
+      - peg-session-hub
+
+networks:
+  peg-services:
+    external: true
+    name: peg-services

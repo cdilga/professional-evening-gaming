@@ -1,0 +1,56 @@
+name: Deploy Shared Postgres
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "infra/shared-postgres/**"
+      - ".github/workflows/deploy-shared-postgres.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install cloudflared
+        run: |
+          curl -fsSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb -o cloudflared.deb
+          sudo dpkg -i cloudflared.deb
+
+      - name: Deploy shared postgres to active host
+        env:
+          SSH_KEY: ${{ secrets[vars.ACTIVE_TARGET_KEY_SECRET] }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          TUNNEL_HOSTNAME: ${{ vars.SSH_TUNNEL_HOSTNAME }}
+          TUNNEL_SERVICE_TOKEN_ID: ${{ secrets.CF_CLIENT_ID }}
+          TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+          CF_ACCESS_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
+          CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          cloudflared access tcp --hostname ${TUNNEL_HOSTNAME} --url localhost:2222 &
+          TUNNEL_PID=$!
+          sleep 3
+
+          cat >> ~/.ssh/config <<EOF
+          Host deploy-target
+            HostName localhost
+            Port 2222
+            User ${DEPLOY_USER}
+            IdentityFile ~/.ssh/deploy_key
+            StrictHostKeyChecking no
+          EOF
+
+          ssh -F ~/.ssh/config deploy-target "mkdir -p ~/professional-evening-gaming/shared-postgres"
+          scp -F ~/.ssh/config infra/shared-postgres/docker-compose.yml deploy-target:~/professional-evening-gaming/shared-postgres/docker-compose.yml
+          scp -F ~/.ssh/config infra/shared-postgres/.env.example deploy-target:~/professional-evening-gaming/shared-postgres/.env.example
+          scp -F ~/.ssh/config infra/shared-postgres/scripts/setup-target.sh deploy-target:~/professional-evening-gaming/shared-postgres/setup-target.sh
+          scp -F ~/.ssh/config infra/shared-postgres/scripts/deploy.sh deploy-target:~/professional-evening-gaming/shared-postgres/deploy.sh
+          ssh -F ~/.ssh/config deploy-target "chmod +x ~/professional-evening-gaming/shared-postgres/setup-target.sh ~/professional-evening-gaming/shared-postgres/deploy.sh && ~/professional-evening-gaming/shared-postgres/setup-target.sh && ~/professional-evening-gaming/shared-postgres/deploy.sh"
+
+          kill $TUNNEL_PID 2>/dev/null || true

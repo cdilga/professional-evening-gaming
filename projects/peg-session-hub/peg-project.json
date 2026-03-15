@@ -1,0 +1,29 @@
+{
+  "slug": "peg-session-hub",
+  "name": "PEG Session Hub",
+  "summary": "FastAPI + Postgres scheduling and session-planning service for game nights.",
+  "tagline": "A proper service lane with migrations, a dedicated schema, and a deploy path built for TrueNAS-style private hosts.",
+  "status": "ready to deploy",
+  "featured": true,
+  "order": 30,
+  "links": {
+    "page": "/projects/peg-session-hub/",
+    "repoPath": "projects/peg-session-hub",
+    "apiBase": "https://api.professionaleveninggaming.com/session-hub"
+  },
+  "stack": {
+    "frontend": "Static clients or HTMX-ready consumers",
+    "api": "FastAPI",
+    "database": "PostgreSQL schema session_hub",
+    "deploy": "GitHub Actions -> GHCR -> cloudflared SSH -> docker compose + migrations"
+  },
+  "database": {
+    "schema": "session_hub",
+    "sharedClusterReady": true
+  },
+  "deployment": {
+    "workflow": ".github/workflows/deploy-peg-session-hub.yml",
+    "composePath": "projects/peg-session-hub/infra/docker-compose.yml",
+    "healthcheck": "/health"
+  }
+}

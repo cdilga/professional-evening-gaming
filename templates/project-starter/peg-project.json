@@ -1,0 +1,19 @@
+{
+  "slug": "replace-me",
+  "name": "Replace Me",
+  "summary": "Short summary for the shared homepage.",
+  "tagline": "One-line explanation of why this project exists.",
+  "status": "planning",
+  "featured": false,
+  "order": 100,
+  "links": {
+    "page": "/projects/replace-me/",
+    "repoPath": "projects/replace-me"
+  },
+  "stack": {
+    "frontend": "Your frontend choice",
+    "api": "Optional API",
+    "database": "Optional database/schema",
+    "deploy": "How this project deploys"
+  }
+}

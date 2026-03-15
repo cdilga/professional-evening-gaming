@@ -1,0 +1,122 @@
+name: Deploy Private Service
+
+on:
+  workflow_call:
+    inputs:
+      image_name:
+        required: true
+        type: string
+      docker_context:
+        required: true
+        type: string
+      deploy_dir:
+        required: true
+        type: string
+      compose_path:
+        required: true
+        type: string
+      extra_compose_path:
+        required: false
+        type: string
+        default: ""
+      env_example_path:
+        required: true
+        type: string
+      deploy_script_path:
+        required: true
+        type: string
+      setup_target_path:
+        required: true
+        type: string
+      validate_command:
+        required: false
+        type: string
+        default: ""
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run validation
+        if: ${{ inputs.validate_command != '' }}
+        run: ${{ inputs.validate_command }}
+
+  build-and-push:
+    runs-on: ubuntu-latest
+    needs: validate
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ inputs.docker_context }}
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ inputs.image_name }}:latest
+            ${{ env.REGISTRY }}/${{ inputs.image_name }}:${{ github.sha }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install cloudflared
+        run: |
+          curl -fsSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb -o cloudflared.deb
+          sudo dpkg -i cloudflared.deb
+
+      - name: Deploy to active private host
+        env:
+          SSH_KEY: ${{ secrets[vars.ACTIVE_TARGET_KEY_SECRET] }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          TUNNEL_HOSTNAME: ${{ vars.SSH_TUNNEL_HOSTNAME }}
+          TUNNEL_SERVICE_TOKEN_ID: ${{ secrets.CF_CLIENT_ID }}
+          TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+          CF_ACCESS_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
+          CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          cloudflared access tcp --hostname ${TUNNEL_HOSTNAME} --url localhost:2222 &
+          TUNNEL_PID=$!
+          sleep 3
+
+          cat >> ~/.ssh/config <<EOF
+          Host deploy-target
+            HostName localhost
+            Port 2222
+            User ${DEPLOY_USER}
+            IdentityFile ~/.ssh/deploy_key
+            StrictHostKeyChecking no
+          EOF
+
+          ssh -F ~/.ssh/config deploy-target "mkdir -p ${{ inputs.deploy_dir }}"
+          scp -F ~/.ssh/config ${{ inputs.compose_path }} deploy-target:${{ inputs.deploy_dir }}/docker-compose.yml
+          if [ -n "${{ inputs.extra_compose_path }}" ]; then
+            scp -F ~/.ssh/config ${{ inputs.extra_compose_path }} deploy-target:${{ inputs.deploy_dir }}/docker-compose.shared-db.yml
+          fi
+          scp -F ~/.ssh/config ${{ inputs.env_example_path }} deploy-target:${{ inputs.deploy_dir }}/.env.example
+          scp -F ~/.ssh/config ${{ inputs.deploy_script_path }} deploy-target:${{ inputs.deploy_dir }}/deploy.sh
+          scp -F ~/.ssh/config ${{ inputs.setup_target_path }} deploy-target:${{ inputs.deploy_dir }}/setup-target.sh
+          ssh -F ~/.ssh/config deploy-target "chmod +x ${{ inputs.deploy_dir }}/deploy.sh ${{ inputs.deploy_dir }}/setup-target.sh && ${{ inputs.deploy_dir }}/setup-target.sh && ${{ inputs.deploy_dir }}/deploy.sh ${{ github.sha }}"
+
+          kill $TUNNEL_PID 2>/dev/null || true

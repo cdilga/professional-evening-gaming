@@ -1,0 +1,23 @@
+name: Deploy PEG Nightly Landing
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "projects/peg-nightly-landing/**"
+      - ".github/workflows/deploy-peg-nightly-landing.yml"
+      - ".github/workflows/deploy-private-service.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy-private-service.yml
+    with:
+      image_name: cdilga/professional-evening-gaming-nightly-landing
+      docker_context: ./projects/peg-nightly-landing
+      deploy_dir: ~/professional-evening-gaming/peg-nightly-landing
+      compose_path: projects/peg-nightly-landing/infra/docker-compose.yml
+      env_example_path: projects/peg-nightly-landing/infra/.env.example
+      deploy_script_path: projects/peg-nightly-landing/infra/scripts/deploy.sh
+      setup_target_path: projects/peg-nightly-landing/infra/scripts/setup-target.sh
+    secrets: inherit

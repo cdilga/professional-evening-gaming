@@ -1,0 +1,131 @@
+name: Deploy Private Manual
+
+on:
+  workflow_dispatch:
+    inputs:
+      project:
+        description: Project to deploy
+        required: true
+        type: choice
+        options:
+          - astacus-bot
+          - peg-nightly-landing
+          - peg-session-hub
+          - peg-live-lobby
+          - shared-postgres
+      target:
+        description: Deployment target
+        required: true
+        type: choice
+        options:
+          - truenas
+          - triton
+      image_tag:
+        description: Image tag for app projects
+        required: false
+        default: latest
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve target and project
+        id: resolve
+        run: |
+          case "${{ inputs.target }}" in
+            truenas)
+              echo "key_secret=TRUENAS_SSH_KEY" >> $GITHUB_OUTPUT
+              ;;
+            triton)
+              echo "key_secret=TRITON_SSH_KEY" >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+          case "${{ inputs.project }}" in
+            astacus-bot)
+              echo "deploy_dir=~/professional-evening-gaming/astacus-bot" >> $GITHUB_OUTPUT
+              echo "compose_path=projects/astacus-bot/infra/docker-compose.yml" >> $GITHUB_OUTPUT
+              echo "extra_compose_path=projects/astacus-bot/infra/docker-compose.shared-db.yml" >> $GITHUB_OUTPUT
+              echo "env_example=projects/astacus-bot/infra/.env.example" >> $GITHUB_OUTPUT
+              echo "setup_path=projects/astacus-bot/infra/scripts/setup-target.sh" >> $GITHUB_OUTPUT
+              echo "deploy_path=projects/astacus-bot/infra/scripts/deploy.sh" >> $GITHUB_OUTPUT
+              ;;
+            peg-nightly-landing)
+              echo "deploy_dir=~/professional-evening-gaming/peg-nightly-landing" >> $GITHUB_OUTPUT
+              echo "compose_path=projects/peg-nightly-landing/infra/docker-compose.yml" >> $GITHUB_OUTPUT
+              echo "extra_compose_path=" >> $GITHUB_OUTPUT
+              echo "env_example=projects/peg-nightly-landing/infra/.env.example" >> $GITHUB_OUTPUT
+              echo "setup_path=projects/peg-nightly-landing/infra/scripts/setup-target.sh" >> $GITHUB_OUTPUT
+              echo "deploy_path=projects/peg-nightly-landing/infra/scripts/deploy.sh" >> $GITHUB_OUTPUT
+              ;;
+            peg-session-hub)
+              echo "deploy_dir=~/professional-evening-gaming/peg-session-hub" >> $GITHUB_OUTPUT
+              echo "compose_path=projects/peg-session-hub/infra/docker-compose.yml" >> $GITHUB_OUTPUT
+              echo "extra_compose_path=projects/peg-session-hub/infra/docker-compose.shared-db.yml" >> $GITHUB_OUTPUT
+              echo "env_example=projects/peg-session-hub/infra/.env.example" >> $GITHUB_OUTPUT
+              echo "setup_path=projects/peg-session-hub/infra/scripts/setup-target.sh" >> $GITHUB_OUTPUT
+              echo "deploy_path=projects/peg-session-hub/infra/scripts/deploy.sh" >> $GITHUB_OUTPUT
+              ;;
+            peg-live-lobby)
+              echo "deploy_dir=~/professional-evening-gaming/peg-live-lobby" >> $GITHUB_OUTPUT
+              echo "compose_path=projects/peg-live-lobby/infra/docker-compose.yml" >> $GITHUB_OUTPUT
+              echo "extra_compose_path=" >> $GITHUB_OUTPUT
+              echo "env_example=projects/peg-live-lobby/infra/.env.example" >> $GITHUB_OUTPUT
+              echo "setup_path=projects/peg-live-lobby/infra/scripts/setup-target.sh" >> $GITHUB_OUTPUT
+              echo "deploy_path=projects/peg-live-lobby/infra/scripts/deploy.sh" >> $GITHUB_OUTPUT
+              ;;
+            shared-postgres)
+              echo "deploy_dir=~/professional-evening-gaming/shared-postgres" >> $GITHUB_OUTPUT
+              echo "compose_path=infra/shared-postgres/docker-compose.yml" >> $GITHUB_OUTPUT
+              echo "extra_compose_path=" >> $GITHUB_OUTPUT
+              echo "env_example=infra/shared-postgres/.env.example" >> $GITHUB_OUTPUT
+              echo "setup_path=infra/shared-postgres/scripts/setup-target.sh" >> $GITHUB_OUTPUT
+              echo "deploy_path=infra/shared-postgres/scripts/deploy.sh" >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+      - name: Install cloudflared
+        run: |
+          curl -fsSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb -o cloudflared.deb
+          sudo dpkg -i cloudflared.deb
+
+      - name: Deploy to selected target
+        env:
+          SSH_KEY: ${{ secrets[steps.resolve.outputs.key_secret] }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          TUNNEL_HOSTNAME: ${{ vars.SSH_TUNNEL_HOSTNAME }}
+          TUNNEL_SERVICE_TOKEN_ID: ${{ secrets.CF_CLIENT_ID }}
+          TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+          CF_ACCESS_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
+          CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          cloudflared access tcp --hostname ${TUNNEL_HOSTNAME} --url localhost:2222 &
+          TUNNEL_PID=$!
+          sleep 3
+
+          cat >> ~/.ssh/config <<EOF
+          Host deploy-target
+            HostName localhost
+            Port 2222
+            User ${DEPLOY_USER}
+            IdentityFile ~/.ssh/deploy_key
+            StrictHostKeyChecking no
+          EOF
+
+          ssh -F ~/.ssh/config deploy-target "mkdir -p ${{ steps.resolve.outputs.deploy_dir }}"
+          scp -F ~/.ssh/config ${{ steps.resolve.outputs.compose_path }} deploy-target:${{ steps.resolve.outputs.deploy_dir }}/docker-compose.yml
+          if [ -n "${{ steps.resolve.outputs.extra_compose_path }}" ]; then
+            scp -F ~/.ssh/config ${{ steps.resolve.outputs.extra_compose_path }} deploy-target:${{ steps.resolve.outputs.deploy_dir }}/docker-compose.shared-db.yml
+          fi
+          scp -F ~/.ssh/config ${{ steps.resolve.outputs.env_example }} deploy-target:${{ steps.resolve.outputs.deploy_dir }}/.env.example
+          scp -F ~/.ssh/config ${{ steps.resolve.outputs.setup_path }} deploy-target:${{ steps.resolve.outputs.deploy_dir }}/setup-target.sh
+          scp -F ~/.ssh/config ${{ steps.resolve.outputs.deploy_path }} deploy-target:${{ steps.resolve.outputs.deploy_dir }}/deploy.sh
+          ssh -F ~/.ssh/config deploy-target "chmod +x ${{ steps.resolve.outputs.deploy_dir }}/setup-target.sh ${{ steps.resolve.outputs.deploy_dir }}/deploy.sh && ${{ steps.resolve.outputs.deploy_dir }}/setup-target.sh && ${{ steps.resolve.outputs.deploy_dir }}/deploy.sh ${{ inputs.image_tag }}"
+
+          kill $TUNNEL_PID 2>/dev/null || true

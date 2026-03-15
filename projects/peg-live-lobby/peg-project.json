@@ -1,0 +1,25 @@
+{
+  "slug": "peg-live-lobby",
+  "name": "PEG Live Lobby",
+  "summary": "Fastify-powered realtime lobby service for ready checks, presence, and live room state.",
+  "tagline": "A Node-based API lane proving PEG projects can swap to a different runtime without touching the rest of the repo.",
+  "status": "ready to deploy",
+  "featured": true,
+  "order": 40,
+  "links": {
+    "page": "/projects/peg-live-lobby/",
+    "repoPath": "projects/peg-live-lobby",
+    "apiBase": "https://api.professionaleveninggaming.com/live-lobby"
+  },
+  "stack": {
+    "frontend": "Realtime consumers",
+    "api": "Node.js + Fastify + WebSocket",
+    "database": "Optional external store",
+    "deploy": "GitHub Actions -> GHCR -> cloudflared SSH -> docker compose"
+  },
+  "deployment": {
+    "workflow": ".github/workflows/deploy-peg-live-lobby.yml",
+    "composePath": "projects/peg-live-lobby/infra/docker-compose.yml",
+    "healthcheck": "/health"
+  }
+}

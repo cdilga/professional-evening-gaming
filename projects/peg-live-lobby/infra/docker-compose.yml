@@ -1,0 +1,27 @@
+services:
+  app:
+    image: ghcr.io/cdilga/professional-evening-gaming-live-lobby:${LIVE_LOBBY_IMAGE_TAG:-latest}
+    container_name: peg-live-lobby
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+    ports:
+      - "127.0.0.1:${LIVE_LOBBY_PORT:-8202}:3000"
+    networks:
+      - peg-live-lobby
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: peg-live-lobby-cloudflared
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - peg-live-lobby
+
+networks:
+  peg-live-lobby:
+    driver: bridge

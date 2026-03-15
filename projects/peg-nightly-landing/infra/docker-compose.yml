@@ -1,0 +1,25 @@
+services:
+  app:
+    image: ghcr.io/cdilga/professional-evening-gaming-nightly-landing:${PEG_NIGHTLY_IMAGE_TAG:-latest}
+    container_name: peg-nightly-landing
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${LANDING_PORT:-8200}:80"
+    networks:
+      - peg-nightly-landing
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: peg-nightly-landing-cloudflared
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - peg-nightly-landing
+
+networks:
+  peg-nightly-landing:
+    driver: bridge

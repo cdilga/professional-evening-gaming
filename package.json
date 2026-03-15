@@ -1,0 +1,9 @@
+{
+  "name": "professional-evening-gaming",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "build:site": "node scripts/build-site.mjs",
+    "validate:projects": "node scripts/build-site.mjs --validate-only"
+  }
+}

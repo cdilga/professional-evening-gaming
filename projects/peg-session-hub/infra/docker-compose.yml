@@ -1,0 +1,53 @@
+services:
+  api:
+    image: ghcr.io/cdilga/professional-evening-gaming-session-hub:${SESSION_HUB_IMAGE_TAG:-latest}
+    container_name: peg-session-hub-api
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+    ports:
+      - "127.0.0.1:${SESSION_HUB_PORT:-8201}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - peg-session-hub
+
+  postgres:
+    image: postgres:16-bookworm
+    container_name: peg-session-hub-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - peg-session-hub-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - peg-session-hub
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: peg-session-hub-cloudflared
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - peg-session-hub
+
+volumes:
+  peg-session-hub-data:
+
+networks:
+  peg-session-hub:
+    driver: bridge

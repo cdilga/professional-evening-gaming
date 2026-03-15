@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PEG Nightly Landing | Professional Evening Gaming</title>
+    <meta
+      name="description"
+      content="PEG Nightly Landing is a static-only example project with its own independent deployment lane."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/assets/css/site.css" />
+  </head>
+  <body data-page="project-detail">
+    <div class="page-aura page-aura-left"></div>
+    <div class="page-aura page-aura-right"></div>
+    <header class="site-header shell">
+      <a class="brand" href="/">
+        <span class="brand-kicker">PEG</span>
+        <span class="brand-name">Professional Evening Gaming</span>
+      </a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="/">Home</a>
+        <a href="/projects/" aria-current="page">Projects</a>
+        <a href="/#platform">Platform</a>
+      </nav>
+    </header>
+
+    <main class="shell page-main project-detail-page">
+      <section class="panel detail-hero">
+        <div>
+          <p class="eyebrow">Static-only example</p>
+          <h1>PEG Nightly Landing</h1>
+          <p class="lede">
+            A one-purpose microsite lane for event teasers, landing pages, and playful one-offs. No database, no
+            shared app runtime, no dependency on the main PEG Pages bundle.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="/projects/">Back to all projects</a>
+            <a class="button button-secondary" href="https://github.com/cdilga/professional-evening-gaming/tree/main/projects/peg-nightly-landing">Source</a>
+          </div>
+        </div>
+        <div class="panel inset-panel">
+          <p class="mini-label">What it proves</p>
+          <ul class="principle-list compact-list">
+            <li><strong>Static can stay static:</strong> no forced framework coupling.</li>
+            <li><strong>Own deploy lane:</strong> GHCR image plus nginx on the private host.</li>
+            <li><strong>Shared discovery:</strong> still indexed from `peg-project.json`.</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer shell">
+      <p>Professional Evening Gaming <span data-year></span></p>
+      <a href="/projects/">Project index</a>
+    </footer>
+
+    <script src="/assets/js/site.js" defer></script>
+  </body>
+</html>

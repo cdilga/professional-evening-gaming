@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Astacus Bot | Professional Evening Gaming</title>
+    <meta
+      name="description"
+      content="Astacus Bot is the PEG service lane for Discord-driven tasks, FastAPI endpoints, and schema-backed state."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/assets/css/site.css" />
+  </head>
+  <body data-page="project-detail">
+    <div class="page-aura page-aura-left"></div>
+    <div class="page-aura page-aura-right"></div>
+    <header class="site-header shell">
+      <a class="brand" href="/">
+        <span class="brand-kicker">PEG</span>
+        <span class="brand-name">Professional Evening Gaming</span>
+      </a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="/">Home</a>
+        <a href="/projects/" aria-current="page">Projects</a>
+        <a href="/#platform">Platform</a>
+      </nav>
+    </header>
+
+    <main class="shell page-main project-detail-page">
+      <section class="panel detail-hero">
+        <div>
+          <p class="eyebrow">Project spotlight</p>
+          <h1>Astacus Bot</h1>
+          <p class="lede">
+            The first proper service lane for PEG: Discord-triggered work, a FastAPI surface, private Postgres,
+            and migrations on every deploy so the bot can keep durable state without exposing the database.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="/projects/">Back to all projects</a>
+            <a class="button button-secondary" href="https://github.com/cdilga/professional-evening-gaming">View repo</a>
+          </div>
+        </div>
+        <div class="panel inset-panel">
+          <p class="mini-label">Current shape</p>
+          <ul class="principle-list compact-list">
+            <li><strong>API:</strong> FastAPI container with CORS for the static site.</li>
+            <li><strong>Data:</strong> PostgreSQL 16 with an `astacus_bot` schema.</li>
+            <li><strong>Deploy:</strong> GHCR image, cloudflared SSH, compose rollout, then migrations.</li>
+            <li><strong>Extensibility:</strong> add more schemas as new PEG projects need durable state.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="detail-grid">
+        <article class="panel">
+          <p class="eyebrow">What it unlocks</p>
+          <ul class="principle-list compact-list">
+            <li>Discord bot commands can persist notes, jobs, or project state.</li>
+            <li>Static Pages frontends can call a stable API host with CORS enabled.</li>
+            <li>Each new service-backed project can claim its own schema and endpoints.</li>
+          </ul>
+        </article>
+        <article class="panel">
+          <p class="eyebrow">Source layout</p>
+          <ul class="principle-list compact-list mono-list">
+            <li>`projects/astacus-bot/peg-project.json`</li>
+            <li>`projects/astacus-bot/api/`</li>
+            <li>`projects/astacus-bot/infra/docker-compose.yml`</li>
+            <li>`projects/astacus-bot/infra/scripts/deploy.sh`</li>
+          </ul>
+        </article>
+      </section>
+    </main>
+
+    <footer class="site-footer shell">
+      <p>Professional Evening Gaming <span data-year></span></p>
+      <a href="/projects/">Project index</a>
+    </footer>
+
+    <script src="/assets/js/site.js" defer></script>
+  </body>
+</html>

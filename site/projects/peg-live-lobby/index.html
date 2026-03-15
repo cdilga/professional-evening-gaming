@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PEG Live Lobby | Professional Evening Gaming</title>
+    <meta
+      name="description"
+      content="PEG Live Lobby is a Node + Fastify + WebSocket service for realtime room state and ready checks."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/assets/css/site.css" />
+  </head>
+  <body data-page="project-detail">
+    <div class="page-aura page-aura-left"></div>
+    <div class="page-aura page-aura-right"></div>
+    <header class="site-header shell">
+      <a class="brand" href="/">
+        <span class="brand-kicker">PEG</span>
+        <span class="brand-name">Professional Evening Gaming</span>
+      </a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="/">Home</a>
+        <a href="/projects/" aria-current="page">Projects</a>
+        <a href="/#platform">Platform</a>
+      </nav>
+    </header>
+
+    <main class="shell page-main project-detail-page">
+      <section class="panel detail-hero">
+        <div>
+          <p class="eyebrow">Node realtime example</p>
+          <h1>PEG Live Lobby</h1>
+          <p class="lede">
+            A lightweight realtime backend for room presence, ready checks, and live match state. It proves PEG can
+            host non-Python service projects without changing the shared control-plane model.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="/projects/">Back to all projects</a>
+            <a class="button button-secondary" href="https://github.com/cdilga/professional-evening-gaming/tree/main/projects/peg-live-lobby">Source</a>
+          </div>
+        </div>
+        <div class="panel inset-panel">
+          <p class="mini-label">Realtime lane</p>
+          <ul class="principle-list compact-list">
+            <li><strong>API:</strong> Fastify REST and websocket endpoint.</li>
+            <li><strong>State:</strong> in-memory now, external store optional later.</li>
+            <li><strong>Deploy:</strong> same private-host pipeline as the Python services.</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer shell">
+      <p>Professional Evening Gaming <span data-year></span></p>
+      <a href="/projects/">Project index</a>
+    </footer>
+
+    <script src="/assets/js/site.js" defer></script>
+  </body>
+</html>

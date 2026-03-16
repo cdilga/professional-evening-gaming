@@ -7,7 +7,65 @@ services:
       - peg-astacus
       - peg-services
 
+  api-gateway:
+    image: nginx:1.29-alpine
+    container_name: peg-api-gateway
+    restart: unless-stopped
+    depends_on:
+      - api
+    command:
+      - /bin/sh
+      - -c
+      - |
+        cat <<'EOF' >/etc/nginx/conf.d/default.conf
+        server {
+          listen 8080;
+          server_name _;
+
+          location = /health {
+            proxy_pass http://peg-astacus-api:8000/health;
+          }
+
+          location /v1/ {
+            proxy_pass http://peg-astacus-api:8000;
+          }
+
+          location /session-hub/ws {
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $$http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_set_header Host $$host;
+            rewrite ^/session-hub/(.*)$ /$1 break;
+            proxy_pass http://peg-session-hub-api:8000;
+          }
+
+          location /session-hub/ {
+            rewrite ^/session-hub/(.*)$ /$1 break;
+            proxy_pass http://peg-session-hub-api:8000;
+          }
+
+          location /live-lobby/ws {
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $$http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_set_header Host $$host;
+            rewrite ^/live-lobby/(.*)$ /$1 break;
+            proxy_pass http://peg-live-lobby:3000;
+          }
+
+          location /live-lobby/ {
+            rewrite ^/live-lobby/(.*)$ /$1 break;
+            proxy_pass http://peg-live-lobby:3000;
+          }
+        }
+        EOF
+        exec nginx -g 'daemon off;'
+    networks:
+      - peg-astacus
+      - peg-services
+
   cloudflared:
+    command: tunnel --no-autoupdate --url http://api-gateway:8080 run
     networks:
       - peg-astacus
 

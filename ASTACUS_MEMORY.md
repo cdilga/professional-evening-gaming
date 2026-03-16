@@ -27,6 +27,7 @@ Professional Evening Gaming is not one app. It is a shared control plane for:
 - `docs/truenas-deploy-runbook.md` is the exact deployment runbook
 - remote `.env` files are meant to be reconciled from project-specific GitHub secrets on deploy
 - periodic audits live in `.github/workflows/service-healthcheck.yml` and `.github/workflows/deployment-drift.yml`
+- current runtime-env secrets were copied from the live `truenas` host, so `triton` is only safe if it can share that same config
 
 ## How projects work
 
@@ -68,6 +69,8 @@ Important rule: the root repo indexes projects, but does not force them into one
 
 - `npm run validate:projects`
 - `npm run build:site`
+- `npm run test:unit`
+- `npm run test:integration`
 - `python3 -m compileall projects/astacus-bot/api/app`
 
 ## Manual host assumptions

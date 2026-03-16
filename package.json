@@ -4,6 +4,9 @@
   "version": "0.1.0",
   "scripts": {
     "build:site": "node scripts/build-site.mjs",
-    "validate:projects": "node scripts/build-site.mjs --validate-only"
+    "validate:projects": "node scripts/build-site.mjs --validate-only",
+    "test:unit": "bash scripts/run_unit_tests.sh",
+    "test:integration": "npm run build:site && python3 scripts/run_integration_checks.py",
+    "test:all": "npm run test:unit && npm run test:integration"
   }
 }

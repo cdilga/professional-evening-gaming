@@ -16,7 +16,11 @@ Reference projects currently included:
 
 - `npm run validate:projects` - validate all project contracts
 - `npm run build:site` - build the static site into `dist/`
-- `python3 -m compileall projects/astacus-bot/api/app` - quick syntax check for the FastAPI app
+- `npm run test:unit` - run Python API tests and the Node live-lobby test suite
+- `npm run test:integration` - rebuild the site and verify end-to-end project wiring
+- `python3 scripts/run_integration_checks.py --live` - optional public live smoke against the PEG API host
+- `python3 -m compileall projects/astacus-bot/api/app` - quick syntax check for the Astacus FastAPI app
+- `python3 -m compileall projects/peg-session-hub/api/app` - quick syntax check for the Session Hub FastAPI app
 
 ## Deployment
 
@@ -44,6 +48,11 @@ The periodic audits are intentionally lightweight:
 - healthcheck verifies local service endpoints and shared Postgres readiness on the active host
 - drift audit compares deployed compose/scripts/env-example files against the repo and checks recorded image tags against the running containers
 
+Current assumption:
+
+- the runtime env secrets were synced from the live `truenas` host
+- deploys will therefore assume `triton` can use the same runtime env unless and until target-specific secrets are added
+
 ## Shared database mode
 
 If you want multiple PEG APIs to share one private Postgres cluster:
@@ -59,5 +68,7 @@ See `docs/truenas-deploy-runbook.md` for the exact host, secrets, tunnel, and ro
 ## Architecture
 
 See `docs/platform-architecture.md` and `AGENTS.md` for the operating model.
+
+`CLAUDE.md` is intentionally a symlink to `AGENTS.md` so local agent tooling gets the same repo instructions.
 
 If Astacus or another sandbox agent seems to have no context, start with `ASTACUS_MEMORY.md`.

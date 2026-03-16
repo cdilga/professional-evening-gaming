@@ -24,6 +24,7 @@ For anything dynamic:
 
 - static pages call a dedicated API hostname
 - the API sits behind Cloudflare tunnel ingress
+- the free public host is `https://peg-api.dilger.dev`
 - Postgres stays private on the Docker network
 - CORS allows the Pages domain to call the API directly
 

@@ -75,6 +75,39 @@
           </ul>
         </article>
       </section>
+
+      <section class="detail-grid">
+        <article class="panel demo-panel" data-demo="astacus-notes" data-api-base="https://peg-api.dilger.dev/v1">
+          <div class="demo-panel-header">
+            <div>
+              <p class="eyebrow">Live demo</p>
+              <h2>Astacus notes board</h2>
+            </div>
+            <span class="status-pill" data-demo-status>Checking API...</span>
+          </div>
+          <p class="demo-copy">Drop a note and watch the project prove it really is backed by a real API lane.</p>
+          <form class="demo-form" data-demo-form>
+            <label>
+              <span>Name</span>
+              <input name="author" type="text" maxlength="80" placeholder="cass" required />
+            </label>
+            <label>
+              <span>Note</span>
+              <textarea name="body" maxlength="500" placeholder="Astacus can absolutely ship this." required></textarea>
+            </label>
+            <button class="button button-primary" type="submit">Post note</button>
+          </form>
+          <div class="demo-list" data-demo-list></div>
+        </article>
+        <article class="panel demo-side-panel">
+          <p class="eyebrow">What the demo proves</p>
+          <ul class="principle-list compact-list">
+            <li>The static site can talk to a real API over CORS.</li>
+            <li>Notes persist in Postgres-backed state instead of local fake data.</li>
+            <li>The service deploy lane is good enough for actual feature slices, not just health checks.</li>
+          </ul>
+        </article>
+      </section>
     </main>
 
     <footer class="site-footer shell">

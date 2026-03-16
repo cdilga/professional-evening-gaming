@@ -3,7 +3,7 @@
   "name": "PEG Nightly Landing",
   "summary": "Standalone static microsite for upcoming sessions, teases, and inside jokes.",
   "tagline": "A static-only project that deploys independently from the main Pages shell while still being indexed by PEG.",
-  "status": "ready to deploy",
+  "status": "standalone preview ready",
   "featured": true,
   "order": 20,
   "links": {

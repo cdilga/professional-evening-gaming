@@ -33,7 +33,7 @@ Typical value when TrueNAS is active:
 Suggested hostnames:
 
 - `ssh-deploy.professionaleveninggaming.com` -> `ssh://localhost:22`
-- `api.professionaleveninggaming.com` -> public API ingress
+- `peg-api.dilger.dev` -> shared public API ingress for Astacus, Session Hub, and Live Lobby
 - `nightly.professionaleveninggaming.com` -> PEG Nightly Landing
 - `lobby.professionaleveninggaming.com` -> PEG Live Lobby
 
@@ -149,6 +149,8 @@ Use `triton` instead of `truenas` to target the other host.
 - `.github/workflows/service-healthcheck.yml` runs every 30 minutes against the active host
 - `.github/workflows/deployment-drift.yml` runs nightly and checks remote deployment files against repo copies
 - service deploy scripts write `.deploy-state` so drift checks can compare the recorded tag to the running container image
+- current repo secrets were synced from the live `truenas` host, so cross-target deploys presently assume `triton` can share the same runtime env
+- if `triton` needs different values, introduce target-specific runtime secrets before relying on it as an independent deployment target
 
 ## Rollout order
 

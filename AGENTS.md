@@ -2,6 +2,8 @@
 
 This repository is the control plane for Professional Evening Gaming.
 
+`CLAUDE.md` should mirror this file exactly; keep the symlink intact so agent tooling lands on one source of truth.
+
 Before doing anything substantial, read `ASTACUS_MEMORY.md` for the sandbox brief and current architectural facts.
 
 ## Mission
@@ -46,6 +48,7 @@ Before doing anything substantial, read `ASTACUS_MEMORY.md` for the sandbox brie
 - for schema-per-project on one cluster, deploy `infra/shared-postgres/` first and set `USE_SHARED_POSTGRES=true` in the service env
 - manual targeted deploys use `.github/workflows/deploy-private-manual.yml`; branch-targeted deploys use `deploy/<target>/<project>`
 - periodic automation now includes `.github/workflows/service-healthcheck.yml` and `.github/workflows/deployment-drift.yml`
+- current runtime-env secrets were synced from `truenas`; do not assume `triton` can diverge safely until target-specific secrets exist
 
 ## Content and vibe guidance
 
@@ -53,12 +56,28 @@ Before doing anything substantial, read `ASTACUS_MEMORY.md` for the sandbox brie
 - favor confident, slightly theatrical copy over bland startup filler
 - preserve mobile usability and direct navigation
 
-## Validation before handoff
+## Build and test checklist
 
-- run `npm run validate:projects`
-- run `npm run build:site`
-- run `python3 -m compileall projects/astacus-bot/api/app`
-- if deployment files changed, review the matching workflow and compose paths together
+Run the smallest useful set for the area you touched, then finish with the full pass before handoff on larger changes.
+
+- `npm run validate:projects` - validate all project contracts and page wiring
+- `npm run build:site` - rebuild the public Pages artifact into `dist/`
+- `npm run test:unit` - Python API tests plus the Node live-lobby test suite
+- `npm run test:integration` - build the site and verify cross-project wiring in `dist/`
+- `python3 scripts/run_integration_checks.py --live` - optional live smoke against the public PEG API host
+
+Project-specific shortcuts:
+
+- `python3 -m compileall projects/astacus-bot/api/app`
+- `python3 -m compileall projects/peg-session-hub/api/app`
+- `npm --prefix projects/peg-live-lobby/app test`
+
+## Expectations for service-backed projects
+
+- every service project should have a project page that proves the thing works, not just explains architecture
+- prefer browser-facing demos that hit the live API path where practical
+- if a project needs durable state, wire it to its own schema and show that state on the page
+- if deployment files change, review the matching workflow, compose files, runtime env, and host health path together
 
 ## Memory refresh checklist
 

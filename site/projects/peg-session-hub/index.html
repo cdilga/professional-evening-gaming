@@ -54,6 +54,46 @@
           </ul>
         </div>
       </section>
+
+      <section class="detail-grid">
+        <article class="panel demo-panel" data-demo="session-hub" data-api-base="https://peg-api.dilger.dev/session-hub">
+          <div class="demo-panel-header">
+            <div>
+              <p class="eyebrow">Live Postgres demo</p>
+              <h2>Plan a real session</h2>
+            </div>
+            <span class="status-pill" data-demo-status>Checking API...</span>
+          </div>
+          <p class="demo-copy">
+            This one is meant to feel undeniably real: fetch sessions from Postgres, add one from the browser, and
+            watch the schedule update.
+          </p>
+          <form class="demo-form" data-demo-form>
+            <label>
+              <span>Session title</span>
+              <input name="title" type="text" maxlength="120" placeholder="Friday knock-off LAN" required />
+            </label>
+            <label>
+              <span>Game</span>
+              <input name="game_name" type="text" maxlength="120" placeholder="Risk of Rain 2" required />
+            </label>
+            <label>
+              <span>Scheduled for</span>
+              <input name="scheduled_for" type="datetime-local" />
+            </label>
+            <button class="button button-primary" type="submit">Add session</button>
+          </form>
+          <div class="demo-list" data-demo-list></div>
+        </article>
+        <article class="panel demo-side-panel">
+          <p class="eyebrow">What the demo proves</p>
+          <ul class="principle-list compact-list">
+            <li>The route is public, but the database is still private.</li>
+            <li>`session_hub` owns a dedicated schema and migrations.</li>
+            <li>The project can evolve without turning PEG into one giant app.</li>
+          </ul>
+        </article>
+      </section>
     </main>
 
     <footer class="site-footer shell">

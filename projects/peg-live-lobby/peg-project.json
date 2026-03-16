@@ -3,7 +3,7 @@
   "name": "PEG Live Lobby",
   "summary": "Fastify-powered realtime lobby service for ready checks, presence, and live room state.",
   "tagline": "A Node-based API lane proving PEG projects can swap to a different runtime without touching the rest of the repo.",
-  "status": "ready to deploy",
+  "status": "live demo online",
   "featured": true,
   "order": 40,
   "links": {

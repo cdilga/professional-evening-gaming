@@ -1,47 +1,62 @@
+import { fileURLToPath } from "node:url";
+
 import Fastify from "fastify";
 import websocket from "@fastify/websocket";
 
-const app = Fastify({ logger: true });
-await app.register(websocket);
+function createState() {
+  return {
+    room: "main-lobby",
+    players: ["astacus", "cass", "the lads"],
+    readyCount: 1,
+    updatedAt: new Date().toISOString(),
+  };
+}
 
-const state = {
-  room: "main-lobby",
-  players: ["astacus", "cass", "the lads"],
-  readyCount: 1,
-  updatedAt: new Date().toISOString(),
-};
+export function buildApp() {
+  const app = Fastify({ logger: true });
+  const state = createState();
 
-app.get("/health", async () => ({
-  status: "ok",
-  service: "peg-live-lobby",
-  room: state.room,
-}));
+  app.register(websocket);
 
-app.get("/v1/lobby", async () => ({ state }));
+  app.get("/health", async () => ({
+    status: "ok",
+    service: "peg-live-lobby",
+    room: state.room,
+  }));
 
-app.post("/v1/lobby/ready", async (request) => {
-  const payload = request.body || {};
-  if (payload.player && !state.players.includes(payload.player)) {
-    state.players.push(payload.player);
-  }
-  state.readyCount += 1;
-  state.updatedAt = new Date().toISOString();
-  return { state };
-});
+  app.get("/v1/lobby", async () => ({ state }));
 
-app.get("/ws", { websocket: true }, (socket) => {
-  socket.send(JSON.stringify({ type: "snapshot", state }));
-  socket.on("message", (raw) => {
-    try {
-      const payload = JSON.parse(raw.toString());
-      if (payload.type === "ping") {
-        socket.send(JSON.stringify({ type: "pong", state }));
-      }
-    } catch {
-      socket.send(JSON.stringify({ type: "error", message: "invalid json" }));
+  app.post("/v1/lobby/ready", async (request) => {
+    const payload = request.body || {};
+    if (payload.player && !state.players.includes(payload.player)) {
+      state.players.push(payload.player);
     }
+    state.readyCount += 1;
+    state.updatedAt = new Date().toISOString();
+    return { state };
   });
-});
 
-const port = Number(process.env.PORT || 3000);
-await app.listen({ host: "0.0.0.0", port });
+  app.get("/ws", { websocket: true }, (socket) => {
+    socket.send(JSON.stringify({ type: "snapshot", state }));
+    socket.on("message", (raw) => {
+      try {
+        const payload = JSON.parse(raw.toString());
+        if (payload.type === "ping") {
+          socket.send(JSON.stringify({ type: "pong", state }));
+        }
+      } catch {
+        socket.send(JSON.stringify({ type: "error", message: "invalid json" }));
+      }
+    });
+  });
+
+  return app;
+}
+
+const isDirectRun = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
+
+if (isDirectRun) {
+  const app = buildApp();
+  const port = Number(process.env.PORT || 3000);
+  await app.listen({ host: "0.0.0.0", port });
+}

@@ -3,7 +3,7 @@
   "name": "PEG Session Hub",
   "summary": "FastAPI + Postgres scheduling and session-planning service for game nights.",
   "tagline": "A proper service lane with migrations, a dedicated schema, and a deploy path built for TrueNAS-style private hosts.",
-  "status": "ready to deploy",
+  "status": "postgres demo online",
   "featured": true,
   "order": 30,
   "links": {

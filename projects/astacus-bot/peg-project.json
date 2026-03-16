@@ -3,7 +3,7 @@
   "name": "Astacus Bot",
   "summary": "Discord-driven operations bot with a real API lane and durable state.",
   "tagline": "A basic FastAPI service and private Postgres stack so Discord asks can land in something sturdier than a webhook.",
-  "status": "foundation live",
+  "status": "live demo online",
   "featured": true,
   "order": 10,
   "links": {

@@ -9,6 +9,7 @@ services:
       - "127.0.0.1:${LIVE_LOBBY_PORT:-8202}:3000"
     networks:
       - peg-live-lobby
+      - peg-services
 
   cloudflared:
     image: cloudflare/cloudflared:latest
@@ -25,3 +26,6 @@ services:
 networks:
   peg-live-lobby:
     driver: bridge
+  peg-services:
+    external: true
+    name: peg-services

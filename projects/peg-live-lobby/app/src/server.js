@@ -36,20 +36,20 @@ function saveState(statePath, state) {
   fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
 }
 
-function readyCount(state) {
-  return state.players.filter((p) => p.ready).length;
+function readyCount(players) {
+  return players.filter((p) => p.ready).length;
 }
 
-function allReady(state) {
-  return state.players.length > 0 && state.players.every((p) => p.ready);
+function allReady(players) {
+  return players.length > 0 && players.every((p) => p.ready);
 }
 
 function stateView(state) {
   return {
     ...state,
-    readyCount: readyCount(state),
+    readyCount: readyCount(state.players),
     totalPlayers: state.players.length,
-    allReady: allReady(state),
+    allReady: allReady(state.players),
   };
 }
 
@@ -77,12 +77,27 @@ export function buildApp(opts = {}) {
     service: "peg-live-lobby",
     room: state.room,
     connectedClients: sockets.size,
-    readyCount: readyCount(state),
+    readyCount: readyCount(state.players),
     totalPlayers: state.players.length,
-    allReady: allReady(state),
+    allReady: allReady(state.players),
   }));
 
-  app.get("/v1/lobby", async () => ({ state: stateView(state) }));
+  app.get("/v1/lobby", async (request) => {
+    const sessionId = request.query.session_id;
+    if (sessionId) {
+      const filtered = state.players.filter((p) => p.sessionId === sessionId);
+      return {
+        state: {
+          ...state,
+          players: filtered,
+          readyCount: readyCount(filtered),
+          totalPlayers: filtered.length,
+          allReady: allReady(filtered),
+        },
+      };
+    }
+    return { state: stateView(state) };
+  });
 
   app.post("/v1/lobby/ready", async (request) => {
     const payload = request.body || {};
@@ -90,11 +105,20 @@ export function buildApp(opts = {}) {
       return { error: "player name required" };
     }
 
-    const existing = state.players.find((p) => p.name === payload.player);
+    const sessionId = payload.session_id || null;
+    const existing = state.players.find(
+      (p) => p.name === payload.player && p.sessionId === sessionId
+    );
+
     if (existing) {
       existing.ready = !existing.ready;
     } else {
-      state.players.push({ name: payload.player, ready: true });
+      state.players.push({
+        name: payload.player,
+        ready: true,
+        sessionId,
+        joinedAt: new Date().toISOString(),
+      });
     }
 
     state.updatedAt = new Date().toISOString();

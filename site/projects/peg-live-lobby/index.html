@@ -67,23 +67,31 @@
           <p class="demo-copy">
             Pull the current room snapshot, join the player list with a ready-check, and ping the websocket.
           </p>
-          <form class="demo-form inline-form" data-demo-form>
+          <form class="demo-form" data-demo-form>
             <label>
-              <span>Player name</span>
-              <input name="player" type="text" maxlength="80" placeholder="sassy-sasquatch" required />
+              <span>Session (from Session Hub)</span>
+              <select name="session_id" data-session-select>
+                <option value="">General lobby</option>
+              </select>
             </label>
-            <button class="button button-primary" type="submit">Ready up</button>
-            <button class="button button-secondary" type="button" data-demo-refresh>Refresh state</button>
-            <button class="button button-secondary" type="button" data-demo-ws>Ping websocket</button>
+            <div class="inline-form">
+              <label>
+                <span>Player name</span>
+                <input name="player" type="text" maxlength="80" placeholder="sassy-sasquatch" required />
+              </label>
+              <button class="button button-primary" type="submit">Ready up</button>
+              <button class="button button-secondary" type="button" data-demo-refresh>Refresh</button>
+              <button class="button button-secondary" type="button" data-demo-ws>Ping WS</button>
+            </div>
           </form>
           <div class="demo-list" data-demo-list></div>
         </article>
         <article class="panel demo-side-panel">
           <p class="eyebrow">What the demo proves</p>
           <ul class="principle-list compact-list">
-            <li>PEG can host a non-Python lane and still deploy it the same way.</li>
-            <li>REST and websocket traffic can sit behind the shared public API host.</li>
-            <li>The project feels like a toy people can actually poke, not just read about.</li>
+            <li>Sessions come from Session Hub's Postgres — two projects talking to each other.</li>
+            <li>Joins broadcast to all connected browsers via WebSocket in realtime.</li>
+            <li>Ready state persists across restarts and toggles per player.</li>
           </ul>
         </article>
       </section>

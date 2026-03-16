@@ -107,7 +107,8 @@ function renderLobbyState(state, wsStatus = "not connected") {
       return `<li>${escapeHtml(player)}</li>`;
     }
     const indicator = player.ready ? "ready" : "waiting";
-    return `<li data-ready="${indicator}">${escapeHtml(player.name)} <small>(${indicator})</small></li>`;
+    const session = player.sessionId ? ` · session ${escapeHtml(player.sessionId)}` : "";
+    return `<li data-ready="${indicator}">${escapeHtml(player.name)} <small>(${indicator}${session})</small></li>`;
   }).join("");
 
   const total = state.totalPlayers || 0;
@@ -211,10 +212,12 @@ async function setupSessionHubDemo(root) {
 
 async function setupLiveLobbyDemo(root) {
   const apiBase = root.dataset.apiBase;
+  const sessionHubBase = apiBase.replace(/\/live-lobby$/, "/session-hub");
   const form = root.querySelector("[data-demo-form]");
   const list = root.querySelector("[data-demo-list]");
   const refreshButton = root.querySelector("[data-demo-refresh]");
   const wsButton = root.querySelector("[data-demo-ws]");
+  const sessionSelect = root.querySelector("[data-session-select]");
   let websocketStatus = "not connected";
   let liveSocket = null;
 
@@ -222,10 +225,32 @@ async function setupLiveLobbyDemo(root) {
     list.innerHTML = renderLobbyState(state || {}, websocketStatus);
   }
 
+  async function loadSessions() {
+    try {
+      const response = await fetch(`${sessionHubBase}/v1/sessions`);
+      if (!response.ok) return;
+      const payload = await response.json();
+      const sessions = payload.items || [];
+      sessions.forEach((session) => {
+        const option = document.createElement("option");
+        option.value = String(session.id);
+        option.textContent = `${session.title} (${session.game_name})`;
+        sessionSelect.appendChild(option);
+      });
+    } catch {
+      const option = document.createElement("option");
+      option.disabled = true;
+      option.textContent = "Session Hub unavailable";
+      sessionSelect.appendChild(option);
+    }
+  }
+
   async function refresh() {
+    const sessionId = sessionSelect?.value || "";
+    const query = sessionId ? `?session_id=${sessionId}` : "";
     const [healthResponse, lobbyResponse] = await Promise.all([
       fetch(`${apiBase}/health`),
-      fetch(`${apiBase}/v1/lobby`),
+      fetch(`${apiBase}/v1/lobby${query}`),
     ]);
     if (!healthResponse.ok || !lobbyResponse.ok) {
       throw new Error("Live Lobby fetch failed");
@@ -273,19 +298,23 @@ async function setupLiveLobbyDemo(root) {
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const data = new FormData(form);
+    const sessionId = data.get("session_id") || null;
     setDemoStatus(root, "Sending ready check...", "busy");
+    const body = { player: data.get("player") };
+    if (sessionId) body.session_id = sessionId;
     const response = await fetch(`${apiBase}/v1/lobby/ready`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ player: data.get("player") }),
+      body: JSON.stringify(body),
     });
     if (!response.ok) {
       setDemoStatus(root, "Could not update lobby", "error");
       return;
     }
-    form.reset();
+    form.querySelector('input[name="player"]').value = "";
   });
 
+  sessionSelect?.addEventListener("change", refresh);
   refreshButton?.addEventListener("click", refresh);
   wsButton?.addEventListener("click", () => {
     if (liveSocket && liveSocket.readyState === WebSocket.OPEN) {
@@ -296,6 +325,7 @@ async function setupLiveLobbyDemo(root) {
     }
   });
 
+  await loadSessions();
   await refresh();
   connectSocket();
 }

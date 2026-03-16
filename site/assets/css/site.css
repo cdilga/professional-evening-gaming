@@ -494,9 +494,11 @@ h2 {
   margin-top: 18px;
 }
 
-.demo-form.inline-form {
-  grid-template-columns: minmax(0, 1fr) repeat(2, auto);
+.demo-form .inline-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) repeat(3, auto);
   align-items: end;
+  gap: 14px;
 }
 
 .demo-form label {
@@ -507,6 +509,7 @@ h2 {
   color: var(--muted);
 }
 
+.demo-form select,
 .demo-form input,
 .demo-form textarea {
   width: 100%;
@@ -690,7 +693,7 @@ h2 {
     grid-template-columns: 1fr;
   }
 
-  .demo-form.inline-form {
+  .demo-form .inline-form {
     grid-template-columns: 1fr;
   }
 }

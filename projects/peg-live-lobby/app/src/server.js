@@ -1,7 +1,11 @@
+import fs from "node:fs";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import Fastify from "fastify";
 import websocket from "@fastify/websocket";
+
+const DEFAULT_STATE_PATH = "/data/state.json";
 
 function createState() {
   return {
@@ -12,9 +16,25 @@ function createState() {
   };
 }
 
-export function buildApp() {
-  const app = Fastify({ logger: true });
-  const state = createState();
+function loadState(statePath) {
+  try {
+    const raw = fs.readFileSync(statePath, "utf8");
+    return JSON.parse(raw);
+  } catch {
+    return createState();
+  }
+}
+
+function saveState(statePath, state) {
+  const dir = path.dirname(statePath);
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+}
+
+export function buildApp(opts = {}) {
+  const statePath = opts.statePath ?? process.env.STATE_PATH ?? DEFAULT_STATE_PATH;
+  const app = Fastify({ logger: !opts.statePath });
+  const state = loadState(statePath);
 
   app.register(websocket);
 
@@ -33,6 +53,7 @@ export function buildApp() {
     }
     state.readyCount += 1;
     state.updatedAt = new Date().toISOString();
+    saveState(statePath, state);
     return { state };
   });
 

@@ -8,8 +8,8 @@
   --text: #3d2b1f;
   --muted: #6f5847;
   --accent: #ff8c42;
-  --accent-soft: #ffe66d;
-  --mint: #7df9c1;
+  --accent-soft: #a0522d;
+  --mint: #266d3e;
   --shadow: rgba(92, 64, 51, 0.22);
   --shell: min(1160px, calc(100vw - 32px));
 }
@@ -29,7 +29,7 @@ body {
   font-family: "Kalam", cursive;
   background:
     radial-gradient(circle at top left, rgba(255, 140, 66, 0.18), transparent 24%),
-    radial-gradient(circle at 80% 10%, rgba(125, 249, 193, 0.18), transparent 22%),
+    radial-gradient(circle at 80% 10%, rgba(38, 109, 62, 0.1), transparent 22%),
     linear-gradient(180deg, #faf7f0 0%, var(--bg) 40%, var(--bg-deep) 100%);
 }
 
@@ -64,7 +64,7 @@ img {
 .page-aura-right {
   top: 8rem;
   right: -12rem;
-  background: rgba(110, 243, 214, 0.22);
+  background: rgba(38, 109, 62, 0.14);
 }
 
 .shell {
@@ -406,8 +406,8 @@ h2 {
 .project-status {
   padding: 6px 10px;
   border-radius: 999px;
-  background: rgba(125, 249, 193, 0.24);
-  border: 1px solid rgba(92, 64, 51, 0.22);
+  background: rgba(38, 109, 62, 0.12);
+  border: 1px solid rgba(38, 109, 62, 0.3);
   color: var(--mint);
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.72rem;
@@ -573,18 +573,21 @@ h2 {
 }
 
 .status-pill[data-state="ok"] {
-  color: #1c6c43;
-  background: rgba(125, 249, 193, 0.42);
+  color: #145234;
+  background: rgba(38, 109, 62, 0.15);
+  border-color: rgba(38, 109, 62, 0.3);
 }
 
 .status-pill[data-state="error"] {
-  color: #8a2d1f;
-  background: rgba(255, 140, 66, 0.28);
+  color: #7a2518;
+  background: rgba(210, 90, 40, 0.15);
+  border-color: rgba(210, 90, 40, 0.3);
 }
 
 .status-pill[data-state="busy"] {
-  color: #6d5313;
-  background: rgba(255, 230, 109, 0.5);
+  color: #4d3a0e;
+  background: rgba(180, 140, 30, 0.18);
+  border-color: rgba(140, 110, 20, 0.3);
 }
 
 .nightly-preview {

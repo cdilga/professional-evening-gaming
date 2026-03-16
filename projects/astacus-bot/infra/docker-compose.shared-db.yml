@@ -22,6 +22,11 @@ services:
           listen 8080;
           server_name _;
 
+          resolver 127.0.0.11 valid=10s ipv6=off;
+
+          set $$upstream_session_hub http://peg-session-hub-api:8000;
+          set $$upstream_live_lobby http://peg-live-lobby:3000;
+
           location = /health {
             proxy_pass http://peg-astacus-api:8000/health;
           }
@@ -35,13 +40,13 @@ services:
             proxy_set_header Upgrade $$http_upgrade;
             proxy_set_header Connection "upgrade";
             proxy_set_header Host $$host;
-            rewrite ^/session-hub/(.*)$ /$1 break;
-            proxy_pass http://peg-session-hub-api:8000;
+            rewrite ^/session-hub/(.*)$ /$$1 break;
+            proxy_pass $$upstream_session_hub;
           }
 
           location /session-hub/ {
-            rewrite ^/session-hub/(.*)$ /$1 break;
-            proxy_pass http://peg-session-hub-api:8000;
+            rewrite ^/session-hub/(.*)$ /$$1 break;
+            proxy_pass $$upstream_session_hub;
           }
 
           location /live-lobby/ws {
@@ -49,13 +54,13 @@ services:
             proxy_set_header Upgrade $$http_upgrade;
             proxy_set_header Connection "upgrade";
             proxy_set_header Host $$host;
-            rewrite ^/live-lobby/(.*)$ /$1 break;
-            proxy_pass http://peg-live-lobby:3000;
+            rewrite ^/live-lobby/(.*)$ /$$1 break;
+            proxy_pass $$upstream_live_lobby;
           }
 
           location /live-lobby/ {
-            rewrite ^/live-lobby/(.*)$ /$1 break;
-            proxy_pass http://peg-live-lobby:3000;
+            rewrite ^/live-lobby/(.*)$ /$$1 break;
+            proxy_pass $$upstream_live_lobby;
           }
         }
         EOF

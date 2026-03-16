@@ -14,6 +14,7 @@ services:
         condition: service_healthy
     networks:
       - peg-session-hub
+      - peg-services
 
   postgres:
     image: postgres:16-bookworm
@@ -51,3 +52,6 @@ volumes:
 networks:
   peg-session-hub:
     driver: bridge
+  peg-services:
+    external: true
+    name: peg-services

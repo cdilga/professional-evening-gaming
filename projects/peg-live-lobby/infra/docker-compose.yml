@@ -5,6 +5,8 @@ services:
     restart: unless-stopped
     environment:
       PORT: 3000
+    volumes:
+      - peg-live-lobby-state:/data
     ports:
       - "127.0.0.1:${LIVE_LOBBY_PORT:-8202}:3000"
     networks:
@@ -22,6 +24,9 @@ services:
       - "host.docker.internal:host-gateway"
     networks:
       - peg-live-lobby
+
+volumes:
+  peg-live-lobby-state:
 
 networks:
   peg-live-lobby:

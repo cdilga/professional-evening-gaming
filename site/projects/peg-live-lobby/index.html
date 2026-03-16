@@ -48,9 +48,9 @@
         <div class="panel inset-panel">
           <p class="mini-label">Realtime lane</p>
           <ul class="principle-list compact-list">
-            <li><strong>API:</strong> Fastify REST and websocket endpoint.</li>
-            <li><strong>State:</strong> in-memory now, external store optional later.</li>
-            <li><strong>Deploy:</strong> same private-host pipeline as the Python services.</li>
+            <li><strong>API:</strong> Fastify REST + persistent WebSocket with broadcast.</li>
+            <li><strong>State:</strong> file-persisted, survives restarts.</li>
+            <li><strong>Realtime:</strong> joins broadcast to all connected clients.</li>
           </ul>
         </div>
       </section>

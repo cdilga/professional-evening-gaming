@@ -572,6 +572,32 @@ h2 {
   background: rgba(255, 255, 255, 0.42);
 }
 
+.demo-inline-list li[data-ready="ready"] {
+  border-color: rgba(38, 109, 62, 0.4);
+  background: rgba(38, 109, 62, 0.1);
+}
+
+.demo-inline-list li[data-ready="waiting"] {
+  border-color: rgba(140, 110, 20, 0.3);
+  background: rgba(180, 140, 30, 0.08);
+}
+
+.demo-item-ready {
+  border-color: rgba(38, 109, 62, 0.5);
+  background: rgba(38, 109, 62, 0.08);
+}
+
+.demo-all-ready {
+  margin: 8px 0;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(38, 109, 62, 0.12);
+  color: #145234;
+  font-family: "Permanent Marker", cursive;
+  font-size: 1rem;
+  text-align: center;
+}
+
 .status-pill[data-state="ok"] {
   color: #145234;
   background: rgba(38, 109, 62, 0.15);

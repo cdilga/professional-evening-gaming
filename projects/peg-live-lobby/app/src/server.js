@@ -10,8 +10,7 @@ const DEFAULT_STATE_PATH = "/data/state.json";
 function createState() {
   return {
     room: "main-lobby",
-    players: ["astacus", "cass", "the lads"],
-    readyCount: 1,
+    players: [],
     updatedAt: new Date().toISOString(),
   };
 }
@@ -19,7 +18,13 @@ function createState() {
 function loadState(statePath) {
   try {
     const raw = fs.readFileSync(statePath, "utf8");
-    return JSON.parse(raw);
+    const loaded = JSON.parse(raw);
+    // Migrate from old string[] format to {name, ready}[] format
+    if (loaded.players?.length && typeof loaded.players[0] === "string") {
+      loaded.players = loaded.players.map((name) => ({ name, ready: false }));
+      delete loaded.readyCount;
+    }
+    return loaded;
   } catch {
     return createState();
   }
@@ -31,10 +36,39 @@ function saveState(statePath, state) {
   fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
 }
 
+function readyCount(state) {
+  return state.players.filter((p) => p.ready).length;
+}
+
+function allReady(state) {
+  return state.players.length > 0 && state.players.every((p) => p.ready);
+}
+
+function stateView(state) {
+  return {
+    ...state,
+    readyCount: readyCount(state),
+    totalPlayers: state.players.length,
+    allReady: allReady(state),
+  };
+}
+
 export function buildApp(opts = {}) {
   const statePath = opts.statePath ?? process.env.STATE_PATH ?? DEFAULT_STATE_PATH;
   const app = Fastify({ logger: !opts.statePath });
   const state = loadState(statePath);
+  const sockets = new Set();
+
+  function broadcast(type = "update") {
+    const message = JSON.stringify({ type, state: stateView(state) });
+    for (const socket of sockets) {
+      try {
+        socket.send(message);
+      } catch {
+        sockets.delete(socket);
+      }
+    }
+  }
 
   app.register(websocket);
 
@@ -42,34 +76,55 @@ export function buildApp(opts = {}) {
     status: "ok",
     service: "peg-live-lobby",
     room: state.room,
+    connectedClients: sockets.size,
+    readyCount: readyCount(state),
+    totalPlayers: state.players.length,
+    allReady: allReady(state),
   }));
 
-  app.get("/v1/lobby", async () => ({ state }));
+  app.get("/v1/lobby", async () => ({ state: stateView(state) }));
 
   app.post("/v1/lobby/ready", async (request) => {
     const payload = request.body || {};
-    if (payload.player && !state.players.includes(payload.player)) {
-      state.players.push(payload.player);
+    if (!payload.player) {
+      return { error: "player name required" };
     }
-    state.readyCount += 1;
+
+    const existing = state.players.find((p) => p.name === payload.player);
+    if (existing) {
+      existing.ready = !existing.ready;
+    } else {
+      state.players.push({ name: payload.player, ready: true });
+    }
+
     state.updatedAt = new Date().toISOString();
     saveState(statePath, state);
-    return { state };
+    broadcast();
+    return { state: stateView(state) };
   });
 
   app.get("/ws", { websocket: true }, (socket) => {
-    socket.send(JSON.stringify({ type: "snapshot", state }));
+    sockets.add(socket);
+    socket.send(JSON.stringify({ type: "snapshot", state: stateView(state) }));
+
     socket.on("message", (raw) => {
       try {
         const payload = JSON.parse(raw.toString());
         if (payload.type === "ping") {
-          socket.send(JSON.stringify({ type: "pong", state }));
+          socket.send(JSON.stringify({ type: "pong", state: stateView(state) }));
         }
       } catch {
         socket.send(JSON.stringify({ type: "error", message: "invalid json" }));
       }
     });
+
+    socket.on("close", () => {
+      sockets.delete(socket);
+    });
   });
+
+  app.decorate("lobbyState", state);
+  app.decorate("lobbySockets", sockets);
 
   return app;
 }

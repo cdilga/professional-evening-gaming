@@ -101,12 +101,26 @@ function renderSessionItem(item) {
   `;
 }
 
-function renderLobbyState(state, wsStatus = "not pinged yet") {
-  const players = (state.players || []).map((player) => `<li>${escapeHtml(player)}</li>`).join("");
+function renderLobbyState(state, wsStatus = "not connected") {
+  const players = (state.players || []).map((player) => {
+    if (typeof player === "string") {
+      return `<li>${escapeHtml(player)}</li>`;
+    }
+    const indicator = player.ready ? "ready" : "waiting";
+    return `<li data-ready="${indicator}">${escapeHtml(player.name)} <small>(${indicator})</small></li>`;
+  }).join("");
+
+  const total = state.totalPlayers || 0;
+  const ready = state.readyCount || 0;
+  const allReady = state.allReady;
+  const progressText = total > 0 ? `${ready}/${total} ready` : "No players yet";
+  const allReadyBanner = allReady ? `<p class="demo-all-ready">All players ready!</p>` : "";
+
   return `
-    <article class="demo-item">
+    <article class="demo-item${allReady ? " demo-item-ready" : ""}">
       <strong>${escapeHtml(state.room || "main-lobby")}</strong>
-      <p>${escapeHtml(String(state.readyCount || 0))} ready - websocket ${escapeHtml(wsStatus)}</p>
+      <p>${escapeHtml(progressText)} · ${escapeHtml(wsStatus)}</p>
+      ${allReadyBanner}
       <ul class="demo-inline-list">${players}</ul>
       <span>Updated ${escapeHtml(state.updatedAt || "just now")}</span>
     </article>
@@ -201,7 +215,12 @@ async function setupLiveLobbyDemo(root) {
   const list = root.querySelector("[data-demo-list]");
   const refreshButton = root.querySelector("[data-demo-refresh]");
   const wsButton = root.querySelector("[data-demo-ws]");
-  let websocketStatus = "not pinged yet";
+  let websocketStatus = "not connected";
+  let liveSocket = null;
+
+  function renderState(state) {
+    list.innerHTML = renderLobbyState(state || {}, websocketStatus);
+  }
 
   async function refresh() {
     const [healthResponse, lobbyResponse] = await Promise.all([
@@ -211,32 +230,44 @@ async function setupLiveLobbyDemo(root) {
     if (!healthResponse.ok || !lobbyResponse.ok) {
       throw new Error("Live Lobby fetch failed");
     }
+    const health = await healthResponse.json();
     const payload = await lobbyResponse.json();
-    list.innerHTML = renderLobbyState(payload.state || {}, websocketStatus);
-    setDemoStatus(root, "Realtime lane live", "ok");
+    renderState(payload.state);
+    const clients = health.connectedClients || 0;
+    setDemoStatus(root, `Live - ${clients} connected`, "ok");
   }
 
-  async function pingSocket() {
-    setDemoStatus(root, "Pinging websocket...", "busy");
+  function connectSocket() {
     const wsUrl = apiBase.replace(/^http/, "ws") + "/ws";
-    const socket = new WebSocket(wsUrl);
-    await new Promise((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error("WebSocket timeout")), 5000);
-      socket.addEventListener("open", () => {
-        socket.send(JSON.stringify({ type: "ping" }));
-      });
-      socket.addEventListener("message", (event) => {
-        clearTimeout(timer);
-        websocketStatus = `pong received: ${event.data.slice(0, 60)}`;
-        socket.close();
-        resolve();
-      });
-      socket.addEventListener("error", () => {
-        clearTimeout(timer);
-        reject(new Error("WebSocket error"));
-      });
+    liveSocket = new WebSocket(wsUrl);
+
+    liveSocket.addEventListener("open", () => {
+      websocketStatus = "connected";
+      setDemoStatus(root, "WebSocket live", "ok");
     });
-    await refresh();
+
+    liveSocket.addEventListener("message", (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.type === "snapshot" || msg.type === "update" || msg.type === "pong") {
+          renderState(msg.state);
+          if (msg.type === "update") {
+            websocketStatus = "live broadcast received";
+            setDemoStatus(root, "Live update", "ok");
+          }
+        }
+      } catch { /* ignore malformed */ }
+    });
+
+    liveSocket.addEventListener("close", () => {
+      websocketStatus = "disconnected";
+      setDemoStatus(root, "WebSocket closed - reconnecting...", "busy");
+      setTimeout(connectSocket, 3000);
+    });
+
+    liveSocket.addEventListener("error", () => {
+      websocketStatus = "error";
+    });
   }
 
   form.addEventListener("submit", async (event) => {
@@ -253,22 +284,20 @@ async function setupLiveLobbyDemo(root) {
       return;
     }
     form.reset();
-    await refresh();
   });
 
   refreshButton?.addEventListener("click", refresh);
-  wsButton?.addEventListener("click", async () => {
-    try {
-      await pingSocket();
-    } catch (error) {
-      console.error(error);
-      websocketStatus = "ping failed";
-      setDemoStatus(root, "WebSocket check failed", "error");
-      await refresh();
+  wsButton?.addEventListener("click", () => {
+    if (liveSocket && liveSocket.readyState === WebSocket.OPEN) {
+      liveSocket.send(JSON.stringify({ type: "ping" }));
+      setDemoStatus(root, "Ping sent", "busy");
+    } else {
+      setDemoStatus(root, "WebSocket not connected", "error");
     }
   });
 
   await refresh();
+  connectSocket();
 }
 
 async function loadDemo() {

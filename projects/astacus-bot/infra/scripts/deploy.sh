@@ -49,6 +49,9 @@ echo "Running migrations"
 "${COMPOSE_ARGS[@]}" run --rm api python -m app.migrate
 
 SERVICES=(api)
+if [ "${USE_SHARED_POSTGRES:-false}" = "true" ]; then
+  SERVICES+=(api-gateway)
+fi
 if [ "${ENABLE_TUNNEL:-false}" = "true" ] && [ -n "${TUNNEL_TOKEN:-}" ]; then
   SERVICES+=(cloudflared)
 fi

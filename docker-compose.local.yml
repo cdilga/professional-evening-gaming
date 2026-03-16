@@ -1,0 +1,157 @@
+# Full PEG platform for local development.
+# Usage:
+#   docker network create peg-services 2>/dev/null; true
+#   cp .env.local.example .env.local
+#   docker compose -f docker-compose.local.yml --env-file .env.local up -d --build
+#
+# All services, one Postgres, one API gateway. No tunnels.
+
+services:
+  postgres:
+    image: postgres:16-bookworm
+    container_name: peg-shared-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: peg
+      POSTGRES_USER: ${POSTGRES_USER:-peg_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-peg-local-dev}
+    volumes:
+      - peg-local-pgdata:/var/lib/postgresql/data
+      - ./infra/shared-postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-peg_admin} -d peg"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-55432}:5432"
+    networks:
+      - peg-services
+
+  astacus-api:
+    image: ghcr.io/cdilga/professional-evening-gaming-astacus-api:${ASTACUS_IMAGE_TAG:-latest}
+    container_name: peg-astacus-api
+    restart: unless-stopped
+    environment:
+      APP_ENV: development
+      DATABASE_URL: postgresql://${POSTGRES_USER:-peg_admin}:${POSTGRES_PASSWORD:-peg-local-dev}@postgres:5432/peg
+      CORS_ORIGINS: "http://localhost:4173,http://localhost:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${ASTACUS_PORT:-8100}:8000"
+    networks:
+      - peg-services
+
+  session-hub-api:
+    image: ghcr.io/cdilga/professional-evening-gaming-session-hub:${SESSION_HUB_IMAGE_TAG:-latest}
+    container_name: peg-session-hub-api
+    restart: unless-stopped
+    environment:
+      APP_ENV: development
+      DATABASE_URL: postgresql://${POSTGRES_USER:-peg_admin}:${POSTGRES_PASSWORD:-peg-local-dev}@postgres:5432/peg
+      CORS_ORIGINS: "http://localhost:4173,http://localhost:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${SESSION_HUB_PORT:-8201}:8000"
+    networks:
+      - peg-services
+
+  live-lobby:
+    image: ghcr.io/cdilga/professional-evening-gaming-live-lobby:${LIVE_LOBBY_IMAGE_TAG:-latest}
+    container_name: peg-live-lobby
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+    volumes:
+      - peg-local-lobby-state:/data
+    ports:
+      - "127.0.0.1:${LIVE_LOBBY_PORT:-8202}:3000"
+    networks:
+      - peg-services
+
+  nightly-landing:
+    image: ghcr.io/cdilga/professional-evening-gaming-nightly-landing:${NIGHTLY_IMAGE_TAG:-latest}
+    container_name: peg-nightly-landing
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${NIGHTLY_PORT:-8200}:80"
+    networks:
+      - peg-services
+
+  api-gateway:
+    image: nginx:1.27-alpine
+    container_name: peg-api-gateway
+    restart: unless-stopped
+    depends_on:
+      - astacus-api
+      - session-hub-api
+      - live-lobby
+    command:
+      - /bin/sh
+      - -c
+      - |
+        cat <<'EOF' >/etc/nginx/conf.d/default.conf
+        server {
+          listen 8080;
+          server_name _;
+
+          resolver 127.0.0.11 valid=10s ipv6=off;
+
+          set $$upstream_session_hub http://peg-session-hub-api:8000;
+          set $$upstream_live_lobby http://peg-live-lobby:3000;
+
+          location = /health {
+            proxy_pass http://peg-astacus-api:8000/health;
+          }
+
+          location /v1/ {
+            proxy_pass http://peg-astacus-api:8000;
+          }
+
+          location /session-hub/ws {
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $$http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_set_header Host $$host;
+            rewrite ^/session-hub/(.*)$ /$$1 break;
+            proxy_pass $$upstream_session_hub;
+          }
+
+          location /session-hub/ {
+            rewrite ^/session-hub/(.*)$ /$$1 break;
+            proxy_pass $$upstream_session_hub;
+          }
+
+          location /live-lobby/ws {
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $$http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_set_header Host $$host;
+            rewrite ^/live-lobby/(.*)$ /$$1 break;
+            proxy_pass $$upstream_live_lobby;
+          }
+
+          location /live-lobby/ {
+            rewrite ^/live-lobby/(.*)$ /$$1 break;
+            proxy_pass $$upstream_live_lobby;
+          }
+        }
+        EOF
+        exec nginx -g 'daemon off;'
+    ports:
+      - "127.0.0.1:${GATEWAY_PORT:-8080}:8080"
+    networks:
+      - peg-services
+
+volumes:
+  peg-local-pgdata:
+  peg-local-lobby-state:
+
+networks:
+  peg-services:
+    name: peg-services
+    driver: bridge

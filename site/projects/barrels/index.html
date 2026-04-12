@@ -58,6 +58,27 @@
         border-radius: 18px;
         background: rgba(255, 255, 255, 0.42);
       }
+      .lineage-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 18px;
+        margin-top: 24px;
+      }
+      .lineage-card {
+        padding: 18px;
+      }
+      .lineage-card strong {
+        display: block;
+        margin-top: 10px;
+        font-size: 1.25rem;
+        font-family: "Permanent Marker", cursive;
+      }
+      .lineage-card small {
+        display: block;
+        margin-top: 8px;
+        color: var(--muted);
+        font-family: "IBM Plex Mono", monospace;
+      }
       @media (max-width: 960px) {
         .barrel-layout {
           grid-template-columns: 1fr;
@@ -141,6 +162,39 @@
           <p class="eyebrow">Ops feed</p>
           <div class="barrel-event-list" id="barrel-events"></div>
         </aside>
+      </section>
+
+      <section class="panel demo-panel">
+        <div class="demo-panel-header">
+          <div>
+            <p class="eyebrow">Absolutely insane lineage API</p>
+            <h2>Where the fake barrels allegedly came from</h2>
+          </div>
+          <span class="status-pill" id="lineage-status">Fetching weird inputs...</span>
+        </div>
+        <p class="demo-copy">This is parody, mate. Real public data goes in, deeply unserious barrel provenance comes out.</p>
+        <div class="lineage-grid">
+          <article class="panel inset-panel lineage-card">
+            <p class="mini-label">Gulf drilling vibes</p>
+            <strong id="lineage-weather-hou">Loading...</strong>
+            <small id="lineage-weather-hou-detail">Houston weather deciding whether the barrels feel confident.</small>
+          </article>
+          <article class="panel inset-panel lineage-card">
+            <p class="mini-label">Port chaos coefficient</p>
+            <strong id="lineage-weather-mia">Loading...</strong>
+            <small id="lineage-weather-mia-detail">Miami wind as a totally scientific shipping proxy.</small>
+          </article>
+          <article class="panel inset-panel lineage-card">
+            <p class="mini-label">Macro barrel sentiment</p>
+            <strong id="lineage-btc">Loading...</strong>
+            <small id="lineage-btc-detail">Bitcoin price as the emotional support index for pretend commodities.</small>
+          </article>
+          <article class="panel inset-panel lineage-card">
+            <p class="mini-label">Final synthetic origin</p>
+            <strong id="lineage-final">Calibrating dribble...</strong>
+            <small id="lineage-final-detail">A fake provenance chain, assembled fresh on every load.</small>
+          </article>
+        </div>
       </section>
     </main>
 
@@ -228,6 +282,59 @@
         eventsEl.innerHTML = picks.map((event) => `<article class="barrel-event">${event}</article>`).join('');
       }
 
+      const lineageStatusEl = document.getElementById('lineage-status');
+      const houEl = document.getElementById('lineage-weather-hou');
+      const houDetailEl = document.getElementById('lineage-weather-hou-detail');
+      const miaEl = document.getElementById('lineage-weather-mia');
+      const miaDetailEl = document.getElementById('lineage-weather-mia-detail');
+      const btcEl = document.getElementById('lineage-btc');
+      const btcDetailEl = document.getElementById('lineage-btc-detail');
+      const finalEl = document.getElementById('lineage-final');
+      const finalDetailEl = document.getElementById('lineage-final-detail');
+
+      function deriveBarrelLineage(houston, miami, btcUsd) {
+        const weatherFactor = Math.round(((houston.temperature_2m || 0) + (miami.wind_speed_10m || 0)) * 1000);
+        const btcFactor = Math.round((btcUsd || 0) / 37);
+        const approvalsFactor = Math.round(randomBetween(2, 5));
+        const syntheticBarrels = ((weatherFactor + btcFactor + approvalsFactor * 111111) % 9000000) + 11000000;
+        return {
+          syntheticBarrels,
+          lineage: `Houston heat ${houston.temperature_2m}C -> Miami port gusts ${miami.wind_speed_10m} km/h -> BTC support $${btcUsd} -> ${approvalsFactor} lads yelling send it`,
+        };
+      }
+
+      async function loadLineage() {
+        lineageStatusEl.textContent = 'Fetching weird inputs...';
+        try {
+          const [houstonRes, miamiRes, btcRes] = await Promise.all([
+            fetch('https://api.open-meteo.com/v1/forecast?latitude=29.76&longitude=-95.37&current=temperature_2m,wind_speed_10m'),
+            fetch('https://api.open-meteo.com/v1/forecast?latitude=25.76&longitude=-80.19&current=temperature_2m,wind_speed_10m'),
+            fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd')
+          ]);
+          const houston = (await houstonRes.json()).current || {};
+          const miami = (await miamiRes.json()).current || {};
+          const btcUsd = (await btcRes.json()).bitcoin?.usd || 0;
+
+          houEl.textContent = `${houston.temperature_2m ?? '?'}C / ${houston.wind_speed_10m ?? '?'} km/h`;
+          houDetailEl.textContent = 'Houston weather deciding whether the barrels feel confident today.';
+          miaEl.textContent = `${miami.temperature_2m ?? '?'}C / ${miami.wind_speed_10m ?? '?'} km/h`;
+          miaDetailEl.textContent = 'Miami wind now fully repurposed as a shipping chaos coefficient.';
+          btcEl.textContent = `$${btcUsd.toLocaleString()}`;
+          btcDetailEl.textContent = 'Bitcoin price, because proper oil market data would be less funny.';
+
+          const lineage = deriveBarrelLineage(houston, miami, btcUsd);
+          finalEl.textContent = `${(lineage.syntheticBarrels / 1000000).toFixed(1)}M fake barrels`;
+          finalDetailEl.textContent = lineage.lineage;
+          lineageStatusEl.textContent = 'Lineage online';
+          lineageStatusEl.dataset.state = 'ok';
+        } catch (error) {
+          lineageStatusEl.textContent = 'Lineage API cooked';
+          lineageStatusEl.dataset.state = 'error';
+          finalEl.textContent = 'Fallback barrels only';
+          finalDetailEl.textContent = 'Live scraping fell over, so the barrels are now sourced from vibes alone.';
+        }
+      }
+
       function refreshDashboard() {
         const series = generateSeries();
         const avg = series.reduce((sum, point) => sum + point.value, 0) / series.length;
@@ -237,6 +344,7 @@
         vibeEl.textContent = vibeWords[Math.floor(Math.random() * vibeWords.length)];
         renderChart(series);
         renderEvents();
+        loadLineage();
       }
 
       refreshButton?.addEventListener('click', refreshDashboard);

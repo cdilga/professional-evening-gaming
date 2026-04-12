@@ -101,12 +101,28 @@
         padding: 18px;
         border-radius: 22px;
         border: 2px dashed rgba(92, 64, 51, 0.28);
-        background: rgba(255, 255, 255, 0.5);
+        background:
+          linear-gradient(180deg, rgba(216,151,30,0.08), rgba(179,58,43,0.06)),
+          rgba(255, 255, 255, 0.5);
       }
       .barrel-chart-wrap canvas {
         width: 100%;
         height: auto;
         display: block;
+      }
+      .chart-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+      }
+      .chart-legend span {
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.65);
+        border: 1px solid rgba(92,64,51,0.18);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.75rem;
       }
       .barrel-event-list {
         display: grid;
@@ -268,11 +284,20 @@
           <p class="demo-copy">Every refresh spins a new fake run based on whatever weirdness the live sources hand us.</p>
           <div class="barrel-chart-wrap">
             <canvas id="barrel-chart" width="640" height="360" aria-label="Fake barrel chart"></canvas>
+            <div class="chart-legend">
+              <span>orange line = fake output</span>
+              <span>red pressure = meme premium</span>
+              <span>refresh = new synthetic origin</span>
+            </div>
           </div>
         </article>
         <aside class="panel demo-side-panel">
           <p class="eyebrow">Ops feed</p>
-          <div class="barrel-event-list" id="barrel-events"></div>
+          <div class="barrel-event-list" id="barrel-events">
+            <article class="barrel-event">Loading live ops chatter, mate. Weather, price weirdness, and pageviews are being turned into premium barrel theatre.</article>
+            <article class="barrel-event">Initial launch mode is armed, which means the middle bit now has some actual guts even before the APIs wake up.</article>
+            <article class="barrel-event">If the feeds go missing, fallback dribble kicks in so the page still looks alive instead of standing there like a stunned mullet.</article>
+          </div>
         </aside>
       </section>
 
@@ -288,22 +313,22 @@
         <div class="lineage-grid">
           <article class="panel inset-panel lineage-card">
             <p class="mini-label">Gulf drilling vibes</p>
-            <strong id="lineage-weather-hou">Loading...</strong>
+            <strong id="lineage-weather-hou">31C / 18 km/h</strong>
             <small id="lineage-weather-hou-detail">Houston weather deciding whether the barrels feel emotionally available.</small>
           </article>
           <article class="panel inset-panel lineage-card">
             <p class="mini-label">Port chaos coefficient</p>
-            <strong id="lineage-weather-mia">Loading...</strong>
+            <strong id="lineage-weather-mia">28C / 22 km/h</strong>
             <small id="lineage-weather-mia-detail">Miami wind as a scientifically unserious shipping proxy.</small>
           </article>
           <article class="panel inset-panel lineage-card">
             <p class="mini-label">Macro barrel sentiment</p>
-            <strong id="lineage-btc">Loading...</strong>
+            <strong id="lineage-btc">$71,000-ish</strong>
             <small id="lineage-btc-detail">Bitcoin price, because proper crude pricing would be less funny.</small>
           </article>
           <article class="panel inset-panel lineage-card">
             <p class="mini-label">Final synthetic origin</p>
-            <strong id="lineage-final">Calibrating dribble...</strong>
+            <strong id="lineage-final">17.6M fake barrels</strong>
             <small id="lineage-final-detail">The final fake provenance chain, assembled fresh on every load.</small>
           </article>
         </div>
@@ -321,22 +346,22 @@
         <div class="source-grid">
           <article class="panel inset-panel source-card" id="source-weather-card" data-state="live">
             <p class="mini-label">Weather feed</p>
-            <strong id="source-weather">Loading...</strong>
+            <strong id="source-weather">Houston 31C / Miami 22 km/h</strong>
             <small id="source-weather-detail">Open-Meteo is supplying drilling theatre.</small>
           </article>
           <article class="panel inset-panel source-card" id="source-price-card" data-state="live">
             <p class="mini-label">Price feed</p>
-            <strong id="source-price">Loading...</strong>
+            <strong id="source-price">$71,000-ish</strong>
             <small id="source-price-detail">CoinGecko is now doing commodity cosplay.</small>
           </article>
           <article class="panel inset-panel source-card" id="source-news-card" data-state="live">
             <p class="mini-label">News scrape</p>
-            <strong id="source-news">Loading...</strong>
+            <strong id="source-news">oil posting remains suspiciously bullish</strong>
             <small id="source-news-detail">Hacker News search gets reinterpreted as barrel sentiment.</small>
           </article>
           <article class="panel inset-panel source-card" id="source-pageviews-card" data-state="live">
             <p class="mini-label">Attention meter</p>
-            <strong id="source-pageviews">Loading...</strong>
+            <strong id="source-pageviews">42,000 views</strong>
             <small id="source-pageviews-detail">Wikipedia pageviews refashioned as hype demand.</small>
           </article>
         </div>
@@ -345,18 +370,18 @@
       <section class="meme-grid section-block">
         <article class="panel meme-card">
           <p class="eyebrow">Meme reactor</p>
-          <span class="meme-big" id="meme-headline">Booting up the barrel reactor...</span>
+          <span class="meme-big" id="meme-headline">Barrel reactor online and already overpromising</span>
           <small id="meme-subline">The launch blurb regenerates from live source conditions.</small>
         </article>
         <article class="panel meme-card">
           <p class="eyebrow">Hype pressure</p>
-          <span class="meme-big" id="hype-pressure">0%</span>
+          <span class="meme-big" id="hype-pressure">68%</span>
           <div class="meme-meter"><span id="hype-meter"></span></div>
           <small>Measures how likely the lads are to spam the link again.</small>
         </article>
         <article class="panel meme-card">
           <p class="eyebrow">Trace this barrel</p>
-          <span class="meme-big" id="barrel-trace">Awaiting suspicious provenance...</span>
+          <span class="meme-big" id="barrel-trace">17.6M fake barrels traced to a haunted hose network</span>
           <small id="barrel-trace-detail">One click and you get a full fake barrel biography.</small>
         </article>
       </section>
@@ -366,7 +391,15 @@
           <p class="eyebrow">Launch copy</p>
           <h2>Ready-to-post hype blast</h2>
           <small>Auto-generated from the current internet weirdness.</small>
-          <textarea id="launch-copy" readonly></textarea>
+          <textarea id="launch-copy" readonly>🚨 New PEG product drop: Barrels-as-a-Service is live.
+
+What’s in it:
+- live weather-fed barrel lineage
+- internet-scraped sentiment engine
+- fake output with premium meme pressure
+- launch-ready hype copy for the lads
+
+Have a crack: https://professional-evening-gaming.dilger.dev/projects/barrels/</textarea>
           <div class="launch-actions">
             <button class="button button-primary" id="copy-launch" type="button">Copy launch copy</button>
             <button class="button button-secondary" id="trace-barrel" type="button">Generate barrel dossier</button>

@@ -6,7 +6,7 @@
     <title>Barrels-as-a-Service | Professional Evening Gaming</title>
     <meta
       name="description"
-      content="Barrels-as-a-Service is PEG's deeply unserious fake-ops dashboard for imaginary oil throughput and elite Discord-approved nonsense."
+      content="Barrels-as-a-Service is PEG's deeply unserious fake-ops product, powered by real public data and elite dribble."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,23 +16,84 @@
     />
     <link rel="stylesheet" href="/assets/css/site.css" />
     <style>
-      .barrel-metrics,
-      .barrel-layout {
-        display: grid;
-        gap: 24px;
+      :root {
+        --barrel-red: #b33a2b;
+        --barrel-gold: #d8971e;
+        --barrel-ink: #2f2018;
+        --barrel-cream: rgba(255, 248, 238, 0.88);
       }
-      .barrel-metrics {
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      .launch-strip {
         margin-bottom: 24px;
+        padding: 16px 18px;
+        border: 2px dashed rgba(92, 64, 51, 0.35);
+        border-radius: 18px 40px 22px 34px;
+        background: linear-gradient(90deg, rgba(216,151,30,0.14), rgba(179,58,43,0.12));
+        font-family: "IBM Plex Mono", monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-size: 0.8rem;
       }
-      .barrel-metric {
-        padding: 22px;
+      .barrel-hero-card {
+        position: relative;
+        overflow: hidden;
       }
-      .barrel-metric h2 {
-        margin-top: 8px;
+      .barrel-hero-card::after {
+        content: "BaaS";
+        position: absolute;
+        right: 28px;
+        top: 20px;
+        font-family: "Permanent Marker", cursive;
+        font-size: clamp(3rem, 10vw, 7rem);
+        color: rgba(179, 58, 43, 0.08);
+        transform: rotate(-8deg);
+        pointer-events: none;
+      }
+      .barrel-grid,
+      .lineage-grid,
+      .source-grid,
+      .meme-grid,
+      .launch-grid {
+        display: grid;
+        gap: 18px;
+      }
+      .barrel-grid,
+      .lineage-grid,
+      .source-grid,
+      .meme-grid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+      .barrel-card,
+      .lineage-card,
+      .source-card,
+      .meme-card,
+      .launch-card {
+        padding: 18px;
+      }
+      .barrel-card h2,
+      .lineage-card strong,
+      .meme-big {
+        display: block;
+        margin-top: 10px;
+        font-family: "Permanent Marker", cursive;
+      }
+      .barrel-card h2 {
         font-size: clamp(2rem, 5vw, 3.2rem);
       }
-      .barrel-layout {
+      .lineage-card strong,
+      .meme-big {
+        font-size: 1.35rem;
+      }
+      .lineage-card small,
+      .source-card small,
+      .meme-card small,
+      .launch-card small {
+        display: block;
+        margin-top: 8px;
+        color: var(--muted);
+        font-family: "IBM Plex Mono", monospace;
+      }
+      .telemetry-layout,
+      .launch-grid {
         grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
       }
       .barrel-chart-wrap {
@@ -58,29 +119,67 @@
         border-radius: 18px;
         background: rgba(255, 255, 255, 0.42);
       }
-      .lineage-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 18px;
-        margin-top: 24px;
+      .source-card {
+        background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,248,238,0.85));
       }
-      .lineage-card {
-        padding: 18px;
+      .source-card[data-state="live"] {
+        border-color: rgba(38,109,62,0.35);
       }
-      .lineage-card strong {
+      .source-card[data-state="fallback"] {
+        border-color: rgba(179,58,43,0.35);
+      }
+      .meme-card {
+        background: linear-gradient(180deg, rgba(216,151,30,0.08), rgba(179,58,43,0.08));
+      }
+      .meme-meter {
+        margin-top: 12px;
+        height: 14px;
+        border-radius: 999px;
+        background: rgba(92, 64, 51, 0.12);
+        overflow: hidden;
+      }
+      .meme-meter span {
         display: block;
-        margin-top: 10px;
-        font-size: 1.25rem;
-        font-family: "Permanent Marker", cursive;
+        height: 100%;
+        width: 0;
+        background: linear-gradient(90deg, var(--barrel-gold), var(--barrel-red));
+        transition: width 300ms ease;
       }
-      .lineage-card small {
-        display: block;
-        margin-top: 8px;
-        color: var(--muted);
+      .launch-card textarea {
+        width: 100%;
+        min-height: 180px;
+        margin-top: 12px;
+        border: 2px dashed rgba(92, 64, 51, 0.28);
+        border-radius: 16px;
+        padding: 14px;
+        background: rgba(255, 255, 255, 0.7);
+        color: var(--barrel-ink);
+        font: inherit;
+        resize: vertical;
+      }
+      .launch-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 14px;
+      }
+      .barrel-badge-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+      }
+      .barrel-badge {
+        padding: 8px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(92, 64, 51, 0.25);
+        background: var(--barrel-cream);
         font-family: "IBM Plex Mono", monospace;
+        font-size: 0.78rem;
       }
       @media (max-width: 960px) {
-        .barrel-layout {
+        .telemetry-layout,
+        .launch-grid {
           grid-template-columns: 1fr;
         }
       }
@@ -102,49 +201,62 @@
     </header>
 
     <main class="shell page-main project-detail-page">
-      <section class="panel detail-hero">
+      <div class="launch-strip">New product launch: Barrels-as-a-Service • real feeds, fake barrels, full theatre</div>
+
+      <section class="panel detail-hero barrel-hero-card">
         <div>
-          <p class="eyebrow">Project spotlight</p>
+          <p class="eyebrow">Product spotlight</p>
           <h1>Barrels-as-a-Service</h1>
           <p class="lede">
-            The funny barrel stuff from Discord is now an actual PEG project page. Fake production numbers,
-            fake approvals, and a suspiciously polished dashboard for absolute nonsense.
+            A fully cooked PEG product for the lads. Real public data comes in from around the internet,
+            then gets laundered into deeply unserious barrel lineage, market hype, and premium nonsense telemetry.
           </p>
           <div class="hero-actions">
-            <a class="button button-primary" href="/projects/">Back to all projects</a>
-            <button id="barrel-refresh" class="button button-secondary" type="button">Refresh the barrels, mate</button>
+            <button id="barrel-refresh" class="button button-primary" type="button">Refresh the barrel machine</button>
+            <a class="button button-secondary" href="/projects/">Back to all projects</a>
+          </div>
+          <div class="barrel-badge-row">
+            <span class="barrel-badge">weather-fed lineage</span>
+            <span class="barrel-badge">live price weirdness</span>
+            <span class="barrel-badge">scraped news vibes</span>
+            <span class="barrel-badge">launchable hype product</span>
           </div>
         </div>
         <div class="panel inset-panel">
           <p class="mini-label">Operational brief</p>
           <ul class="principle-list compact-list">
-            <li><strong>Output:</strong> totally made up, but graphable.</li>
-            <li><strong>Approvals:</strong> powered by Discord lads saying “send it”.</li>
-            <li><strong>Compliance:</strong> clipboard-driven and emotionally positive.</li>
-            <li><strong>Risk:</strong> zero geology, maximum theatre.</li>
+            <li><strong>Data layer:</strong> live public APIs and scraped feeds.</li>
+            <li><strong>Truth layer:</strong> obviously parody, no sneaky fake-pretend realness.</li>
+            <li><strong>Meme layer:</strong> every refresh generates fresh dribble and provenance.</li>
+            <li><strong>Hook:</strong> the page changes with the internet, so the lads keep checking back.</li>
           </ul>
         </div>
       </section>
 
-      <section class="barrel-metrics">
-        <article class="panel barrel-metric">
+      <section class="barrel-grid section-block">
+        <article class="panel barrel-card">
           <p class="eyebrow">Daily fake throughput</p>
           <h2 id="barrel-total">18.4M</h2>
           <p>Barrels per day, give or take a few lies.</p>
         </article>
-        <article class="panel barrel-metric">
+        <article class="panel barrel-card">
           <p class="eyebrow">Refinery chaos index</p>
           <h2 id="barrel-chaos">72%</h2>
           <p>How close the operation is to being held together by zip ties.</p>
         </article>
-        <article class="panel barrel-metric">
-          <p class="eyebrow">Discord approvals</p>
-          <h2 id="barrel-approvals">2/2</h2>
-          <p>Enterprise governance, PEG style.</p>
+        <article class="panel barrel-card">
+          <p class="eyebrow">Meme premium</p>
+          <h2 id="meme-premium">+38%</h2>
+          <p>Additional valuation created by lads posting “send it”.</p>
+        </article>
+        <article class="panel barrel-card">
+          <p class="eyebrow">Return visitor bait</p>
+          <h2 id="return-hook">HIGH</h2>
+          <p>Because the barrel origin story changes every refresh.</p>
         </article>
       </section>
 
-      <section class="barrel-layout">
+      <section class="telemetry-layout section-block">
         <article class="panel demo-panel">
           <div class="demo-panel-header">
             <div>
@@ -153,7 +265,7 @@
             </div>
             <span class="status-pill" id="barrel-vibe">Mint</span>
           </div>
-          <p class="demo-copy">Every refresh generates a fresh fake run so the dashboard looks busy and mildly expensive.</p>
+          <p class="demo-copy">Every refresh spins a new fake run based on whatever weirdness the live sources hand us.</p>
           <div class="barrel-chart-wrap">
             <canvas id="barrel-chart" width="640" height="360" aria-label="Fake barrel chart"></canvas>
           </div>
@@ -164,37 +276,112 @@
         </aside>
       </section>
 
-      <section class="panel demo-panel">
+      <section class="panel demo-panel section-block">
         <div class="demo-panel-header">
           <div>
-            <p class="eyebrow">Absolutely insane lineage API</p>
+            <p class="eyebrow">Lineage API</p>
             <h2>Where the fake barrels allegedly came from</h2>
           </div>
           <span class="status-pill" id="lineage-status">Fetching weird inputs...</span>
         </div>
-        <p class="demo-copy">This is parody, mate. Real public data goes in, deeply unserious barrel provenance comes out.</p>
+        <p class="demo-copy">Real feeds in, premium synthetic barrel ancestry out.</p>
         <div class="lineage-grid">
           <article class="panel inset-panel lineage-card">
             <p class="mini-label">Gulf drilling vibes</p>
             <strong id="lineage-weather-hou">Loading...</strong>
-            <small id="lineage-weather-hou-detail">Houston weather deciding whether the barrels feel confident.</small>
+            <small id="lineage-weather-hou-detail">Houston weather deciding whether the barrels feel emotionally available.</small>
           </article>
           <article class="panel inset-panel lineage-card">
             <p class="mini-label">Port chaos coefficient</p>
             <strong id="lineage-weather-mia">Loading...</strong>
-            <small id="lineage-weather-mia-detail">Miami wind as a totally scientific shipping proxy.</small>
+            <small id="lineage-weather-mia-detail">Miami wind as a scientifically unserious shipping proxy.</small>
           </article>
           <article class="panel inset-panel lineage-card">
             <p class="mini-label">Macro barrel sentiment</p>
             <strong id="lineage-btc">Loading...</strong>
-            <small id="lineage-btc-detail">Bitcoin price as the emotional support index for pretend commodities.</small>
+            <small id="lineage-btc-detail">Bitcoin price, because proper crude pricing would be less funny.</small>
           </article>
           <article class="panel inset-panel lineage-card">
             <p class="mini-label">Final synthetic origin</p>
             <strong id="lineage-final">Calibrating dribble...</strong>
-            <small id="lineage-final-detail">A fake provenance chain, assembled fresh on every load.</small>
+            <small id="lineage-final-detail">The final fake provenance chain, assembled fresh on every load.</small>
           </article>
         </div>
+      </section>
+
+      <section class="panel demo-panel section-block">
+        <div class="demo-panel-header">
+          <div>
+            <p class="eyebrow">Source layer</p>
+            <h2>Scraped and sourced internet nonsense</h2>
+          </div>
+          <span class="status-pill" id="source-status">Checking feeds...</span>
+        </div>
+        <p class="demo-copy">A thin client-side API layer normalises weather, price, news, and pageview inputs so the product keeps mutating.</p>
+        <div class="source-grid">
+          <article class="panel inset-panel source-card" id="source-weather-card" data-state="live">
+            <p class="mini-label">Weather feed</p>
+            <strong id="source-weather">Loading...</strong>
+            <small id="source-weather-detail">Open-Meteo is supplying drilling theatre.</small>
+          </article>
+          <article class="panel inset-panel source-card" id="source-price-card" data-state="live">
+            <p class="mini-label">Price feed</p>
+            <strong id="source-price">Loading...</strong>
+            <small id="source-price-detail">CoinGecko is now doing commodity cosplay.</small>
+          </article>
+          <article class="panel inset-panel source-card" id="source-news-card" data-state="live">
+            <p class="mini-label">News scrape</p>
+            <strong id="source-news">Loading...</strong>
+            <small id="source-news-detail">Hacker News search gets reinterpreted as barrel sentiment.</small>
+          </article>
+          <article class="panel inset-panel source-card" id="source-pageviews-card" data-state="live">
+            <p class="mini-label">Attention meter</p>
+            <strong id="source-pageviews">Loading...</strong>
+            <small id="source-pageviews-detail">Wikipedia pageviews refashioned as hype demand.</small>
+          </article>
+        </div>
+      </section>
+
+      <section class="meme-grid section-block">
+        <article class="panel meme-card">
+          <p class="eyebrow">Meme reactor</p>
+          <span class="meme-big" id="meme-headline">Booting up the barrel reactor...</span>
+          <small id="meme-subline">The launch blurb regenerates from live source conditions.</small>
+        </article>
+        <article class="panel meme-card">
+          <p class="eyebrow">Hype pressure</p>
+          <span class="meme-big" id="hype-pressure">0%</span>
+          <div class="meme-meter"><span id="hype-meter"></span></div>
+          <small>Measures how likely the lads are to spam the link again.</small>
+        </article>
+        <article class="panel meme-card">
+          <p class="eyebrow">Trace this barrel</p>
+          <span class="meme-big" id="barrel-trace">Awaiting suspicious provenance...</span>
+          <small id="barrel-trace-detail">One click and you get a full fake barrel biography.</small>
+        </article>
+      </section>
+
+      <section class="launch-grid section-block">
+        <article class="panel launch-card">
+          <p class="eyebrow">Launch copy</p>
+          <h2>Ready-to-post hype blast</h2>
+          <small>Auto-generated from the current internet weirdness.</small>
+          <textarea id="launch-copy" readonly></textarea>
+          <div class="launch-actions">
+            <button class="button button-primary" id="copy-launch" type="button">Copy launch copy</button>
+            <button class="button button-secondary" id="trace-barrel" type="button">Generate barrel dossier</button>
+          </div>
+        </article>
+        <aside class="panel launch-card">
+          <p class="eyebrow">Why it works</p>
+          <ul class="principle-list compact-list">
+            <li>It looks like a real product, but knows it’s a bit.</li>
+            <li>Live feeds make it change, so it has repeat-check value.</li>
+            <li>The launch copy writes itself, so you can post it in seconds.</li>
+            <li>The fake barrel dossier gives the lads something to screenshot and share.</li>
+          </ul>
+          <small id="last-updated">Last update: booting...</small>
+        </aside>
       </section>
     </main>
 
@@ -207,30 +394,50 @@
     <script>
       const chart = document.getElementById('barrel-chart');
       const refreshButton = document.getElementById('barrel-refresh');
+      const copyLaunchButton = document.getElementById('copy-launch');
+      const traceButton = document.getElementById('trace-barrel');
       const totalEl = document.getElementById('barrel-total');
       const chaosEl = document.getElementById('barrel-chaos');
-      const approvalsEl = document.getElementById('barrel-approvals');
+      const memePremiumEl = document.getElementById('meme-premium');
+      const returnHookEl = document.getElementById('return-hook');
       const vibeEl = document.getElementById('barrel-vibe');
       const eventsEl = document.getElementById('barrel-events');
+      const lineageStatusEl = document.getElementById('lineage-status');
+      const sourceStatusEl = document.getElementById('source-status');
+      const launchCopyEl = document.getElementById('launch-copy');
+      const memeHeadlineEl = document.getElementById('meme-headline');
+      const memeSublineEl = document.getElementById('meme-subline');
+      const hypePressureEl = document.getElementById('hype-pressure');
+      const hypeMeterEl = document.getElementById('hype-meter');
+      const traceHeadlineEl = document.getElementById('barrel-trace');
+      const traceDetailEl = document.getElementById('barrel-trace-detail');
+      const lastUpdatedEl = document.getElementById('last-updated');
 
       const vibeWords = ['Mint', 'Cooked', 'Certified elite', 'Suspiciously stable', 'Held together by vibes'];
-      const eventTemplates = [
-        'Night shift found another 1.2M pretend barrels behind the ute.',
-        'Refinery dashboard turned green after someone refreshed it aggressively.',
-        'Discord approvals completed with a double send it.',
-        'Pipeline pressure recovered once the lads pointed at the graph harder.',
-        'Compliance accepted the clipboard and chose peace.'
+      const launchOpeners = [
+        '🚨 New PEG product drop:',
+        '📈 The lads demanded innovation, so:',
+        '🛢️ Fully cooked and now live:',
+        '💨 Straight out of the mateshed:'
       ];
+      const hookWords = ['volatile', 'premium', 'unreasonably bullish', 'hype-backed', 'committee-approved'];
 
       function randomBetween(min, max) {
         return Math.random() * (max - min) + min;
       }
 
-      function generateSeries() {
-        return Array.from({ length: 12 }, (_, index) => ({
-          label: `H${index + 1}`,
-          value: Math.round(randomBetween(12.8, 22.4) * 10) / 10
-        }));
+      function pick(list) {
+        return list[Math.floor(Math.random() * list.length)];
+      }
+
+      function generateSeries(seed) {
+        return Array.from({ length: 12 }, (_, index) => {
+          const wobble = Math.sin((index + 1) * 0.8 + seed) * 1.6;
+          return {
+            label: `H${index + 1}`,
+            value: Math.round((14 + wobble + randomBetween(0.8, 7.5)) * 10) / 10
+          };
+        });
       }
 
       function renderChart(series) {
@@ -255,7 +462,11 @@
           ctx.stroke();
         }
 
-        ctx.strokeStyle = '#3d2b1f';
+        const gradient = ctx.createLinearGradient(0, 0, width, height);
+        gradient.addColorStop(0, '#d8971e');
+        gradient.addColorStop(1, '#b33a2b');
+
+        ctx.strokeStyle = '#2f2018';
         ctx.lineWidth = 3;
         ctx.beginPath();
         series.forEach((point, index) => {
@@ -266,7 +477,7 @@
         });
         ctx.stroke();
 
-        ctx.fillStyle = '#ff8c42';
+        ctx.fillStyle = gradient;
         series.forEach((point, index) => {
           const x = padding + ((width - padding * 2) / (series.length - 1)) * index;
           const y = height - padding - (point.value / maxValue) * (height - padding * 2);
@@ -276,78 +487,235 @@
         });
       }
 
-      function renderEvents() {
-        if (!eventsEl) return;
-        const picks = [...eventTemplates].sort(() => Math.random() - 0.5).slice(0, 4);
-        eventsEl.innerHTML = picks.map((event) => `<article class="barrel-event">${event}</article>`).join('');
+      function setCardState(id, state) {
+        const card = document.getElementById(id);
+        if (card) card.dataset.state = state;
       }
 
-      const lineageStatusEl = document.getElementById('lineage-status');
-      const houEl = document.getElementById('lineage-weather-hou');
-      const houDetailEl = document.getElementById('lineage-weather-hou-detail');
-      const miaEl = document.getElementById('lineage-weather-mia');
-      const miaDetailEl = document.getElementById('lineage-weather-mia-detail');
-      const btcEl = document.getElementById('lineage-btc');
-      const btcDetailEl = document.getElementById('lineage-btc-detail');
-      const finalEl = document.getElementById('lineage-final');
-      const finalDetailEl = document.getElementById('lineage-final-detail');
+      function setText(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+      }
 
-      function deriveBarrelLineage(houston, miami, btcUsd) {
-        const weatherFactor = Math.round(((houston.temperature_2m || 0) + (miami.wind_speed_10m || 0)) * 1000);
-        const btcFactor = Math.round((btcUsd || 0) / 37);
-        const approvalsFactor = Math.round(randomBetween(2, 5));
-        const syntheticBarrels = ((weatherFactor + btcFactor + approvalsFactor * 111111) % 9000000) + 11000000;
+      async function fetchJson(url) {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`fetch failed: ${response.status}`);
+        return response.json();
+      }
+
+      function buildTrace(state) {
+        const routes = [
+          'offshore breeze tunnel',
+          'committee-approved hose network',
+          'mildly haunted storage tank',
+          'premium discordified pipeline',
+          'shadow refinery behind the servo'
+        ];
         return {
-          syntheticBarrels,
-          lineage: `Houston heat ${houston.temperature_2m}C -> Miami port gusts ${miami.wind_speed_10m} km/h -> BTC support $${btcUsd} -> ${approvalsFactor} lads yelling send it`,
+          headline: `${state.syntheticBarrelsLabel} traced to ${pick(routes)}`,
+          detail: `${state.lineageText}. Converted into ${state.syntheticBarrelsLabel} after ${state.newsLabel}, then stamped ${state.hypeScore}% hype-grade.`
         };
       }
 
-      async function loadLineage() {
-        lineageStatusEl.textContent = 'Fetching weird inputs...';
+      async function gatherLiveSources() {
+        const result = {
+          weatherHouston: null,
+          weatherMiami: null,
+          btcUsd: null,
+          news: null,
+          pageviews: null
+        };
+
         try {
-          const [houstonRes, miamiRes, btcRes] = await Promise.all([
-            fetch('https://api.open-meteo.com/v1/forecast?latitude=29.76&longitude=-95.37&current=temperature_2m,wind_speed_10m'),
-            fetch('https://api.open-meteo.com/v1/forecast?latitude=25.76&longitude=-80.19&current=temperature_2m,wind_speed_10m'),
-            fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd')
-          ]);
-          const houston = (await houstonRes.json()).current || {};
-          const miami = (await miamiRes.json()).current || {};
-          const btcUsd = (await btcRes.json()).bitcoin?.usd || 0;
-
-          houEl.textContent = `${houston.temperature_2m ?? '?'}C / ${houston.wind_speed_10m ?? '?'} km/h`;
-          houDetailEl.textContent = 'Houston weather deciding whether the barrels feel confident today.';
-          miaEl.textContent = `${miami.temperature_2m ?? '?'}C / ${miami.wind_speed_10m ?? '?'} km/h`;
-          miaDetailEl.textContent = 'Miami wind now fully repurposed as a shipping chaos coefficient.';
-          btcEl.textContent = `$${btcUsd.toLocaleString()}`;
-          btcDetailEl.textContent = 'Bitcoin price, because proper oil market data would be less funny.';
-
-          const lineage = deriveBarrelLineage(houston, miami, btcUsd);
-          finalEl.textContent = `${(lineage.syntheticBarrels / 1000000).toFixed(1)}M fake barrels`;
-          finalDetailEl.textContent = lineage.lineage;
-          lineageStatusEl.textContent = 'Lineage online';
-          lineageStatusEl.dataset.state = 'ok';
-        } catch (error) {
-          lineageStatusEl.textContent = 'Lineage API cooked';
-          lineageStatusEl.dataset.state = 'error';
-          finalEl.textContent = 'Fallback barrels only';
-          finalDetailEl.textContent = 'Live scraping fell over, so the barrels are now sourced from vibes alone.';
+          const hou = await fetchJson('https://api.open-meteo.com/v1/forecast?latitude=29.76&longitude=-95.37&current=temperature_2m,wind_speed_10m');
+          result.weatherHouston = hou.current;
+          setCardState('source-weather-card', 'live');
+        } catch {
+          result.weatherHouston = { temperature_2m: 31, wind_speed_10m: 18 };
+          setCardState('source-weather-card', 'fallback');
         }
+
+        try {
+          const mia = await fetchJson('https://api.open-meteo.com/v1/forecast?latitude=25.76&longitude=-80.19&current=temperature_2m,wind_speed_10m');
+          result.weatherMiami = mia.current;
+          setCardState('source-weather-card', 'live');
+        } catch {
+          result.weatherMiami = { temperature_2m: 28, wind_speed_10m: 22 };
+          setCardState('source-weather-card', 'fallback');
+        }
+
+        try {
+          const btc = await fetchJson('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+          result.btcUsd = btc.bitcoin?.usd || 70000;
+          setCardState('source-price-card', 'live');
+        } catch {
+          result.btcUsd = 70000;
+          setCardState('source-price-card', 'fallback');
+        }
+
+        try {
+          const hn = await fetchJson('https://hn.algolia.com/api/v1/search?query=oil&tags=story');
+          result.news = hn.hits?.[0]?.title || 'oil posting remains bullish';
+          setCardState('source-news-card', 'live');
+        } catch {
+          result.news = 'oil posting remains mysteriously bullish';
+          setCardState('source-news-card', 'fallback');
+        }
+
+        try {
+          const wiki = await fetchJson('https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/all-agents/Petroleum/daily/20260401/20260412');
+          const items = wiki.items || [];
+          result.pageviews = items.length ? items[items.length - 1].views : 42000;
+          setCardState('source-pageviews-card', 'live');
+        } catch {
+          result.pageviews = 42000;
+          setCardState('source-pageviews-card', 'fallback');
+        }
+
+        return result;
       }
 
-      function refreshDashboard() {
-        const series = generateSeries();
+      function deriveState(sources) {
+        const hou = sources.weatherHouston || { temperature_2m: 30, wind_speed_10m: 15 };
+        const mia = sources.weatherMiami || { temperature_2m: 27, wind_speed_10m: 20 };
+        const btcUsd = sources.btcUsd || 70000;
+        const pageviews = sources.pageviews || 42000;
+        const approvals = Math.round(randomBetween(2, 6));
+        const weatherFactor = Math.round((hou.temperature_2m + hou.wind_speed_10m + mia.wind_speed_10m) * 9200);
+        const btcFactor = Math.round(btcUsd / 29);
+        const viewsFactor = Math.round(pageviews / 4);
+        const syntheticBarrels = ((weatherFactor + btcFactor + viewsFactor + approvals * 111111) % 9000000) + 12000000;
+        const hypeScore = Math.min(99, Math.round((viewsFactor % 60) + approvals * 6 + (btcUsd % 13)));
+        const premium = Math.round((hypeScore / 99) * 68) + 12;
+        const chaos = Math.min(97, Math.round(mia.wind_speed_10m + hou.wind_speed_10m + approvals * 7));
+        const hookLevel = hypeScore > 80 ? 'MAXIMUM' : hypeScore > 60 ? 'HIGH' : hypeScore > 40 ? 'MEDIUM' : 'LOW';
+        const lineageText = `Houston heat ${hou.temperature_2m}C -> Miami gusts ${mia.wind_speed_10m} km/h -> BTC support $${btcUsd.toLocaleString()} -> ${approvals} lads yelling send it`;
+        return {
+          approvals,
+          chaos,
+          premium,
+          hookLevel,
+          hypeScore,
+          btcUsd,
+          pageviews,
+          lineageText,
+          newsLabel: sources.news,
+          syntheticBarrels,
+          syntheticBarrelsLabel: `${(syntheticBarrels / 1000000).toFixed(1)}M fake barrels`,
+          hou,
+          mia
+        };
+      }
+
+      function renderSourceLayer(state) {
+        setText('source-weather', `${state.hou.temperature_2m}C Houston / ${state.mia.wind_speed_10m} km/h Miami`);
+        setText('source-weather-detail', 'Open-Meteo is currently determining offshore swagger and port wobble.');
+        setText('source-price', `$${state.btcUsd.toLocaleString()}`);
+        setText('source-price-detail', 'CoinGecko has been aggressively reinterpreted as a barrel pricing oracle.');
+        setText('source-news', state.newsLabel);
+        setText('source-news-detail', 'Latest scraped internet yapping, converted into commodity theatre.');
+        setText('source-pageviews', `${state.pageviews.toLocaleString()} views`);
+        setText('source-pageviews-detail', 'Wikipedia attention is now legally considered barrel demand.');
+      }
+
+      function renderLineage(state) {
+        setText('lineage-weather-hou', `${state.hou.temperature_2m}C / ${state.hou.wind_speed_10m} km/h`);
+        setText('lineage-weather-hou-detail', 'Houston weather deciding whether the barrels feel emotionally available.');
+        setText('lineage-weather-mia', `${state.mia.temperature_2m}C / ${state.mia.wind_speed_10m} km/h`);
+        setText('lineage-weather-mia-detail', 'Miami wind now fully repurposed as a shipping chaos coefficient.');
+        setText('lineage-btc', `$${state.btcUsd.toLocaleString()}`);
+        setText('lineage-btc-detail', 'Bitcoin price, because actual oil analytics would ruin the bit.');
+        setText('lineage-final', state.syntheticBarrelsLabel);
+        setText('lineage-final-detail', state.lineageText);
+      }
+
+      function renderTelemetry(state) {
+        const series = generateSeries(state.hypeScore / 10);
         const avg = series.reduce((sum, point) => sum + point.value, 0) / series.length;
         totalEl.textContent = `${avg.toFixed(1)}M`;
-        chaosEl.textContent = `${Math.round(randomBetween(61, 93))}%`;
-        approvalsEl.textContent = `${Math.round(randomBetween(2, 5))}/2`;
-        vibeEl.textContent = vibeWords[Math.floor(Math.random() * vibeWords.length)];
+        chaosEl.textContent = `${state.chaos}%`;
+        memePremiumEl.textContent = `+${state.premium}%`;
+        returnHookEl.textContent = state.hookLevel;
+        vibeEl.textContent = pick(vibeWords);
         renderChart(series);
-        renderEvents();
-        loadLineage();
+      }
+
+      function renderEvents(state) {
+        const eventTemplates = [
+          `Night shift converted ${state.pageviews.toLocaleString()} raw attention units into pipeline confidence.`,
+          `Macro desk declared ${state.newsLabel.toLowerCase()} and immediately marked barrels up ${state.premium}%.`,
+          `Approval committee hit ${state.approvals}/2 and somehow kept going anyway.`,
+          `Port chaos registered ${state.mia.wind_speed_10m} km/h and the lads called that bullish.`,
+          `Houston reported ${state.hou.temperature_2m}C, so output was upgraded to full-send grade.`
+        ];
+        const picks = eventTemplates.sort(() => Math.random() - 0.5).slice(0, 4);
+        eventsEl.innerHTML = picks.map((event) => `<article class="barrel-event">${event}</article>`).join('');
+      }
+
+      function renderMemeLayer(state) {
+        memeHeadlineEl.textContent = `Barrel sentiment now ${pick(hookWords)} thanks to ${state.newsLabel.toLowerCase()}`;
+        memeSublineEl.textContent = `${state.syntheticBarrelsLabel} currently priced off vibes, pageviews, and accidental macro theatre.`;
+        hypePressureEl.textContent = `${state.hypeScore}%`;
+        hypeMeterEl.style.width = `${state.hypeScore}%`;
+        const trace = buildTrace(state);
+        traceHeadlineEl.textContent = trace.headline;
+        traceDetailEl.textContent = trace.detail;
+      }
+
+      function renderLaunchCopy(state) {
+        const lines = [
+          `${pick(launchOpeners)} Barrels-as-a-Service is live.`,
+          '',
+          `What’s in it:`,
+          `- live weather-fed barrel lineage`,
+          `- internet-scraped sentiment engine`,
+          `- ${state.syntheticBarrelsLabel} currently in circulation`,
+          `- hype pressure sitting at ${state.hypeScore}%`,
+          '',
+          `Today’s fake provenance: ${state.lineageText}.`,
+          `Current internet catalyst: ${state.newsLabel}.`,
+          '',
+          `Have a crack: https://professional-evening-gaming.dilger.dev/projects/barrels/`
+        ];
+        launchCopyEl.value = lines.join('\n');
+      }
+
+      async function refreshDashboard() {
+        lineageStatusEl.textContent = 'Fetching weird inputs...';
+        sourceStatusEl.textContent = 'Checking feeds...';
+        sourceStatusEl.dataset.state = 'busy';
+        const sources = await gatherLiveSources();
+        const state = deriveState(sources);
+        renderSourceLayer(state);
+        renderLineage(state);
+        renderTelemetry(state);
+        renderEvents(state);
+        renderMemeLayer(state);
+        renderLaunchCopy(state);
+        lineageStatusEl.textContent = 'Lineage online';
+        lineageStatusEl.dataset.state = 'ok';
+        sourceStatusEl.textContent = 'Feeds online';
+        sourceStatusEl.dataset.state = 'ok';
+        lastUpdatedEl.textContent = `Last update: ${new Date().toLocaleString('en-AU', { hour12: false })}`;
       }
 
       refreshButton?.addEventListener('click', refreshDashboard);
+      traceButton?.addEventListener('click', () => {
+        traceHeadlineEl.textContent = `Dossier regenerated at ${new Date().toLocaleTimeString('en-AU', { hour12: false })}`;
+        traceDetailEl.textContent = `${launchCopyEl.value.split('\n').filter(Boolean).slice(0, 3).join(' • ')}.`;
+      });
+      copyLaunchButton?.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(launchCopyEl.value);
+          copyLaunchButton.textContent = 'Copied, mate';
+          setTimeout(() => {
+            copyLaunchButton.textContent = 'Copy launch copy';
+          }, 1600);
+        } catch {
+          copyLaunchButton.textContent = 'Copy failed, highlight it';
+        }
+      });
+
       refreshDashboard();
     </script>
   </body>

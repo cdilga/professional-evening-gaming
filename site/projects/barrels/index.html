@@ -21,6 +21,7 @@
         --barrel-gold: #d8971e;
         --barrel-ink: #2f2018;
         --barrel-cream: rgba(255, 248, 238, 0.88);
+        --barrel-green: #2f6f48;
       }
       .launch-strip {
         margin-bottom: 24px;
@@ -52,26 +53,48 @@
       .lineage-grid,
       .source-grid,
       .meme-grid,
-      .launch-grid {
+      .launch-grid,
+      .bucket-grid,
+      .governance-grid,
+      .hots-grid,
+      .hoom-grid,
+      .ticker-grid {
         display: grid;
         gap: 18px;
       }
       .barrel-grid,
       .lineage-grid,
       .source-grid,
-      .meme-grid {
+      .meme-grid,
+      .hots-grid,
+      .hoom-grid,
+      .ticker-grid {
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+      .launch-grid,
+      .telemetry-layout,
+      .bucket-grid,
+      .governance-grid {
+        grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
       }
       .barrel-card,
       .lineage-card,
       .source-card,
       .meme-card,
-      .launch-card {
+      .launch-card,
+      .bucket-card,
+      .governance-card,
+      .hot-card,
+      .hoom-card,
+      .ticker-card {
         padding: 18px;
       }
       .barrel-card h2,
       .lineage-card strong,
-      .meme-big {
+      .meme-big,
+      .bucket-big,
+      .hot-stat,
+      .ticker-big {
         display: block;
         margin-top: 10px;
         font-family: "Permanent Marker", cursive;
@@ -80,43 +103,51 @@
         font-size: clamp(2rem, 5vw, 3.2rem);
       }
       .lineage-card strong,
-      .meme-big {
+      .meme-big,
+      .bucket-big,
+      .hot-stat,
+      .ticker-big {
         font-size: 1.35rem;
       }
       .lineage-card small,
       .source-card small,
       .meme-card small,
-      .launch-card small {
+      .launch-card small,
+      .bucket-card small,
+      .governance-card small,
+      .hot-card small,
+      .hoom-card small,
+      .ticker-card small {
         display: block;
         margin-top: 8px;
         color: var(--muted);
         font-family: "IBM Plex Mono", monospace;
-      }
-      .telemetry-layout,
-      .launch-grid {
-        grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
       }
       .barrel-chart-wrap {
         margin-top: 18px;
         padding: 18px;
         border-radius: 22px;
         border: 2px dashed rgba(92, 64, 51, 0.28);
-        background:
-          linear-gradient(180deg, rgba(216,151,30,0.08), rgba(179,58,43,0.06)),
-          rgba(255, 255, 255, 0.5);
+        background: linear-gradient(180deg, rgba(216,151,30,0.08), rgba(179,58,43,0.06)), rgba(255, 255, 255, 0.5);
       }
       .barrel-chart-wrap canvas {
         width: 100%;
         height: auto;
         display: block;
       }
-      .chart-legend {
+      .chart-legend,
+      .pill-row,
+      .sentiment-bars {
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
         margin-top: 14px;
       }
-      .chart-legend span {
+      .chart-legend span,
+      .barrel-badge,
+      .status-chip,
+      .sentiment-pill,
+      .governance-pill {
         padding: 8px 12px;
         border-radius: 999px;
         background: rgba(255,255,255,0.65);
@@ -124,80 +155,142 @@
         font-family: "IBM Plex Mono", monospace;
         font-size: 0.75rem;
       }
-      .barrel-event-list {
+      .barrel-event-list,
+      .principles-list,
+      .market-list {
         display: grid;
         gap: 12px;
         margin-top: 18px;
       }
-      .barrel-event {
+      .barrel-event,
+      .market-row,
+      .principle-row {
         padding: 14px 16px;
         border: 2px dashed rgba(92, 64, 51, 0.24);
         border-radius: 18px;
         background: rgba(255, 255, 255, 0.42);
       }
-      .source-card {
+      .source-card,
+      .bucket-card,
+      .governance-card,
+      .hot-card,
+      .hoom-card,
+      .ticker-card {
         background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,248,238,0.85));
       }
-      .source-card[data-state="live"] {
+      .source-card[data-state="live"],
+      .hoom-card[data-state="bullish"] {
         border-color: rgba(38,109,62,0.35);
       }
-      .source-card[data-state="fallback"] {
+      .source-card[data-state="fallback"],
+      .hoom-card[data-state="cooked"] {
         border-color: rgba(179,58,43,0.35);
       }
-      .meme-card {
+      .meme-card,
+      .hot-card {
         background: linear-gradient(180deg, rgba(216,151,30,0.08), rgba(179,58,43,0.08));
       }
-      .meme-meter {
+      .meme-meter,
+      .liquidity-meter,
+      .odds-meter,
+      .conviction-meter {
         margin-top: 12px;
         height: 14px;
         border-radius: 999px;
         background: rgba(92, 64, 51, 0.12);
         overflow: hidden;
       }
-      .meme-meter span {
+      .meme-meter span,
+      .liquidity-meter span,
+      .odds-meter span,
+      .conviction-meter span {
         display: block;
         height: 100%;
         width: 0;
         background: linear-gradient(90deg, var(--barrel-gold), var(--barrel-red));
         transition: width 300ms ease;
       }
-      .launch-card textarea {
+      .launch-card textarea,
+      .bucket-form input,
+      .bucket-form select {
         width: 100%;
-        min-height: 180px;
-        margin-top: 12px;
         border: 2px dashed rgba(92, 64, 51, 0.28);
         border-radius: 16px;
-        padding: 14px;
+        padding: 12px 14px;
         background: rgba(255, 255, 255, 0.7);
         color: var(--barrel-ink);
         font: inherit;
+      }
+      .launch-card textarea {
+        min-height: 180px;
+        margin-top: 12px;
         resize: vertical;
       }
-      .launch-actions {
+      .launch-actions,
+      .hero-actions,
+      .barrel-badge-row,
+      .bucket-actions {
         display: flex;
         flex-wrap: wrap;
         gap: 12px;
         margin-top: 14px;
       }
       .barrel-badge-row {
-        display: flex;
-        flex-wrap: wrap;
         gap: 10px;
         margin-top: 18px;
       }
-      .barrel-badge {
-        padding: 8px 12px;
-        border-radius: 999px;
-        border: 1px solid rgba(92, 64, 51, 0.25);
-        background: var(--barrel-cream);
+      .barrel-badge { background: var(--barrel-cream); }
+      .bucket-form {
+        display: grid;
+        gap: 12px;
+        margin-top: 16px;
+      }
+      .bucket-two-up,
+      .conviction-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .range-wrap {
+        display: grid;
+        gap: 8px;
+      }
+      .big-toggle {
+        cursor: pointer;
+      }
+      .principles-list strong,
+      .market-row strong,
+      .ticker-card strong { display:block; }
+      .ticker-tape {
+        display:grid;
+        gap:10px;
+      }
+      .tape-line {
+        padding: 12px 14px;
+        border-radius: 16px;
+        background: rgba(47,32,24,0.06);
+        border: 1px dashed rgba(92,64,51,0.2);
         font-family: "IBM Plex Mono", monospace;
-        font-size: 0.78rem;
+        font-size: 0.82rem;
+      }
+      .hoom-card h3,
+      .hot-card h3,
+      .governance-card h3,
+      .bucket-card h3 {
+        margin: 0;
+        font-size: 1.2rem;
+      }
+      .ghost-note {
+        opacity: 0.8;
+        font-style: italic;
       }
       @media (max-width: 960px) {
         .telemetry-layout,
-        .launch-grid {
-          grid-template-columns: 1fr;
-        }
+        .launch-grid,
+        .bucket-grid,
+        .governance-grid,
+        .bucket-two-up,
+        .conviction-row { grid-template-columns: 1fr; }
       }
     </style>
   </head>
@@ -225,17 +318,19 @@
           <h1>Barrels-as-a-Service</h1>
           <p class="lede">
             A fully cooked PEG product for the lads. Real public data comes in from around the internet,
-            then gets laundered into deeply unserious barrel lineage, market hype, and premium nonsense telemetry.
+            then gets laundered into deeply unserious barrel lineage, market hype, hoom conviction, and bucket-market theatre.
           </p>
           <div class="hero-actions">
             <button id="barrel-refresh" class="button button-primary" type="button">Refresh the barrel machine</button>
-            <a class="button button-secondary" href="/projects/">Back to all projects</a>
+            <button id="mate-mode" class="button button-secondary big-toggle" type="button">Mate mode: ON</button>
+            <button id="seriousness-toggle" class="button button-secondary big-toggle" type="button">Tone: Cooked</button>
           </div>
           <div class="barrel-badge-row">
             <span class="barrel-badge">weather-fed lineage</span>
             <span class="barrel-badge">live price weirdness</span>
             <span class="barrel-badge">scraped news vibes</span>
-            <span class="barrel-badge">launchable hype product</span>
+            <span class="barrel-badge">bucket market theatre</span>
+            <span class="barrel-badge">hoom conviction engine</span>
           </div>
         </div>
         <div class="panel inset-panel">
@@ -245,6 +340,7 @@
             <li><strong>Truth layer:</strong> obviously parody, no sneaky fake-pretend realness.</li>
             <li><strong>Meme layer:</strong> every refresh generates fresh dribble and provenance.</li>
             <li><strong>Hook:</strong> the page changes with the internet, so the lads keep checking back.</li>
+            <li><strong>Governance:</strong> if it fails the pub test, it gets sent to the barbie council.</li>
           </ul>
         </div>
       </section>
@@ -269,6 +365,112 @@
           <p class="eyebrow">Return visitor bait</p>
           <h2 id="return-hook">HIGH</h2>
           <p>Because the barrel origin story changes every refresh.</p>
+        </article>
+      </section>
+
+      <section class="bucket-grid section-block">
+        <article class="panel bucket-card">
+          <div class="demo-panel-header">
+            <div>
+              <p class="eyebrow">Create a bucket</p>
+              <h2>Launch a Polymarket-for-drongos barrel market</h2>
+            </div>
+            <span class="status-pill" id="bucket-status">Bucket composer armed</span>
+          </div>
+          <form class="bucket-form" id="bucket-form">
+            <div class="bucket-two-up">
+              <label>
+                <span>Bucket title</span>
+                <input id="bucket-title" value="Will fake barrel demand rip before knock-off?" />
+              </label>
+              <label>
+                <span>Template</span>
+                <select id="bucket-template">
+                  <option value="normal">Normal, but still cooked</option>
+                  <option value="silly">Silly bucket</option>
+                  <option value="feral">Fully feral</option>
+                </select>
+              </label>
+            </div>
+            <div class="bucket-two-up">
+              <label>
+                <span>Outcome A</span>
+                <input id="bucket-yes" value="Yes, full send" />
+              </label>
+              <label>
+                <span>Outcome B</span>
+                <input id="bucket-no" value="No, too cooked" />
+              </label>
+            </div>
+            <div class="bucket-two-up">
+              <label>
+                <span>Close window</span>
+                <select id="bucket-close">
+                  <option>Arvo close</option>
+                  <option>Before the pub</option>
+                  <option selected>By knock-off</option>
+                  <option>After democracy sausage review</option>
+                </select>
+              </label>
+              <label>
+                <span>Emoji badge</span>
+                <select id="bucket-emoji">
+                  <option>🛢️</option>
+                  <option>💨</option>
+                  <option>📈</option>
+                  <option>🍻</option>
+                </select>
+              </label>
+            </div>
+            <div class="range-wrap">
+              <span>Founder confidence: <strong id="confidence-readout">67%</strong></span>
+              <input id="bucket-confidence" type="range" min="10" max="99" value="67" />
+            </div>
+            <div class="pill-row">
+              <span class="status-chip" id="bucket-preview-odds">Implied odds: 63 / 37</span>
+              <span class="status-chip" id="bucket-preview-liquidity">Bucket liquidity: warm</span>
+              <span class="status-chip" id="bucket-preview-governance">Governance: fair dinkum</span>
+            </div>
+            <div class="odds-meter"><span id="odds-meter-bar"></span></div>
+            <div class="liquidity-meter"><span id="liquidity-meter-bar"></span></div>
+            <div class="bucket-actions">
+              <button class="button button-primary" id="launch-bucket" type="submit">Launch barrel</button>
+              <button class="button button-secondary" id="shake-barrel" type="button">Tap the barrel</button>
+            </div>
+          </form>
+        </article>
+        <aside class="panel bucket-card">
+          <p class="eyebrow">Most cooked markets</p>
+          <div class="market-list" id="market-list">
+            <article class="market-row"><strong>Will bunker sentiment beat actual geology?</strong><small>61% yes • status: committee-approved nonsense</small></article>
+            <article class="market-row"><strong>Can hooms collectively price in servo vibes?</strong><small>74% yes • status: under review by the shed</small></article>
+            <article class="market-row"><strong>Will the bucket survive the pub test?</strong><small>88% yes • status: democracy sausage pending</small></article>
+          </div>
+        </aside>
+      </section>
+
+      <section class="hoom-grid section-block">
+        <article class="panel hoom-card" data-state="bullish">
+          <p class="eyebrow">Hoom sentiment</p>
+          <h3 id="hoom-headline">Absolutely bullish</h3>
+          <small id="hoom-summary">The hooms reckon this bucket has legs, elbows, and a suspicious amount of confidence.</small>
+          <div class="sentiment-bars">
+            <span class="sentiment-pill" id="mates-pill">Mates: 71%</span>
+            <span class="sentiment-pill" id="punters-pill">Punters: 64%</span>
+            <span class="sentiment-pill" id="pub-pill">Pub bloke: 93%</span>
+            <span class="sentiment-pill" id="anon-pill">Anon hooms: 58%</span>
+          </div>
+          <div class="conviction-meter"><span id="conviction-meter-bar"></span></div>
+        </article>
+        <article class="panel hoom-card" data-state="bullish">
+          <p class="eyebrow">Risk of absolute scenes</p>
+          <span class="bucket-big" id="scenes-risk">Moderate chaos</span>
+          <small id="scenes-risk-detail">Still within legally acceptable mateshed parameters.</small>
+        </article>
+        <article class="panel hoom-card" data-state="cooked">
+          <p class="eyebrow">Bucket trust signal</p>
+          <span class="bucket-big" id="trust-signal">Fair dinkum</span>
+          <small id="trust-signal-detail">No dog acts detected by the current governance stack.</small>
         </article>
       </section>
 
@@ -298,6 +500,53 @@
             <article class="barrel-event">Initial launch mode is armed, which means the middle bit now has some actual guts even before the APIs wake up.</article>
             <article class="barrel-event">If the feeds go missing, fallback dribble kicks in so the page still looks alive instead of standing there like a stunned mullet.</article>
           </div>
+        </aside>
+      </section>
+
+      <section class="hots-grid section-block">
+        <article class="panel hot-card">
+          <p class="eyebrow">Today’s hottest barrels</p>
+          <span class="hot-stat" id="hot-barrel-stat">17.6M synthetic</span>
+          <small id="hot-barrel-copy">Now trading at a premium because the internet accidentally made eye contact with it.</small>
+        </article>
+        <article class="panel hot-card">
+          <p class="eyebrow">Most cooked market of the week</p>
+          <span class="hot-stat" id="cooked-market-stat">Servo Arbitrage Bucket</span>
+          <small id="cooked-market-copy">Consensus says it should never have been created, which is why volume is up.</small>
+        </article>
+        <article class="panel hot-card">
+          <p class="eyebrow">Hall of Dinkum</p>
+          <span class="hot-stat" id="hall-stat">Pub Test Champion</span>
+          <small id="hall-copy">Awarded to the bucket most likely to survive an argument near the barbie.</small>
+        </article>
+      </section>
+
+      <section class="governance-grid section-block">
+        <article class="panel governance-card">
+          <div class="demo-panel-header">
+            <div>
+              <p class="eyebrow">Aussie principles</p>
+              <h2>Barrel governance constitution</h2>
+            </div>
+            <span class="status-pill" id="governance-status">Fair dinkum</span>
+          </div>
+          <div class="principles-list" id="principles-list">
+            <article class="principle-row"><strong>1. Fair go for all buckets</strong><small>No outcome shall be stitched up by a bloke with suspiciously tidy spreadsheets.</small></article>
+            <article class="principle-row"><strong>2. No dog acts</strong><small>If the thesis is nonsense, say it with your chest and let the hooms price it in.</small></article>
+            <article class="principle-row"><strong>3. Democracy sausage first, disputes later</strong><small>Major governance escalations require snack-based consultation.</small></article>
+            <article class="principle-row"><strong>4. Pub test override</strong><small>If the market sounds too cooked at first listen, it gets an extra review by the shed.</small></article>
+            <article class="principle-row"><strong>5. Own the full send</strong><small>If you launch it, you explain it to the lads when it goes sideways.</small></article>
+          </div>
+        </article>
+        <aside class="panel governance-card">
+          <p class="eyebrow">Governance chips</p>
+          <div class="pill-row" id="governance-pills">
+            <span class="governance-pill">fair dinkum</span>
+            <span class="governance-pill">under review by the shed</span>
+            <span class="governance-pill">barbie council pending</span>
+            <span class="governance-pill">pub test passed</span>
+          </div>
+          <small class="ghost-note">If it sounds too corporate, flip mate mode back on and try again.</small>
         </aside>
       </section>
 
@@ -386,6 +635,23 @@
         </article>
       </section>
 
+      <section class="ticker-grid section-block">
+        <article class="panel ticker-card">
+          <p class="eyebrow">National bucket sentiment map</p>
+          <span class="ticker-big" id="map-headline">Brisbane: irresponsible optimism</span>
+          <div class="ticker-tape" id="ticker-tape">
+            <div class="tape-line">Brisbane desk: full send bias detected</div>
+            <div class="tape-line">Perth desk: wants more barrels and fewer questions</div>
+            <div class="tape-line">Melbourne desk: requires artisanal governance wording</div>
+          </div>
+        </article>
+        <article class="panel ticker-card">
+          <p class="eyebrow">Bucket tape</p>
+          <span class="ticker-big" id="ticker-headline">3 new hoom bets just hit the tape</span>
+          <small id="ticker-copy">The tape is completely made up, but the energy is immaculate.</small>
+        </article>
+      </section>
+
       <section class="launch-grid section-block">
         <article class="panel launch-card">
           <p class="eyebrow">Launch copy</p>
@@ -429,6 +695,25 @@ Have a crack: https://professional-evening-gaming.dilger.dev/projects/barrels/</
       const refreshButton = document.getElementById('barrel-refresh');
       const copyLaunchButton = document.getElementById('copy-launch');
       const traceButton = document.getElementById('trace-barrel');
+      const mateModeButton = document.getElementById('mate-mode');
+      const seriousnessButton = document.getElementById('seriousness-toggle');
+      const bucketForm = document.getElementById('bucket-form');
+      const bucketTitleInput = document.getElementById('bucket-title');
+      const bucketTemplateInput = document.getElementById('bucket-template');
+      const bucketYesInput = document.getElementById('bucket-yes');
+      const bucketNoInput = document.getElementById('bucket-no');
+      const bucketCloseInput = document.getElementById('bucket-close');
+      const bucketEmojiInput = document.getElementById('bucket-emoji');
+      const bucketConfidenceInput = document.getElementById('bucket-confidence');
+      const confidenceReadout = document.getElementById('confidence-readout');
+      const bucketStatus = document.getElementById('bucket-status');
+      const bucketPreviewOdds = document.getElementById('bucket-preview-odds');
+      const bucketPreviewLiquidity = document.getElementById('bucket-preview-liquidity');
+      const bucketPreviewGovernance = document.getElementById('bucket-preview-governance');
+      const oddsMeterBar = document.getElementById('odds-meter-bar');
+      const liquidityMeterBar = document.getElementById('liquidity-meter-bar');
+      const marketList = document.getElementById('market-list');
+
       const totalEl = document.getElementById('barrel-total');
       const chaosEl = document.getElementById('barrel-chaos');
       const memePremiumEl = document.getElementById('meme-premium');
@@ -445,31 +730,47 @@ Have a crack: https://professional-evening-gaming.dilger.dev/projects/barrels/</
       const traceHeadlineEl = document.getElementById('barrel-trace');
       const traceDetailEl = document.getElementById('barrel-trace-detail');
       const lastUpdatedEl = document.getElementById('last-updated');
+      const hoomHeadlineEl = document.getElementById('hoom-headline');
+      const hoomSummaryEl = document.getElementById('hoom-summary');
+      const matesPill = document.getElementById('mates-pill');
+      const puntersPill = document.getElementById('punters-pill');
+      const pubPill = document.getElementById('pub-pill');
+      const anonPill = document.getElementById('anon-pill');
+      const convictionMeterBar = document.getElementById('conviction-meter-bar');
+      const scenesRiskEl = document.getElementById('scenes-risk');
+      const scenesRiskDetailEl = document.getElementById('scenes-risk-detail');
+      const trustSignalEl = document.getElementById('trust-signal');
+      const trustSignalDetailEl = document.getElementById('trust-signal-detail');
+      const governanceStatusEl = document.getElementById('governance-status');
+      const hotBarrelStatEl = document.getElementById('hot-barrel-stat');
+      const hotBarrelCopyEl = document.getElementById('hot-barrel-copy');
+      const cookedMarketStatEl = document.getElementById('cooked-market-stat');
+      const cookedMarketCopyEl = document.getElementById('cooked-market-copy');
+      const hallStatEl = document.getElementById('hall-stat');
+      const hallCopyEl = document.getElementById('hall-copy');
+      const mapHeadlineEl = document.getElementById('map-headline');
+      const tickerHeadlineEl = document.getElementById('ticker-headline');
+      const tickerCopyEl = document.getElementById('ticker-copy');
+      const tickerTapeEl = document.getElementById('ticker-tape');
 
       const vibeWords = ['Mint', 'Cooked', 'Certified elite', 'Suspiciously stable', 'Held together by vibes'];
-      const launchOpeners = [
-        '🚨 New PEG product drop:',
-        '📈 The lads demanded innovation, so:',
-        '🛢️ Fully cooked and now live:',
-        '💨 Straight out of the mateshed:'
-      ];
+      const launchOpeners = ['🚨 New PEG product drop:', '📈 The lads demanded innovation, so:', '🛢️ Fully cooked and now live:', '💨 Straight out of the mateshed:'];
       const hookWords = ['volatile', 'premium', 'unreasonably bullish', 'hype-backed', 'committee-approved'];
+      const governanceWords = ['fair dinkum', 'under review by the shed', 'barbie council pending', 'pub test passed', 'slightly cooked but acceptable'];
+      const cities = ['Brisbane', 'Perth', 'Sydney', 'Melbourne', 'Adelaide'];
 
-      function randomBetween(min, max) {
-        return Math.random() * (max - min) + min;
-      }
+      let mateMode = true;
+      let seriousMode = false;
+      let currentState = null;
 
-      function pick(list) {
-        return list[Math.floor(Math.random() * list.length)];
-      }
+      function randomBetween(min, max) { return Math.random() * (max - min) + min; }
+      function pick(list) { return list[Math.floor(Math.random() * list.length)]; }
+      function pct(n) { return `${Math.round(n)}%`; }
 
       function generateSeries(seed) {
         return Array.from({ length: 12 }, (_, index) => {
           const wobble = Math.sin((index + 1) * 0.8 + seed) * 1.6;
-          return {
-            label: `H${index + 1}`,
-            value: Math.round((14 + wobble + randomBetween(0.8, 7.5)) * 10) / 10
-          };
+          return { label: `H${index + 1}`, value: Math.round((14 + wobble + randomBetween(0.8, 7.5)) * 10) / 10 };
         });
       }
 
@@ -480,55 +781,33 @@ Have a crack: https://professional-evening-gaming.dilger.dev/projects/barrels/</
         const height = chart.height;
         const padding = 36;
         const maxValue = Math.max(...series.map((point) => point.value)) + 2;
-
         ctx.clearRect(0, 0, width, height);
         ctx.fillStyle = '#faf7f0';
         ctx.fillRect(0, 0, width, height);
-
         ctx.strokeStyle = 'rgba(92, 64, 51, 0.15)';
         ctx.lineWidth = 1;
         for (let i = 0; i <= 4; i += 1) {
           const y = padding + ((height - padding * 2) / 4) * i;
-          ctx.beginPath();
-          ctx.moveTo(padding, y);
-          ctx.lineTo(width - padding, y);
-          ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(width - padding, y); ctx.stroke();
         }
-
         const gradient = ctx.createLinearGradient(0, 0, width, height);
-        gradient.addColorStop(0, '#d8971e');
-        gradient.addColorStop(1, '#b33a2b');
-
-        ctx.strokeStyle = '#2f2018';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
+        gradient.addColorStop(0, '#d8971e'); gradient.addColorStop(1, '#b33a2b');
+        ctx.strokeStyle = '#2f2018'; ctx.lineWidth = 3; ctx.beginPath();
         series.forEach((point, index) => {
           const x = padding + ((width - padding * 2) / (series.length - 1)) * index;
           const y = height - padding - (point.value / maxValue) * (height - padding * 2);
-          if (index === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
+          if (index === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
         });
-        ctx.stroke();
-
-        ctx.fillStyle = gradient;
+        ctx.stroke(); ctx.fillStyle = gradient;
         series.forEach((point, index) => {
           const x = padding + ((width - padding * 2) / (series.length - 1)) * index;
           const y = height - padding - (point.value / maxValue) * (height - padding * 2);
-          ctx.beginPath();
-          ctx.arc(x, y, 5, 0, Math.PI * 2);
-          ctx.fill();
+          ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill();
         });
       }
 
-      function setCardState(id, state) {
-        const card = document.getElementById(id);
-        if (card) card.dataset.state = state;
-      }
-
-      function setText(id, value) {
-        const el = document.getElementById(id);
-        if (el) el.textContent = value;
-      }
+      function setCardState(id, state) { const card = document.getElementById(id); if (card) card.dataset.state = state; }
+      function setText(id, value) { const el = document.getElementById(id); if (el) el.textContent = value; }
 
       async function fetchJson(url) {
         const response = await fetch(url);
@@ -537,13 +816,7 @@ Have a crack: https://professional-evening-gaming.dilger.dev/projects/barrels/</
       }
 
       function buildTrace(state) {
-        const routes = [
-          'offshore breeze tunnel',
-          'committee-approved hose network',
-          'mildly haunted storage tank',
-          'premium discordified pipeline',
-          'shadow refinery behind the servo'
-        ];
+        const routes = ['offshore breeze tunnel', 'committee-approved hose network', 'mildly haunted storage tank', 'premium discordified pipeline', 'shadow refinery behind the servo'];
         return {
           headline: `${state.syntheticBarrelsLabel} traced to ${pick(routes)}`,
           detail: `${state.lineageText}. Converted into ${state.syntheticBarrelsLabel} after ${state.newsLabel}, then stamped ${state.hypeScore}% hype-grade.`
@@ -551,60 +824,17 @@ Have a crack: https://professional-evening-gaming.dilger.dev/projects/barrels/</
       }
 
       async function gatherLiveSources() {
-        const result = {
-          weatherHouston: null,
-          weatherMiami: null,
-          btcUsd: null,
-          news: null,
-          pageviews: null
-        };
-
-        try {
-          const hou = await fetchJson('https://api.open-meteo.com/v1/forecast?latitude=29.76&longitude=-95.37&current=temperature_2m,wind_speed_10m');
-          result.weatherHouston = hou.current;
-          setCardState('source-weather-card', 'live');
-        } catch {
-          result.weatherHouston = { temperature_2m: 31, wind_speed_10m: 18 };
-          setCardState('source-weather-card', 'fallback');
-        }
-
-        try {
-          const mia = await fetchJson('https://api.open-meteo.com/v1/forecast?latitude=25.76&longitude=-80.19&current=temperature_2m,wind_speed_10m');
-          result.weatherMiami = mia.current;
-          setCardState('source-weather-card', 'live');
-        } catch {
-          result.weatherMiami = { temperature_2m: 28, wind_speed_10m: 22 };
-          setCardState('source-weather-card', 'fallback');
-        }
-
-        try {
-          const btc = await fetchJson('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
-          result.btcUsd = btc.bitcoin?.usd || 70000;
-          setCardState('source-price-card', 'live');
-        } catch {
-          result.btcUsd = 70000;
-          setCardState('source-price-card', 'fallback');
-        }
-
-        try {
-          const hn = await fetchJson('https://hn.algolia.com/api/v1/search?query=oil&tags=story');
-          result.news = hn.hits?.[0]?.title || 'oil posting remains bullish';
-          setCardState('source-news-card', 'live');
-        } catch {
-          result.news = 'oil posting remains mysteriously bullish';
-          setCardState('source-news-card', 'fallback');
-        }
-
-        try {
-          const wiki = await fetchJson('https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/all-agents/Petroleum/daily/20260401/20260412');
-          const items = wiki.items || [];
-          result.pageviews = items.length ? items[items.length - 1].views : 42000;
-          setCardState('source-pageviews-card', 'live');
-        } catch {
-          result.pageviews = 42000;
-          setCardState('source-pageviews-card', 'fallback');
-        }
-
+        const result = { weatherHouston: null, weatherMiami: null, btcUsd: null, news: null, pageviews: null };
+        try { const hou = await fetchJson('https://api.open-meteo.com/v1/forecast?latitude=29.76&longitude=-95.37&current=temperature_2m,wind_speed_10m'); result.weatherHouston = hou.current; setCardState('source-weather-card', 'live'); }
+        catch { result.weatherHouston = { temperature_2m: 31, wind_speed_10m: 18 }; setCardState('source-weather-card', 'fallback'); }
+        try { const mia = await fetchJson('https://api.open-meteo.com/v1/forecast?latitude=25.76&longitude=-80.19&current=temperature_2m,wind_speed_10m'); result.weatherMiami = mia.current; setCardState('source-weather-card', 'live'); }
+        catch { result.weatherMiami = { temperature_2m: 28, wind_speed_10m: 22 }; setCardState('source-weather-card', 'fallback'); }
+        try { const btc = await fetchJson('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd'); result.btcUsd = btc.bitcoin?.usd || 70000; setCardState('source-price-card', 'live'); }
+        catch { result.btcUsd = 70000; setCardState('source-price-card', 'fallback'); }
+        try { const hn = await fetchJson('https://hn.algolia.com/api/v1/search?query=oil&tags=story'); result.news = hn.hits?.[0]?.title || 'oil posting remains bullish'; setCardState('source-news-card', 'live'); }
+        catch { result.news = 'oil posting remains mysteriously bullish'; setCardState('source-news-card', 'fallback'); }
+        try { const wiki = await fetchJson('https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/all-agents/Petroleum/daily/20260401/20260412'); const items = wiki.items || []; result.pageviews = items.length ? items[items.length - 1].views : 42000; setCardState('source-pageviews-card', 'live'); }
+        catch { result.pageviews = 42000; setCardState('source-pageviews-card', 'fallback'); }
         return result;
       }
 
@@ -623,21 +853,7 @@ Have a crack: https://professional-evening-gaming.dilger.dev/projects/barrels/</
         const chaos = Math.min(97, Math.round(mia.wind_speed_10m + hou.wind_speed_10m + approvals * 7));
         const hookLevel = hypeScore > 80 ? 'MAXIMUM' : hypeScore > 60 ? 'HIGH' : hypeScore > 40 ? 'MEDIUM' : 'LOW';
         const lineageText = `Houston heat ${hou.temperature_2m}C -> Miami gusts ${mia.wind_speed_10m} km/h -> BTC support $${btcUsd.toLocaleString()} -> ${approvals} lads yelling send it`;
-        return {
-          approvals,
-          chaos,
-          premium,
-          hookLevel,
-          hypeScore,
-          btcUsd,
-          pageviews,
-          lineageText,
-          newsLabel: sources.news,
-          syntheticBarrels,
-          syntheticBarrelsLabel: `${(syntheticBarrels / 1000000).toFixed(1)}M fake barrels`,
-          hou,
-          mia
-        };
+        return { approvals, chaos, premium, hookLevel, hypeScore, btcUsd, pageviews, lineageText, newsLabel: sources.news, syntheticBarrels, syntheticBarrelsLabel: `${(syntheticBarrels / 1000000).toFixed(1)}M fake barrels`, hou, mia };
       }
 
       function renderSourceLayer(state) {
@@ -645,32 +861,20 @@ Have a crack: https://professional-evening-gaming.dilger.dev/projects/barrels/</
         setText('source-weather-detail', 'Open-Meteo is currently determining offshore swagger and port wobble.');
         setText('source-price', `$${state.btcUsd.toLocaleString()}`);
         setText('source-price-detail', 'CoinGecko has been aggressively reinterpreted as a barrel pricing oracle.');
-        setText('source-news', state.newsLabel);
-        setText('source-news-detail', 'Latest scraped internet yapping, converted into commodity theatre.');
-        setText('source-pageviews', `${state.pageviews.toLocaleString()} views`);
-        setText('source-pageviews-detail', 'Wikipedia attention is now legally considered barrel demand.');
+        setText('source-news', state.newsLabel); setText('source-news-detail', 'Latest scraped internet yapping, converted into commodity theatre.');
+        setText('source-pageviews', `${state.pageviews.toLocaleString()} views`); setText('source-pageviews-detail', 'Wikipedia attention is now legally considered barrel demand.');
       }
 
       function renderLineage(state) {
         setText('lineage-weather-hou', `${state.hou.temperature_2m}C / ${state.hou.wind_speed_10m} km/h`);
-        setText('lineage-weather-hou-detail', 'Houston weather deciding whether the barrels feel emotionally available.');
         setText('lineage-weather-mia', `${state.mia.temperature_2m}C / ${state.mia.wind_speed_10m} km/h`);
-        setText('lineage-weather-mia-detail', 'Miami wind now fully repurposed as a shipping chaos coefficient.');
-        setText('lineage-btc', `$${state.btcUsd.toLocaleString()}`);
-        setText('lineage-btc-detail', 'Bitcoin price, because actual oil analytics would ruin the bit.');
-        setText('lineage-final', state.syntheticBarrelsLabel);
-        setText('lineage-final-detail', state.lineageText);
+        setText('lineage-btc', `$${state.btcUsd.toLocaleString()}`); setText('lineage-final', state.syntheticBarrelsLabel); setText('lineage-final-detail', state.lineageText);
       }
 
       function renderTelemetry(state) {
         const series = generateSeries(state.hypeScore / 10);
         const avg = series.reduce((sum, point) => sum + point.value, 0) / series.length;
-        totalEl.textContent = `${avg.toFixed(1)}M`;
-        chaosEl.textContent = `${state.chaos}%`;
-        memePremiumEl.textContent = `+${state.premium}%`;
-        returnHookEl.textContent = state.hookLevel;
-        vibeEl.textContent = pick(vibeWords);
-        renderChart(series);
+        totalEl.textContent = `${avg.toFixed(1)}M`; chaosEl.textContent = `${state.chaos}%`; memePremiumEl.textContent = `+${state.premium}%`; returnHookEl.textContent = state.hookLevel; vibeEl.textContent = pick(vibeWords); renderChart(series);
       }
 
       function renderEvents(state) {
@@ -688,49 +892,97 @@ Have a crack: https://professional-evening-gaming.dilger.dev/projects/barrels/</
       function renderMemeLayer(state) {
         memeHeadlineEl.textContent = `Barrel sentiment now ${pick(hookWords)} thanks to ${state.newsLabel.toLowerCase()}`;
         memeSublineEl.textContent = `${state.syntheticBarrelsLabel} currently priced off vibes, pageviews, and accidental macro theatre.`;
-        hypePressureEl.textContent = `${state.hypeScore}%`;
-        hypeMeterEl.style.width = `${state.hypeScore}%`;
-        const trace = buildTrace(state);
-        traceHeadlineEl.textContent = trace.headline;
-        traceDetailEl.textContent = trace.detail;
+        hypePressureEl.textContent = `${state.hypeScore}%`; hypeMeterEl.style.width = `${state.hypeScore}%`;
+        const trace = buildTrace(state); traceHeadlineEl.textContent = trace.headline; traceDetailEl.textContent = trace.detail;
+      }
+
+      function renderBucketPreview() {
+        const confidence = Number(bucketConfidenceInput.value);
+        confidenceReadout.textContent = pct(confidence);
+        const yes = bucketYesInput.value || 'Yes'; const no = bucketNoInput.value || 'No';
+        const oddsA = Math.max(8, Math.min(92, confidence)); const oddsB = 100 - oddsA;
+        const liquidityWord = confidence > 80 ? 'absolutely sloshing' : confidence > 60 ? 'warm' : confidence > 40 ? 'respectable' : 'thin as a servo pie';
+        bucketPreviewOdds.textContent = `Implied odds: ${oddsA} / ${oddsB}`;
+        bucketPreviewLiquidity.textContent = `Bucket liquidity: ${liquidityWord}`;
+        bucketPreviewGovernance.textContent = `Governance: ${pick(governanceWords)}`;
+        oddsMeterBar.style.width = `${oddsA}%`;
+        liquidityMeterBar.style.width = `${Math.min(100, confidence + 12)}%`;
+        bucketStatus.textContent = `${bucketEmojiInput.value} ${yes} vs ${no} by ${bucketCloseInput.value}`;
+      }
+
+      function renderHoomLayer(state) {
+        const mates = Math.min(99, state.hypeScore + Math.round(randomBetween(-8, 6)));
+        const punters = Math.min(99, state.hypeScore + Math.round(randomBetween(-12, 3)));
+        const pub = Math.min(99, state.hypeScore + Math.round(randomBetween(6, 18)));
+        const anon = Math.min(99, state.hypeScore + Math.round(randomBetween(-16, 8)));
+        matesPill.textContent = `Mates: ${mates}%`; puntersPill.textContent = `Punters: ${punters}%`; pubPill.textContent = `Pub bloke: ${pub}%`; anonPill.textContent = `Anon hooms: ${anon}%`;
+        const avg = Math.round((mates + punters + pub + anon) / 4);
+        hoomHeadlineEl.textContent = avg > 75 ? 'Absolutely bullish' : avg > 55 ? 'Mildly cooked optimism' : 'Feral doubt';
+        hoomSummaryEl.textContent = mateMode ? 'The hooms reckon this bucket has legs, elbows, and a suspicious amount of confidence.' : 'Aggregated human conviction remains theatrically supportive.';
+        convictionMeterBar.style.width = `${avg}%`;
+        scenesRiskEl.textContent = avg > 80 ? 'High chance of absolute scenes' : avg > 60 ? 'Moderate chaos' : 'Managed nonsense';
+        scenesRiskDetailEl.textContent = avg > 80 ? 'This one could end in somebody yelling thesis at a barbecue.' : 'Still within legally acceptable mateshed parameters.';
+        trustSignalEl.textContent = avg > 70 ? 'Fair dinkum' : 'Needs extra pub review';
+        trustSignalDetailEl.textContent = avg > 70 ? 'No dog acts detected by the current governance stack.' : 'A suspiciously tidy spreadsheet has triggered scrutiny.';
+      }
+
+      function renderShowcase(state) {
+        hotBarrelStatEl.textContent = state.syntheticBarrelsLabel;
+        hotBarrelCopyEl.textContent = `Now trading at a premium because ${state.newsLabel.toLowerCase()} and the lads got ideas.`;
+        cookedMarketStatEl.textContent = `${bucketTitleInput.value.split('?')[0] || 'Knock-off Drift Bucket'}`;
+        cookedMarketCopyEl.textContent = `${bucketTemplateInput.value === 'feral' ? 'This should probably be illegal, which is why the tape loves it.' : 'Consensus says it should never have been created, which is why volume is up.'}`;
+        hallStatEl.textContent = state.hypeScore > 75 ? 'Pub Test Champion' : 'Fair Go Finalist';
+        hallCopyEl.textContent = `${pick(cities)} desk has awarded this one ceremonial respect and two side-eyes.`;
+        mapHeadlineEl.textContent = `${pick(cities)}: ${pick(['irresponsible optimism','barrel delirium','measured nonsense','premium send-it energy'])}`;
+        tickerHeadlineEl.textContent = `${Math.round(randomBetween(2,5))} new hoom bets just hit the tape`;
+        tickerCopyEl.textContent = mateMode ? 'The tape is completely made up, but the energy is immaculate.' : 'Market tape remains theatrically active.';
+        tickerTapeEl.innerHTML = [
+          `${pick(cities)} desk: full send bias detected`,
+          `${pick(cities)} desk: requires more buckets and fewer questions`,
+          `${pick(cities)} desk: governance wording under active barbecue review`
+        ].map((line) => `<div class="tape-line">${line}</div>`).join('');
       }
 
       function renderLaunchCopy(state) {
         const lines = [
-          `${pick(launchOpeners)} Barrels-as-a-Service is live.`,
-          '',
-          `What’s in it:`,
-          `- live weather-fed barrel lineage`,
-          `- internet-scraped sentiment engine`,
-          `- ${state.syntheticBarrelsLabel} currently in circulation`,
-          `- hype pressure sitting at ${state.hypeScore}%`,
-          '',
-          `Today’s fake provenance: ${state.lineageText}.`,
-          `Current internet catalyst: ${state.newsLabel}.`,
-          '',
-          `Have a crack: https://professional-evening-gaming.dilger.dev/projects/barrels/`
+          `${pick(launchOpeners)} Barrels-as-a-Service is live.`, '', 'What’s in it:', '- live weather-fed barrel lineage', '- internet-scraped sentiment engine', '- fake bucket market composer', '- hoom conviction and Aussie governance', `- ${state.syntheticBarrelsLabel} currently in circulation`, '', `Today’s fake provenance: ${state.lineageText}.`, `Current internet catalyst: ${state.newsLabel}.`, '', 'Have a crack: https://professional-evening-gaming.dilger.dev/projects/barrels/'
         ];
         launchCopyEl.value = lines.join('\n');
       }
 
-      async function refreshDashboard() {
-        lineageStatusEl.textContent = 'Fetching weird inputs...';
-        sourceStatusEl.textContent = 'Checking feeds...';
-        sourceStatusEl.dataset.state = 'busy';
-        const sources = await gatherLiveSources();
-        const state = deriveState(sources);
-        renderSourceLayer(state);
-        renderLineage(state);
-        renderTelemetry(state);
-        renderEvents(state);
-        renderMemeLayer(state);
-        renderLaunchCopy(state);
-        lineageStatusEl.textContent = 'Lineage online';
-        lineageStatusEl.dataset.state = 'ok';
-        sourceStatusEl.textContent = 'Feeds online';
-        sourceStatusEl.dataset.state = 'ok';
-        lastUpdatedEl.textContent = `Last update: ${new Date().toLocaleString('en-AU', { hour12: false })}`;
+      function applyTone() {
+        mateModeButton.textContent = mateMode ? 'Mate mode: ON' : 'Mate mode: OFF';
+        seriousnessButton.textContent = seriousMode ? 'Tone: Corporate' : 'Tone: Cooked';
+        document.body.style.filter = seriousMode ? 'saturate(0.92)' : 'none';
+        if (currentState) {
+          renderLaunchCopy(currentState);
+          renderHoomLayer(currentState);
+          renderShowcase(currentState);
+        }
       }
+
+      async function refreshDashboard() {
+        lineageStatusEl.textContent = 'Fetching weird inputs...'; sourceStatusEl.textContent = 'Checking feeds...'; sourceStatusEl.dataset.state = 'busy';
+        const sources = await gatherLiveSources();
+        const state = deriveState(sources); currentState = state;
+        renderSourceLayer(state); renderLineage(state); renderTelemetry(state); renderEvents(state); renderMemeLayer(state); renderHoomLayer(state); renderShowcase(state); renderLaunchCopy(state); renderBucketPreview(); applyTone();
+        lineageStatusEl.textContent = 'Lineage online'; lineageStatusEl.dataset.state = 'ok'; sourceStatusEl.textContent = 'Feeds online'; sourceStatusEl.dataset.state = 'ok'; governanceStatusEl.textContent = pick(governanceWords); lastUpdatedEl.textContent = `Last update: ${new Date().toLocaleString('en-AU', { hour12: false })}`;
+      }
+
+      bucketConfidenceInput?.addEventListener('input', renderBucketPreview);
+      [bucketYesInput, bucketNoInput, bucketCloseInput, bucketEmojiInput, bucketTemplateInput, bucketTitleInput].forEach((el) => el?.addEventListener('input', renderBucketPreview));
+      [bucketCloseInput, bucketEmojiInput, bucketTemplateInput].forEach((el) => el?.addEventListener('change', renderBucketPreview));
+
+      bucketForm?.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const row = document.createElement('article');
+        row.className = 'market-row';
+        row.innerHTML = `<strong>${bucketEmojiInput.value} ${bucketTitleInput.value}</strong><small>${bucketYesInput.value} vs ${bucketNoInput.value} • close: ${bucketCloseInput.value} • confidence: ${confidenceReadout.textContent}</small>`;
+        marketList.prepend(row);
+        bucketStatus.textContent = 'Bucket launched to the tape';
+        traceHeadlineEl.textContent = `Bucket launched: ${bucketTitleInput.value}`;
+        traceDetailEl.textContent = mateMode ? 'Fresh bucket minted, hooms notified, and the pub bloke has already overreacted.' : 'Synthetic market launched successfully.';
+      });
 
       refreshButton?.addEventListener('click', refreshDashboard);
       traceButton?.addEventListener('click', () => {
@@ -738,17 +990,18 @@ Have a crack: https://professional-evening-gaming.dilger.dev/projects/barrels/</
         traceDetailEl.textContent = `${launchCopyEl.value.split('\n').filter(Boolean).slice(0, 3).join(' • ')}.`;
       });
       copyLaunchButton?.addEventListener('click', async () => {
-        try {
-          await navigator.clipboard.writeText(launchCopyEl.value);
-          copyLaunchButton.textContent = 'Copied, mate';
-          setTimeout(() => {
-            copyLaunchButton.textContent = 'Copy launch copy';
-          }, 1600);
-        } catch {
-          copyLaunchButton.textContent = 'Copy failed, highlight it';
-        }
+        try { await navigator.clipboard.writeText(launchCopyEl.value); copyLaunchButton.textContent = 'Copied, mate'; setTimeout(() => { copyLaunchButton.textContent = 'Copy launch copy'; }, 1600); }
+        catch { copyLaunchButton.textContent = 'Copy failed, highlight it'; }
+      });
+      mateModeButton?.addEventListener('click', () => { mateMode = !mateMode; applyTone(); });
+      seriousnessButton?.addEventListener('click', () => { seriousMode = !seriousMode; applyTone(); });
+      document.getElementById('shake-barrel')?.addEventListener('click', () => {
+        const hero = document.querySelector('.barrel-hero-card');
+        hero.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(0)' }], { duration: 280 });
+        bucketStatus.textContent = 'Barrel tapped, odds rattled';
       });
 
+      renderBucketPreview();
       refreshDashboard();
     </script>
   </body>

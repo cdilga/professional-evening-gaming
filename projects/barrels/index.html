@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Barrels-as-a-Service | Professional Evening Gaming</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Kalam:wght@300;400;700&family=Patrick+Hand&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../../style.css" />
+  </head>
+  <body>
+    <main class="page-shell project-page barrels-page">
+      <a class="back-link" href="/">← Back to PEG</a>
+
+      <section class="hero-card barrel-hero">
+        <p class="eyebrow">Operational nonsense, professionally presented</p>
+        <h1>Barrels-as-a-Service</h1>
+        <p class="lede">A completely serious dashboard for imaginary oil output, premium nonsense analytics, and the lads pretending they run the global energy market from a folding table.</p>
+        <div class="actions">
+          <button id="barrel-refresh" class="primary-button" type="button">Refresh the barrels, mate</button>
+          <p class="helper">No real barrels. Just elite dashboard behaviour.</p>
+        </div>
+      </section>
+
+      <section class="project-detail-grid">
+        <article class="playground-card barrel-card accent-mint">
+          <p class="project-kicker">Daily fake throughput</p>
+          <h2 id="barrel-total">18.4M</h2>
+          <p>Barrels per day, give or take a few lies.</p>
+        </article>
+
+        <article class="playground-card barrel-card accent-gold">
+          <p class="project-kicker">Refinery chaos index</p>
+          <h2 id="chaos-score">72%</h2>
+          <p>How close the lads are to saying “she’ll be right” and shipping anyway.</p>
+        </article>
+
+        <article class="playground-card barrel-card accent-pink">
+          <p class="project-kicker">Spill containment vibes</p>
+          <h2 id="vibes-score">Mint</h2>
+          <p>Official compliance status according to a clipboard and positive thinking.</p>
+        </article>
+
+        <article class="playground-card barrel-card accent-blue">
+          <p class="project-kicker">Discord approvals</p>
+          <h2 id="approval-count">2/2</h2>
+          <p>Because nothing says enterprise like the lads saying “send it”.</p>
+        </article>
+      </section>
+
+      <section class="playground-card barrel-dashboard">
+        <div class="playground-copy">
+          <h2>Throughput graph of complete dribble</h2>
+          <p>Every refresh spins a fresh fake production run. Big numbers, tidy curves, absolutely zero geological truth.</p>
+          <ul id="barrel-events" class="barrel-events"></ul>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="barrel-chart" width="640" height="360" aria-label="Fake barrel throughput chart"></canvas>
+        </div>
+      </section>
+    </main>
+    <script src="./script.js"></script>
+  </body>
+</html>

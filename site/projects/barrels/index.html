@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Barrels-as-a-Service | Professional Evening Gaming</title>
+    <meta
+      name="description"
+      content="Barrels-as-a-Service is PEG's deeply unserious fake-ops dashboard for imaginary oil throughput and elite Discord-approved nonsense."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Kalam:wght@300;400;700&family=Patrick+Hand:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/assets/css/site.css" />
+    <style>
+      .barrel-metrics,
+      .barrel-layout {
+        display: grid;
+        gap: 24px;
+      }
+      .barrel-metrics {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        margin-bottom: 24px;
+      }
+      .barrel-metric {
+        padding: 22px;
+      }
+      .barrel-metric h2 {
+        margin-top: 8px;
+        font-size: clamp(2rem, 5vw, 3.2rem);
+      }
+      .barrel-layout {
+        grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+      }
+      .barrel-chart-wrap {
+        margin-top: 18px;
+        padding: 18px;
+        border-radius: 22px;
+        border: 2px dashed rgba(92, 64, 51, 0.28);
+        background: rgba(255, 255, 255, 0.5);
+      }
+      .barrel-chart-wrap canvas {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+      .barrel-event-list {
+        display: grid;
+        gap: 12px;
+        margin-top: 18px;
+      }
+      .barrel-event {
+        padding: 14px 16px;
+        border: 2px dashed rgba(92, 64, 51, 0.24);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.42);
+      }
+      @media (max-width: 960px) {
+        .barrel-layout {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body data-page="project-detail">
+    <div class="page-aura page-aura-left"></div>
+    <div class="page-aura page-aura-right"></div>
+    <header class="site-header shell">
+      <a class="brand" href="/">
+        <span class="brand-kicker">PEG</span>
+        <span class="brand-name">Professional Evening Gaming (nah yeah)</span>
+      </a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="/">Home</a>
+        <a href="/projects/" aria-current="page">Projects</a>
+        <a href="/#platform">Platform</a>
+      </nav>
+    </header>
+
+    <main class="shell page-main project-detail-page">
+      <section class="panel detail-hero">
+        <div>
+          <p class="eyebrow">Project spotlight</p>
+          <h1>Barrels-as-a-Service</h1>
+          <p class="lede">
+            The funny barrel stuff from Discord is now an actual PEG project page. Fake production numbers,
+            fake approvals, and a suspiciously polished dashboard for absolute nonsense.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="/projects/">Back to all projects</a>
+            <button id="barrel-refresh" class="button button-secondary" type="button">Refresh the barrels, mate</button>
+          </div>
+        </div>
+        <div class="panel inset-panel">
+          <p class="mini-label">Operational brief</p>
+          <ul class="principle-list compact-list">
+            <li><strong>Output:</strong> totally made up, but graphable.</li>
+            <li><strong>Approvals:</strong> powered by Discord lads saying “send it”.</li>
+            <li><strong>Compliance:</strong> clipboard-driven and emotionally positive.</li>
+            <li><strong>Risk:</strong> zero geology, maximum theatre.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="barrel-metrics">
+        <article class="panel barrel-metric">
+          <p class="eyebrow">Daily fake throughput</p>
+          <h2 id="barrel-total">18.4M</h2>
+          <p>Barrels per day, give or take a few lies.</p>
+        </article>
+        <article class="panel barrel-metric">
+          <p class="eyebrow">Refinery chaos index</p>
+          <h2 id="barrel-chaos">72%</h2>
+          <p>How close the operation is to being held together by zip ties.</p>
+        </article>
+        <article class="panel barrel-metric">
+          <p class="eyebrow">Discord approvals</p>
+          <h2 id="barrel-approvals">2/2</h2>
+          <p>Enterprise governance, PEG style.</p>
+        </article>
+      </section>
+
+      <section class="barrel-layout">
+        <article class="panel demo-panel">
+          <div class="demo-panel-header">
+            <div>
+              <p class="eyebrow">Premium telemetry</p>
+              <h2>Throughput graph of complete dribble</h2>
+            </div>
+            <span class="status-pill" id="barrel-vibe">Mint</span>
+          </div>
+          <p class="demo-copy">Every refresh generates a fresh fake run so the dashboard looks busy and mildly expensive.</p>
+          <div class="barrel-chart-wrap">
+            <canvas id="barrel-chart" width="640" height="360" aria-label="Fake barrel chart"></canvas>
+          </div>
+        </article>
+        <aside class="panel demo-side-panel">
+          <p class="eyebrow">Ops feed</p>
+          <div class="barrel-event-list" id="barrel-events"></div>
+        </aside>
+      </section>
+    </main>
+
+    <footer class="site-footer shell">
+      <p>Professional Evening Gaming <span data-year></span></p>
+      <a href="/projects/">Project index</a>
+    </footer>
+
+    <script src="/assets/js/site.js" defer></script>
+    <script>
+      const chart = document.getElementById('barrel-chart');
+      const refreshButton = document.getElementById('barrel-refresh');
+      const totalEl = document.getElementById('barrel-total');
+      const chaosEl = document.getElementById('barrel-chaos');
+      const approvalsEl = document.getElementById('barrel-approvals');
+      const vibeEl = document.getElementById('barrel-vibe');
+      const eventsEl = document.getElementById('barrel-events');
+
+      const vibeWords = ['Mint', 'Cooked', 'Certified elite', 'Suspiciously stable', 'Held together by vibes'];
+      const eventTemplates = [
+        'Night shift found another 1.2M pretend barrels behind the ute.',
+        'Refinery dashboard turned green after someone refreshed it aggressively.',
+        'Discord approvals completed with a double send it.',
+        'Pipeline pressure recovered once the lads pointed at the graph harder.',
+        'Compliance accepted the clipboard and chose peace.'
+      ];
+
+      function randomBetween(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      function generateSeries() {
+        return Array.from({ length: 12 }, (_, index) => ({
+          label: `H${index + 1}`,
+          value: Math.round(randomBetween(12.8, 22.4) * 10) / 10
+        }));
+      }
+
+      function renderChart(series) {
+        if (!chart) return;
+        const ctx = chart.getContext('2d');
+        const width = chart.width;
+        const height = chart.height;
+        const padding = 36;
+        const maxValue = Math.max(...series.map((point) => point.value)) + 2;
+
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = '#faf7f0';
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.strokeStyle = 'rgba(92, 64, 51, 0.15)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 4; i += 1) {
+          const y = padding + ((height - padding * 2) / 4) * i;
+          ctx.beginPath();
+          ctx.moveTo(padding, y);
+          ctx.lineTo(width - padding, y);
+          ctx.stroke();
+        }
+
+        ctx.strokeStyle = '#3d2b1f';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        series.forEach((point, index) => {
+          const x = padding + ((width - padding * 2) / (series.length - 1)) * index;
+          const y = height - padding - (point.value / maxValue) * (height - padding * 2);
+          if (index === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        ctx.fillStyle = '#ff8c42';
+        series.forEach((point, index) => {
+          const x = padding + ((width - padding * 2) / (series.length - 1)) * index;
+          const y = height - padding - (point.value / maxValue) * (height - padding * 2);
+          ctx.beginPath();
+          ctx.arc(x, y, 5, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
+      function renderEvents() {
+        if (!eventsEl) return;
+        const picks = [...eventTemplates].sort(() => Math.random() - 0.5).slice(0, 4);
+        eventsEl.innerHTML = picks.map((event) => `<article class="barrel-event">${event}</article>`).join('');
+      }
+
+      function refreshDashboard() {
+        const series = generateSeries();
+        const avg = series.reduce((sum, point) => sum + point.value, 0) / series.length;
+        totalEl.textContent = `${avg.toFixed(1)}M`;
+        chaosEl.textContent = `${Math.round(randomBetween(61, 93))}%`;
+        approvalsEl.textContent = `${Math.round(randomBetween(2, 5))}/2`;
+        vibeEl.textContent = vibeWords[Math.floor(Math.random() * vibeWords.length)];
+        renderChart(series);
+        renderEvents();
+      }
+
+      refreshButton?.addEventListener('click', refreshDashboard);
+      refreshDashboard();
+    </script>
+  </body>
+</html>

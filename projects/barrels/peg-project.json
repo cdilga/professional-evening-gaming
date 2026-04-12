@@ -1,0 +1,18 @@
+{
+  "slug": "barrels",
+  "name": "Barrels-as-a-Service",
+  "summary": "The funny barrel stuff from Discord, turned into a clickable PEG project with premium fake ops telemetry.",
+  "tagline": "Imaginary oil output, fake approvals, and the lads pretending they run the energy market.",
+  "status": "barrels online",
+  "featured": true,
+  "order": 25,
+  "links": {
+    "page": "/projects/barrels/",
+    "repoPath": "projects/barrels"
+  },
+  "stack": {
+    "frontend": "Static HTML/CSS/JS",
+    "database": "None, just vibes",
+    "deploy": "GitHub Pages"
+  }
+}

@@ -9,6 +9,6 @@
   },
   "dependencies": {
     "@fastify/websocket": "^11.0.2",
-    "fastify": "^5.6.1"
+    "fastify": "^5.8.5"
   }
 }

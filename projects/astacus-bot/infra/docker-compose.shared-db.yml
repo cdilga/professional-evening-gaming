@@ -65,6 +65,22 @@ services:
           }
 
           location /tanker-command/ {
+            add_header Access-Control-Allow-Origin "*" always;
+            add_header Access-Control-Allow-Methods "GET, POST, OPTIONS" always;
+            add_header Access-Control-Allow-Headers "Content-Type" always;
+            add_header Access-Control-Max-Age 86400 always;
+            if ($$request_method = OPTIONS) {
+              return 204;
+            }
+            rewrite ^/tanker-command/(.*)$ /$$1 break;
+            proxy_pass $$upstream_tanker_command;
+          }
+
+          location /tanker-command/ws {
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $$http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_set_header Host $$host;
             rewrite ^/tanker-command/(.*)$ /$$1 break;
             proxy_pass $$upstream_tanker_command;
           }

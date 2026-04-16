@@ -92,16 +92,18 @@
             <div class="control-pill"><strong>Controls</strong> W/S thrust, A/D steer, or touch controls on mobile</div>
             <div class="control-pill" data-player-status>Spectating</div>
             <div class="control-pill" data-connection-status>Connecting...</div>
+            <button class="button button-secondary tanker-fullscreen-button" type="button" data-tanker-fullscreen aria-pressed="false">Go fullscreen</button>
           </div>
 
-          <div class="tanker-touch-controls" data-touch-controls>
+          <canvas class="tanker-canvas" data-tanker-canvas width="1280" height="720" aria-label="Live tanker command map"></canvas>
+
+          <div class="tanker-touch-controls" data-touch-controls aria-label="Mobile tanker controls">
+            <p class="tanker-touch-hint">Mobile controls: tap and hold to drive.</p>
             <button class="button button-secondary tanker-touch-button" type="button" data-touch-control="w">Forward</button>
             <button class="button button-secondary tanker-touch-button" type="button" data-touch-control="a">Left</button>
             <button class="button button-secondary tanker-touch-button" type="button" data-touch-control="d">Right</button>
             <button class="button button-secondary tanker-touch-button" type="button" data-touch-control="s">Reverse</button>
           </div>
-
-          <canvas class="tanker-canvas" data-tanker-canvas width="1280" height="720" aria-label="Live tanker command map"></canvas>
           <div class="demo-list tanker-sidebar" data-demo-list></div>
         </article>
 

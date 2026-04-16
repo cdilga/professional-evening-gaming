@@ -198,7 +198,7 @@ function tankerTemplate(state, player) {
 }
 
 export function joinPlayer(state, payload = {}) {
-  const name = String(payload.name || "").trim().slice(0, 40);
+  const name = String(payload.name || payload.player || "").trim().slice(0, 40);
   const factionId = String(payload.faction_id || payload.factionId || "").trim();
   if (!name) {
     return { error: "name required" };

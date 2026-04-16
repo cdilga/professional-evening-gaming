@@ -13,7 +13,7 @@ function tmpStatePath() {
 }
 
 test("health endpoint reports tanker command service", async () => {
-  const app = buildApp({ statePath: tmpStatePath(), startLoop: false });
+  const app = await buildApp({ statePath: tmpStatePath(), startLoop: false });
   const response = await app.inject({ method: "GET", url: "/health" });
   const payload = response.json();
 
@@ -25,7 +25,7 @@ test("health endpoint reports tanker command service", async () => {
 });
 
 test("join creates player and tanker on valid faction", async () => {
-  const app = buildApp({ statePath: tmpStatePath(), startLoop: false });
+  const app = await buildApp({ statePath: tmpStatePath(), startLoop: false });
   const response = await app.inject({
     method: "POST",
     url: "/v1/game/join",
@@ -42,8 +42,23 @@ test("join creates player and tanker on valid faction", async () => {
   await app.close();
 });
 
+test("join accepts player as a legacy name alias", async () => {
+  const app = await buildApp({ statePath: tmpStatePath(), startLoop: false });
+  const response = await app.inject({
+    method: "POST",
+    url: "/v1/game/join",
+    payload: { player: "CodexProbe", faction_id: FACTIONS[0].id },
+  });
+  const payload = response.json();
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(payload.player.name, "CodexProbe");
+
+  await app.close();
+});
+
 test("join rejects invalid faction", async () => {
-  const app = buildApp({ statePath: tmpStatePath(), startLoop: false });
+  const app = await buildApp({ statePath: tmpStatePath(), startLoop: false });
   const response = await app.inject({
     method: "POST",
     url: "/v1/game/join",
@@ -55,7 +70,7 @@ test("join rejects invalid faction", async () => {
 });
 
 test("game tick produces dashboard payload", async () => {
-  const app = buildApp({ statePath: tmpStatePath(), startLoop: false, enableTestRoutes: true });
+  const app = await buildApp({ statePath: tmpStatePath(), startLoop: false, enableTestRoutes: true });
   await app.inject({
     method: "POST",
     url: "/v1/game/join",
@@ -74,7 +89,7 @@ test("game tick produces dashboard payload", async () => {
 });
 
 test("player input updates tanker controls", async () => {
-  const app = buildApp({ statePath: tmpStatePath(), startLoop: false });
+  const app = await buildApp({ statePath: tmpStatePath(), startLoop: false });
   const join = await app.inject({
     method: "POST",
     url: "/v1/game/join",
@@ -98,7 +113,7 @@ test("player input updates tanker controls", async () => {
 test("state persists across restart", async () => {
   const statePath = tmpStatePath();
 
-  const app1 = buildApp({ statePath, startLoop: false });
+  const app1 = await buildApp({ statePath, startLoop: false });
   await app1.inject({
     method: "POST",
     url: "/v1/game/join",
@@ -106,7 +121,7 @@ test("state persists across restart", async () => {
   });
   await app1.close();
 
-  const app2 = buildApp({ statePath, startLoop: false });
+  const app2 = await buildApp({ statePath, startLoop: false });
   const response = await app2.inject({ method: "GET", url: "/v1/game" });
   const payload = response.json().state;
 
@@ -114,4 +129,24 @@ test("state persists across restart", async () => {
   assert.equal(payload.players[0].name, "Persisto");
 
   await app2.close();
+});
+
+test("websocket route responds to ping", async () => {
+  const app = await buildApp({ statePath: tmpStatePath(), startLoop: false });
+  await app.ready();
+
+  const socket = await app.injectWS("/ws");
+  const message = await new Promise((resolve, reject) => {
+    socket.send(JSON.stringify({ type: "ping" }));
+    socket.once("message", (raw) => resolve(JSON.parse(raw.toString())));
+    socket.once("error", reject);
+    setTimeout(() => reject(new Error("websocket pong timeout")), 2000);
+  });
+
+  assert.equal(message.type, "pong");
+  assert.ok(message.state);
+  assert.ok(message.dashboard);
+
+  socket.close();
+  await app.close();
 });

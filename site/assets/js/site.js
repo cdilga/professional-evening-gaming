@@ -624,6 +624,7 @@ async function setupTankerCommandDemo(root) {
   const eventsRoot = document.querySelector("[data-tanker-events]");
   const playerStatus = root.querySelector("[data-player-status]");
   const connectionStatus = root.querySelector("[data-connection-status]");
+  const fullscreenButton = root.querySelector("[data-tanker-fullscreen]");
   const touchButtons = Array.from(root.querySelectorAll("[data-touch-control]"));
 
   let playerId = null;
@@ -631,6 +632,83 @@ async function setupTankerCommandDemo(root) {
   let inputTimer = null;
   let socket = null;
   const controls = { thrust: 0, turn: 0 };
+
+  function isNativeFullscreen() {
+    return document.fullscreenElement === root;
+  }
+
+  function isSimulatedFullscreen() {
+    return root.dataset.fullscreen === "simulated";
+  }
+
+  function isFullscreenActive() {
+    return isNativeFullscreen() || isSimulatedFullscreen();
+  }
+
+  function syncFullscreenButton() {
+    if (!fullscreenButton) {
+      return;
+    }
+    const active = isFullscreenActive();
+    fullscreenButton.textContent = active ? "Exit fullscreen" : "Go fullscreen";
+    fullscreenButton.setAttribute("aria-pressed", String(active));
+  }
+
+  async function lockLandscape() {
+    try {
+      await window.screen?.orientation?.lock?.("landscape");
+    } catch {
+      // some browsers do not allow locking orientation for page content
+    }
+  }
+
+  function unlockLandscape() {
+    try {
+      window.screen?.orientation?.unlock?.();
+    } catch {
+      // ignore
+    }
+  }
+
+  function applyFullscreenState(mode = "off") {
+    root.dataset.fullscreen = mode;
+    document.body.classList.toggle("tanker-fullscreen-active", mode !== "off" || isNativeFullscreen());
+    syncFullscreenButton();
+  }
+
+  async function enterFullscreen() {
+    let mode = "off";
+
+    if (typeof root.requestFullscreen === "function") {
+      try {
+        await root.requestFullscreen({ navigationUI: "hide" });
+        mode = "native";
+      } catch {
+        mode = "off";
+      }
+    }
+
+    if (mode === "off") {
+      mode = "simulated";
+    }
+
+    applyFullscreenState(mode);
+    await lockLandscape();
+    setDemoStatus(root, "Fullscreen live", "ok");
+  }
+
+  async function exitFullscreen() {
+    if (isNativeFullscreen() && typeof document.exitFullscreen === "function") {
+      try {
+        await document.exitFullscreen();
+      } catch {
+        // ignore
+      }
+    }
+
+    applyFullscreenState("off");
+    unlockLandscape();
+  }
 
   try {
     playerId = localStorage.getItem("peg-tanker-command-player-id") || null;
@@ -751,6 +829,20 @@ async function setupTankerCommandDemo(root) {
   });
 
   refreshButton?.addEventListener("click", refresh);
+  fullscreenButton?.addEventListener("click", async () => {
+    if (isFullscreenActive()) {
+      await exitFullscreen();
+      return;
+    }
+    await enterFullscreen();
+  });
+
+  document.addEventListener("fullscreenchange", () => {
+    applyFullscreenState(isNativeFullscreen() ? "native" : isSimulatedFullscreen() ? "simulated" : "off");
+    if (!isFullscreenActive()) {
+      unlockLandscape();
+    }
+  });
 
   touchButtons.forEach((button) => {
     const key = button.dataset.touchControl;
@@ -787,6 +879,20 @@ async function setupTankerCommandDemo(root) {
 
   document.addEventListener("keydown", (event) => {
     const key = event.key.toLowerCase();
+    if (key === "f" && shouldCaptureGameKey(event)) {
+      event.preventDefault();
+      if (isFullscreenActive()) {
+        exitFullscreen().catch(() => setDemoStatus(root, "Fullscreen exit failed", "error"));
+      } else {
+        enterFullscreen().catch(() => setDemoStatus(root, "Fullscreen unavailable", "error"));
+      }
+      return;
+    }
+    if (key === "escape" && isSimulatedFullscreen()) {
+      event.preventDefault();
+      exitFullscreen().catch(() => setDemoStatus(root, "Fullscreen exit failed", "error"));
+      return;
+    }
     if (["w", "a", "s", "d"].includes(key) && shouldCaptureGameKey(event)) {
       event.preventDefault();
       setControl(key, true);
@@ -803,6 +909,7 @@ async function setupTankerCommandDemo(root) {
 
   await refresh();
   connectSocket();
+  syncFullscreenButton();
   inputTimer = setInterval(() => {
     if (socket?.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify({ type: "ping" }));
@@ -813,6 +920,8 @@ async function setupTankerCommandDemo(root) {
     if (inputTimer) {
       clearInterval(inputTimer);
     }
+    document.body.classList.remove("tanker-fullscreen-active");
+    unlockLandscape();
   }, { once: true });
 }
 

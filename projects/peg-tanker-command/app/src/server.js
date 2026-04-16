@@ -25,7 +25,7 @@ function saveState(statePath, state) {
   fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
 }
 
-export function buildApp(opts = {}) {
+export async function buildApp(opts = {}) {
   const statePath = opts.statePath ?? process.env.STATE_PATH ?? DEFAULT_STATE_PATH;
   const tickMs = opts.tickMs ?? DEFAULT_TICK_MS;
   const startLoop = opts.startLoop ?? true;
@@ -63,7 +63,7 @@ export function buildApp(opts = {}) {
     return result;
   }
 
-  app.register(websocket);
+  await app.register(websocket);
 
   app.get("/health", async () => getHealthView(state, sockets.size));
 
@@ -88,7 +88,17 @@ export function buildApp(opts = {}) {
     });
   }
 
-  app.get("/ws", { websocket: true }, (socket) => {
+  app.get("/ws", { websocket: true }, (connection) => {
+    const socket =
+      typeof connection?.send === "function"
+        ? connection
+        : typeof connection?.socket?.send === "function"
+          ? connection.socket
+          : null;
+    if (!socket || typeof socket.send !== "function") {
+      return;
+    }
+
     sockets.add(socket);
     socket.send(JSON.stringify({ type: "snapshot", state: getGameView(state), dashboard: getDashboard(state) }));
 
@@ -134,7 +144,7 @@ export function buildApp(opts = {}) {
 const isDirectRun = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
 
 if (isDirectRun) {
-  const app = buildApp();
+  const app = await buildApp();
   const port = Number(process.env.PORT || 3000);
   await app.listen({ host: "0.0.0.0", port });
 }

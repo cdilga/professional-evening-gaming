@@ -479,17 +479,17 @@
           <div class="demo-panel-header">
             <div>
               <p class="eyebrow">Premium telemetry</p>
-              <h2>Throughput graph of complete dribble</h2>
+              <h2>Delivered cargo throughput</h2>
             </div>
             <span class="status-pill" id="barrel-vibe">Mint</span>
           </div>
-          <p class="demo-copy">Every refresh spins a new fake run based on whatever weirdness the live sources hand us.</p>
+          <p class="demo-copy">Live cumulative barrel deliveries from PEG Tanker Command, updating in real time over the websocket feed.</p>
           <div class="barrel-chart-wrap">
-            <canvas id="barrel-chart" width="640" height="360" aria-label="Fake barrel chart"></canvas>
+            <canvas id="barrel-chart" width="640" height="360" aria-label="Delivered cargo time series from Tanker Command"></canvas>
             <div class="chart-legend">
-              <span>orange line = fake output</span>
-              <span>red pressure = meme premium</span>
-              <span>refresh = new synthetic origin</span>
+              <span>orange line = cumulative delivered barrels</span>
+              <span>dots = confirmed delivery snapshots</span>
+              <span><a href="https://professional-evening-gaming.dilger.dev/projects/peg-tanker-command/">watch Tanker Command live</a></span>
             </div>
           </div>
         </article>
@@ -758,51 +758,191 @@ Have a crack: https://professional-evening-gaming.dilger.dev/projects/barrels/</
       const hookWords = ['volatile', 'premium', 'unreasonably bullish', 'hype-backed', 'committee-approved'];
       const governanceWords = ['fair dinkum', 'under review by the shed', 'barbie council pending', 'pub test passed', 'slightly cooked but acceptable'];
       const cities = ['Brisbane', 'Perth', 'Sydney', 'Melbourne', 'Adelaide'];
+      const TANKER_API_BASE = 'https://peg-api.dilger.dev/tanker-command';
+      const TANKER_PAGE_URL = 'https://professional-evening-gaming.dilger.dev/projects/peg-tanker-command/';
 
       let mateMode = true;
       let seriousMode = false;
       let currentState = null;
+      let tankerTelemetry = { totalBarrelsDelivered: 0, deliveryHistory: [], recentEvents: [], connection: 'connecting' };
+      let tankerSocket = null;
+      let tankerReconnectTimer = null;
 
       function randomBetween(min, max) { return Math.random() * (max - min) + min; }
       function pick(list) { return list[Math.floor(Math.random() * list.length)]; }
       function pct(n) { return `${Math.round(n)}%`; }
 
-      function generateSeries(seed) {
-        return Array.from({ length: 12 }, (_, index) => {
-          const wobble = Math.sin((index + 1) * 0.8 + seed) * 1.6;
-          return { label: `H${index + 1}`, value: Math.round((14 + wobble + randomBetween(0.8, 7.5)) * 10) / 10 };
-        });
+      function formatElapsedLabel(elapsedMs) {
+        if (!Number.isFinite(elapsedMs) || elapsedMs <= 0) return '0m';
+        const totalSeconds = Math.max(0, Math.round(elapsedMs / 1000));
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        if (hours <= 0) return `${minutes}m`;
+        if (minutes <= 0) return `${hours}h`;
+        return `${hours}h ${minutes}m`;
+      }
+
+      function normaliseDeliveryHistory(history = []) {
+        const cleaned = history
+          .map((point) => ({
+            elapsedMs: Number(point?.elapsedMs || 0),
+            delivered: Number(point?.delivered || 0),
+            at: point?.at || '',
+          }))
+          .filter((point) => Number.isFinite(point.elapsedMs) && Number.isFinite(point.delivered))
+          .sort((a, b) => a.elapsedMs - b.elapsedMs);
+        if (!cleaned.length || cleaned[0].elapsedMs !== 0) {
+          cleaned.unshift({ elapsedMs: 0, delivered: 0, at: '' });
+        }
+        return cleaned;
       }
 
       function renderChart(series) {
         if (!chart) return;
+        const safeSeries = normaliseDeliveryHistory(series);
         const ctx = chart.getContext('2d');
         const width = chart.width;
         const height = chart.height;
-        const padding = 36;
-        const maxValue = Math.max(...series.map((point) => point.value)) + 2;
+        const padding = { top: 24, right: 24, bottom: 42, left: 54 };
+        const plotWidth = width - padding.left - padding.right;
+        const plotHeight = height - padding.top - padding.bottom;
+        const maxDelivered = Math.max(1, ...safeSeries.map((point) => point.delivered));
+        const maxElapsed = Math.max(1, ...safeSeries.map((point) => point.elapsedMs));
+        const xFor = (elapsedMs) => padding.left + (elapsedMs / maxElapsed) * plotWidth;
+        const yFor = (delivered) => padding.top + plotHeight - (delivered / maxDelivered) * plotHeight;
+
         ctx.clearRect(0, 0, width, height);
         ctx.fillStyle = '#faf7f0';
         ctx.fillRect(0, 0, width, height);
+
         ctx.strokeStyle = 'rgba(92, 64, 51, 0.15)';
         ctx.lineWidth = 1;
+        ctx.font = '12px IBM Plex Mono';
+        ctx.fillStyle = 'rgba(92, 64, 51, 0.8)';
+
         for (let i = 0; i <= 4; i += 1) {
-          const y = padding + ((height - padding * 2) / 4) * i;
-          ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(width - padding, y); ctx.stroke();
+          const value = (maxDelivered / 4) * i;
+          const y = yFor(value);
+          ctx.beginPath();
+          ctx.moveTo(padding.left, y);
+          ctx.lineTo(width - padding.right, y);
+          ctx.stroke();
+          ctx.fillText(`${Math.round(value)}`, 10, y + 4);
         }
-        const gradient = ctx.createLinearGradient(0, 0, width, height);
-        gradient.addColorStop(0, '#d8971e'); gradient.addColorStop(1, '#b33a2b');
-        ctx.strokeStyle = '#2f2018'; ctx.lineWidth = 3; ctx.beginPath();
-        series.forEach((point, index) => {
-          const x = padding + ((width - padding * 2) / (series.length - 1)) * index;
-          const y = height - padding - (point.value / maxValue) * (height - padding * 2);
+
+        const xTicks = safeSeries.length > 1
+          ? [safeSeries[0], safeSeries[Math.floor((safeSeries.length - 1) / 2)], safeSeries[safeSeries.length - 1]]
+          : safeSeries;
+        xTicks.forEach((point, index) => {
+          const x = xFor(point.elapsedMs);
+          ctx.beginPath();
+          ctx.moveTo(x, padding.top);
+          ctx.lineTo(x, padding.top + plotHeight);
+          ctx.stroke();
+          const label = index === xTicks.length - 1 ? 'now' : formatElapsedLabel(point.elapsedMs);
+          ctx.fillText(label, Math.max(6, x - 18), height - 12);
+        });
+
+        const gradient = ctx.createLinearGradient(0, padding.top, 0, height - padding.bottom);
+        gradient.addColorStop(0, 'rgba(216, 151, 30, 0.34)');
+        gradient.addColorStop(1, 'rgba(179, 58, 43, 0.06)');
+
+        ctx.beginPath();
+        safeSeries.forEach((point, index) => {
+          const x = xFor(point.elapsedMs);
+          const y = yFor(point.delivered);
           if (index === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
         });
-        ctx.stroke(); ctx.fillStyle = gradient;
-        series.forEach((point, index) => {
-          const x = padding + ((width - padding * 2) / (series.length - 1)) * index;
-          const y = height - padding - (point.value / maxValue) * (height - padding * 2);
-          ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.lineTo(xFor(safeSeries[safeSeries.length - 1].elapsedMs), padding.top + plotHeight);
+        ctx.lineTo(xFor(safeSeries[0].elapsedMs), padding.top + plotHeight);
+        ctx.closePath();
+        ctx.fillStyle = gradient;
+        ctx.fill();
+
+        ctx.strokeStyle = '#2f2018';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        safeSeries.forEach((point, index) => {
+          const x = xFor(point.elapsedMs);
+          const y = yFor(point.delivered);
+          if (index === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        ctx.fillStyle = '#d8971e';
+        safeSeries.forEach((point) => {
+          const x = xFor(point.elapsedMs);
+          const y = yFor(point.delivered);
+          ctx.beginPath();
+          ctx.arc(x, y, 4.5, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        ctx.fillStyle = '#2f2018';
+        ctx.font = '600 12px IBM Plex Mono';
+        ctx.fillText('Delivered barrels', padding.left, 16);
+      }
+
+      async function refreshTankerTelemetry() {
+        try {
+          const response = await fetch(`${TANKER_API_BASE}/v1/game`);
+          if (!response.ok) throw new Error(`tanker fetch failed: ${response.status}`);
+          const payload = await response.json();
+          const state = payload.state || {};
+          const dashboard = state.dashboard || {};
+          tankerTelemetry = {
+            totalBarrelsDelivered: Number(state.telemetry?.totalBarrelsDelivered ?? dashboard.telemetry?.totalBarrelsDelivered ?? dashboard.deliveries ?? 0),
+            deliveryHistory: normaliseDeliveryHistory(state.telemetry?.deliveryHistory || dashboard.telemetry?.deliveryHistory || []),
+            recentEvents: Array.isArray(state.events) ? state.events.slice(0, 6) : Array.isArray(dashboard.recentEvents) ? dashboard.recentEvents.slice(0, 6) : [],
+            connection: 'live',
+          };
+        } catch {
+          tankerTelemetry = { ...tankerTelemetry, connection: 'fallback' };
+        }
+      }
+
+      function connectTankerFeed() {
+        if (tankerSocket) {
+          try { tankerSocket.close(); } catch {}
+        }
+        const wsUrl = TANKER_API_BASE.replace(/^http/, 'ws') + '/ws';
+        tankerSocket = new WebSocket(wsUrl);
+        tankerTelemetry.connection = 'connecting';
+
+        tankerSocket.addEventListener('open', () => {
+          tankerTelemetry.connection = 'live';
+          if (currentState) renderTelemetry(currentState);
+        });
+
+        tankerSocket.addEventListener('message', (event) => {
+          try {
+            const payload = JSON.parse(event.data);
+            const state = payload.state || {};
+            const dashboard = payload.dashboard || state.dashboard || {};
+            tankerTelemetry = {
+              totalBarrelsDelivered: Number(state.telemetry?.totalBarrelsDelivered ?? dashboard.telemetry?.totalBarrelsDelivered ?? dashboard.deliveries ?? tankerTelemetry.totalBarrelsDelivered ?? 0),
+              deliveryHistory: normaliseDeliveryHistory(state.telemetry?.deliveryHistory || dashboard.telemetry?.deliveryHistory || tankerTelemetry.deliveryHistory || []),
+              recentEvents: Array.isArray(state.events) ? state.events.slice(0, 6) : Array.isArray(dashboard.recentEvents) ? dashboard.recentEvents.slice(0, 6) : tankerTelemetry.recentEvents,
+              connection: 'live',
+            };
+            if (currentState) {
+              renderTelemetry(currentState);
+              renderEvents(currentState);
+              renderLaunchCopy(currentState);
+            }
+          } catch {}
+        });
+
+        tankerSocket.addEventListener('close', () => {
+          tankerTelemetry.connection = 'reconnecting';
+          if (tankerReconnectTimer) clearTimeout(tankerReconnectTimer);
+          tankerReconnectTimer = setTimeout(connectTankerFeed, 2500);
+          if (currentState) renderTelemetry(currentState);
+        });
+
+        tankerSocket.addEventListener('error', () => {
+          tankerTelemetry.connection = 'fallback';
+          if (currentState) renderTelemetry(currentState);
         });
       }
 
@@ -872,12 +1012,22 @@ Have a crack: https://professional-evening-gaming.dilger.dev/projects/barrels/</
       }
 
       function renderTelemetry(state) {
-        const series = generateSeries(state.hypeScore / 10);
-        const avg = series.reduce((sum, point) => sum + point.value, 0) / series.length;
-        totalEl.textContent = `${avg.toFixed(1)}M`; chaosEl.textContent = `${state.chaos}%`; memePremiumEl.textContent = `+${state.premium}%`; returnHookEl.textContent = state.hookLevel; vibeEl.textContent = pick(vibeWords); renderChart(series);
+        const history = normaliseDeliveryHistory(tankerTelemetry.deliveryHistory);
+        const totalDelivered = Number(tankerTelemetry.totalBarrelsDelivered || history.at(-1)?.delivered || 0);
+        totalEl.textContent = `${totalDelivered.toLocaleString()} barrels`;
+        chaosEl.textContent = `${state.chaos}%`;
+        memePremiumEl.textContent = `+${state.premium}%`;
+        returnHookEl.textContent = totalDelivered > 0 ? 'LIVE' : 'ARMING';
+        const connectionLabel = tankerTelemetry.connection === 'live' ? 'Tanker live' : tankerTelemetry.connection === 'reconnecting' ? 'Reconnecting' : tankerTelemetry.connection === 'fallback' ? 'Fallback mode' : 'Connecting';
+        vibeEl.textContent = connectionLabel;
+        renderChart(history);
       }
 
       function renderEvents(state) {
+        const tankerEvents = (tankerTelemetry.recentEvents || [])
+          .filter((event) => event?.type === 'delivery' || event?.message)
+          .slice(0, 4)
+          .map((event) => `${event.message}${event.totalBarrelsDelivered ? ` Total barrels: ${event.totalBarrelsDelivered}.` : ''}`);
         const eventTemplates = [
           `Night shift converted ${state.pageviews.toLocaleString()} raw attention units into pipeline confidence.`,
           `Macro desk declared ${state.newsLabel.toLowerCase()} and immediately marked barrels up ${state.premium}%.`,
@@ -885,7 +1035,7 @@ Have a crack: https://professional-evening-gaming.dilger.dev/projects/barrels/</
           `Port chaos registered ${state.mia.wind_speed_10m} km/h and the lads called that bullish.`,
           `Houston reported ${state.hou.temperature_2m}C, so output was upgraded to full-send grade.`
         ];
-        const picks = eventTemplates.sort(() => Math.random() - 0.5).slice(0, 4);
+        const picks = tankerEvents.length ? tankerEvents : eventTemplates.sort(() => Math.random() - 0.5).slice(0, 4);
         eventsEl.innerHTML = picks.map((event) => `<article class="barrel-event">${event}</article>`).join('');
       }
 
@@ -944,8 +1094,10 @@ Have a crack: https://professional-evening-gaming.dilger.dev/projects/barrels/</
       }
 
       function renderLaunchCopy(state) {
+        const totalDelivered = Number(tankerTelemetry.totalBarrelsDelivered || 0);
+        const latestPoint = normaliseDeliveryHistory(tankerTelemetry.deliveryHistory).at(-1);
         const lines = [
-          `${pick(launchOpeners)} Barrels-as-a-Service is live.`, '', 'What’s in it:', '- live weather-fed barrel lineage', '- internet-scraped sentiment engine', '- fake bucket market composer', '- hoom conviction and Aussie governance', `- ${state.syntheticBarrelsLabel} currently in circulation`, '', `Today’s fake provenance: ${state.lineageText}.`, `Current internet catalyst: ${state.newsLabel}.`, '', 'Have a crack: https://professional-evening-gaming.dilger.dev/projects/barrels/'
+          `${pick(launchOpeners)} Barrels-as-a-Service is live.`, '', 'What’s in it:', '- live weather-fed barrel lineage', '- internet-scraped sentiment engine', '- fake bucket market composer', '- hoom conviction and Aussie governance', `- ${totalDelivered.toLocaleString()} real barrels delivered in Tanker Command`, latestPoint ? `- live chart synced to ${formatElapsedLabel(latestPoint.elapsedMs)} of convoy runtime` : '- live chart armed for convoy runtime', '', `Today’s fake provenance: ${state.lineageText}.`, `Current internet catalyst: ${state.newsLabel}.`, `Realtime convoy feed: ${TANKER_PAGE_URL}`, '', 'Have a crack: https://professional-evening-gaming.dilger.dev/projects/barrels/'
         ];
         launchCopyEl.value = lines.join('\n');
       }
@@ -963,10 +1115,11 @@ Have a crack: https://professional-evening-gaming.dilger.dev/projects/barrels/</
 
       async function refreshDashboard() {
         lineageStatusEl.textContent = 'Fetching weird inputs...'; sourceStatusEl.textContent = 'Checking feeds...'; sourceStatusEl.dataset.state = 'busy';
+        await refreshTankerTelemetry();
         const sources = await gatherLiveSources();
         const state = deriveState(sources); currentState = state;
         renderSourceLayer(state); renderLineage(state); renderTelemetry(state); renderEvents(state); renderMemeLayer(state); renderHoomLayer(state); renderShowcase(state); renderLaunchCopy(state); renderBucketPreview(); applyTone();
-        lineageStatusEl.textContent = 'Lineage online'; lineageStatusEl.dataset.state = 'ok'; sourceStatusEl.textContent = 'Feeds online'; sourceStatusEl.dataset.state = 'ok'; governanceStatusEl.textContent = pick(governanceWords); lastUpdatedEl.textContent = `Last update: ${new Date().toLocaleString('en-AU', { hour12: false })}`;
+        lineageStatusEl.textContent = tankerTelemetry.connection === 'live' ? 'Lineage + tanker live' : 'Lineage online'; lineageStatusEl.dataset.state = 'ok'; sourceStatusEl.textContent = tankerTelemetry.connection === 'live' ? 'Feeds + convoy sync online' : 'Feeds online'; sourceStatusEl.dataset.state = tankerTelemetry.connection === 'fallback' ? 'warn' : 'ok'; governanceStatusEl.textContent = pick(governanceWords); lastUpdatedEl.textContent = `Last update: ${new Date().toLocaleString('en-AU', { hour12: false })}`;
       }
 
       bucketConfidenceInput?.addEventListener('input', renderBucketPreview);
@@ -1002,6 +1155,7 @@ Have a crack: https://professional-evening-gaming.dilger.dev/projects/barrels/</
       });
 
       renderBucketPreview();
+      connectTankerFeed();
       refreshDashboard();
     </script>
   </body>

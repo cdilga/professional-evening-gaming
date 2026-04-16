@@ -5,7 +5,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { buildApp } from "../src/server.js";
-import { FACTIONS } from "../src/game.js";
+import { FACTIONS, stepGame } from "../src/game.js";
 
 function tmpStatePath() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "tanker-command-test-"));
@@ -188,5 +188,38 @@ test("websocket route responds to ping", async () => {
   assert.ok(message.dashboard);
 
   socket.close();
+  await app.close();
+});
+
+
+test("delivery telemetry tracks cumulative barrels over time", async () => {
+  const app = await buildApp({ statePath: tmpStatePath(), startLoop: false });
+  const join = await app.inject({
+    method: "POST",
+    url: "/v1/game/join",
+    payload: { name: "CargoMate", faction_id: FACTIONS[0].id },
+  });
+  const tankerId = join.json().tanker.id;
+  const tanker = app.tankerState.tankers.find((item) => item.id === tankerId);
+  const base = app.tankerState.world.bases.find((item) => item.factionId === tanker.factionId);
+
+  tanker.cargo = 1;
+  tanker.x = base.x;
+  tanker.y = base.y;
+
+  const response = await app.inject({ method: "GET", url: "/v1/game" });
+  const payload = response.json().state;
+
+  assert.equal(payload.telemetry.totalBarrelsDelivered, 0);
+
+  app.tankerState.meta.elapsedMs += 1000;
+  app.tankerState.meta.updatedAt = new Date().toISOString();
+  const state = stepGame(app.tankerState, 100);
+
+  assert.equal(state.telemetry.totalBarrelsDelivered, 1);
+  assert.equal(state.dashboard.telemetry.totalBarrelsDelivered, 1);
+  assert.ok(Array.isArray(state.telemetry.deliveryHistory));
+  assert.equal(state.telemetry.deliveryHistory.at(-1).delivered, 1);
+
   await app.close();
 });

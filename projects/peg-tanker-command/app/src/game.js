@@ -8,6 +8,7 @@ const MAX_EVENTS = 24;
 const RESPAWN_MS = 4000;
 const DRONE_SPAWN_MS = 2600;
 const TICK_MS = 100;
+const MAX_DELIVERY_HISTORY = 240;
 
 export const FACTIONS = [
   { id: "coral", name: "Coral Nomads", color: "#ff7b72", base: { x: 180, y: 180 } },
@@ -82,6 +83,10 @@ export function createGameState() {
     tankers: [],
     drones: [],
     events: [],
+    telemetry: {
+      totalBarrelsDelivered: 0,
+      deliveryHistory: [{ elapsedMs: 0, delivered: 0, at: nowIso() }],
+    },
   };
 }
 
@@ -102,6 +107,54 @@ function pushEvent(state, type, message, extra = {}) {
   state.events = state.events.slice(0, MAX_EVENTS);
 }
 
+function ensureTelemetryState(state) {
+  const telemetry = state.telemetry && typeof state.telemetry === "object" ? state.telemetry : {};
+  const history = Array.isArray(telemetry.deliveryHistory) ? telemetry.deliveryHistory : [];
+  state.telemetry = {
+    totalBarrelsDelivered: Number(telemetry.totalBarrelsDelivered || 0),
+    deliveryHistory: history
+      .map((entry) => ({
+        elapsedMs: Number(entry?.elapsedMs || 0),
+        delivered: Number(entry?.delivered || 0),
+        at: entry?.at || nowIso(),
+      }))
+      .sort((a, b) => a.elapsedMs - b.elapsedMs),
+  };
+
+  if (!state.telemetry.deliveryHistory.length) {
+    state.telemetry.deliveryHistory.push({ elapsedMs: Number(state.meta?.elapsedMs || 0), delivered: 0, at: state.meta?.updatedAt || nowIso() });
+  }
+
+  const lastPoint = state.telemetry.deliveryHistory[state.telemetry.deliveryHistory.length - 1];
+  if (lastPoint.delivered !== state.telemetry.totalBarrelsDelivered) {
+    state.telemetry.deliveryHistory.push({
+      elapsedMs: Number(state.meta?.elapsedMs || lastPoint.elapsedMs || 0),
+      delivered: state.telemetry.totalBarrelsDelivered,
+      at: state.meta?.updatedAt || nowIso(),
+    });
+  }
+
+  state.telemetry.deliveryHistory = state.telemetry.deliveryHistory.slice(-MAX_DELIVERY_HISTORY);
+  state.telemetry.totalBarrelsDelivered = Number(state.telemetry.deliveryHistory[state.telemetry.deliveryHistory.length - 1]?.delivered || 0);
+}
+
+function recordDeliveryHistory(state) {
+  ensureTelemetryState(state);
+  const point = {
+    elapsedMs: state.meta.elapsedMs,
+    delivered: state.telemetry.totalBarrelsDelivered,
+    at: state.meta.updatedAt,
+  };
+  const history = state.telemetry.deliveryHistory;
+  const lastPoint = history[history.length - 1];
+  if (lastPoint && lastPoint.elapsedMs === point.elapsedMs) {
+    history[history.length - 1] = point;
+  } else if (!lastPoint || lastPoint.delivered !== point.delivered || lastPoint.elapsedMs !== point.elapsedMs) {
+    history.push(point);
+  }
+  state.telemetry.deliveryHistory = history.slice(-MAX_DELIVERY_HISTORY);
+}
+
 function updateFactionMetrics(state) {
   for (const faction of state.factions) {
     const tankers = state.tankers.filter((tanker) => tanker.factionId === faction.id);
@@ -116,6 +169,7 @@ function updateFactionMetrics(state) {
 }
 
 function computeDashboard(state) {
+  ensureTelemetryState(state);
   updateFactionMetrics(state);
   const activeTankers = state.tankers.filter((tanker) => tanker.alive).length;
   const convoyLosses = state.tankers.reduce((sum, tanker) => sum + tanker.losses, 0);
@@ -155,10 +209,15 @@ function computeDashboard(state) {
     })),
     leaderboard: scores,
     recentEvents: state.events.slice(0, 10),
+    telemetry: {
+      totalBarrelsDelivered: state.telemetry.totalBarrelsDelivered,
+      deliveryHistory: state.telemetry.deliveryHistory,
+    },
   };
 }
 
 function gameView(state) {
+  ensureTelemetryState(state);
   return {
     room: state.room,
     world: state.world,
@@ -169,6 +228,7 @@ function gameView(state) {
     drones: state.drones,
     dashboard: computeDashboard(state),
     events: state.events,
+    telemetry: state.telemetry,
   };
 }
 
@@ -318,6 +378,7 @@ function sinkTanker(state, tanker) {
 }
 
 export function stepGame(state, deltaMs = TICK_MS) {
+  ensureTelemetryState(state);
   const dt = deltaMs / 1000;
   let changed = false;
   state.meta.elapsedMs += deltaMs;
@@ -365,7 +426,9 @@ export function stepGame(state, deltaMs = TICK_MS) {
       tanker.cargo = 0;
       tanker.deliveries += 1;
       tanker.score += 100;
-      pushEvent(state, "delivery", `${tanker.callsign} delivered a convoy run.`, { tankerId: tanker.id, factionId: tanker.factionId });
+      state.telemetry.totalBarrelsDelivered += 1;
+      recordDeliveryHistory(state);
+      pushEvent(state, "delivery", `${tanker.callsign} delivered a convoy run.`, { tankerId: tanker.id, factionId: tanker.factionId, totalBarrelsDelivered: state.telemetry.totalBarrelsDelivered });
       changed = true;
     }
   }
@@ -423,6 +486,7 @@ export function getGameView(state) {
 }
 
 export function getHealthView(state, connectedClients = 0) {
+  ensureTelemetryState(state);
   const dashboard = computeDashboard(state);
   return {
     status: "ok",
@@ -433,6 +497,7 @@ export function getHealthView(state, connectedClients = 0) {
     droneHits: dashboard.droneHits,
     convoyLosses: dashboard.convoyLosses,
     deliveries: dashboard.deliveries,
+    totalBarrelsDelivered: state.telemetry.totalBarrelsDelivered,
     revision: state.meta.revision,
   };
 }

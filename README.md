@@ -11,6 +11,7 @@ Reference projects currently included:
 - `projects/peg-nightly-landing/` - standalone static microsite
 - `projects/peg-session-hub/` - FastAPI + Postgres planner
 - `projects/peg-live-lobby/` - Node + Fastify realtime service
+- `projects/peg-tanker-command/` - realtime multiplayer tanker game with dashboard-fed match state
 
 ## Commands
 
@@ -26,7 +27,7 @@ Reference projects currently included:
 
 - `.github/workflows/deploy.yml` publishes the static site to GitHub Pages
 - `.github/workflows/deploy-private-service.yml` is the reusable PPaaS-style deploy pipeline for private-host services
-- `.github/workflows/deploy-astacus-api.yml`, `.github/workflows/deploy-peg-nightly-landing.yml`, `.github/workflows/deploy-peg-session-hub.yml`, and `.github/workflows/deploy-peg-live-lobby.yml` wire concrete projects into that pipeline
+- `.github/workflows/deploy-astacus-api.yml`, `.github/workflows/deploy-peg-nightly-landing.yml`, `.github/workflows/deploy-peg-session-hub.yml`, `.github/workflows/deploy-peg-live-lobby.yml`, and `.github/workflows/deploy-peg-tanker-command.yml` wire concrete projects into that pipeline
 - `.github/workflows/deploy-shared-postgres.yml` deploys the optional shared private Postgres cluster
 - `.github/workflows/deploy-private-manual.yml` and `.github/workflows/deploy-private-branch.yml` provide explicit target selection like PPaaS
 - `.github/workflows/service-healthcheck.yml` runs periodic host-local health checks
@@ -42,6 +43,7 @@ Recommended runtime env secrets:
 - `PEG_SESSION_HUB_RUNTIME_ENV`
 - `PEG_NIGHTLY_LANDING_RUNTIME_ENV`
 - `PEG_LIVE_LOBBY_RUNTIME_ENV`
+- `PEG_TANKER_COMMAND_RUNTIME_ENV`
 
 The periodic audits are intentionally lightweight:
 

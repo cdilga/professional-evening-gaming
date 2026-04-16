@@ -794,3 +794,81 @@ h2 {
     padding-inline: 16px;
   }
 }
+
+.browser-support-banner a,
+.browser-support-links a {
+  color: #ffe082;
+}
+
+.tanker-layout {
+  align-items: start;
+}
+
+.tanker-demo-panel {
+  gap: 1rem;
+}
+
+.tanker-join-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.9rem;
+  align-items: end;
+}
+
+.tanker-control-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 0.6rem 0 1rem;
+}
+
+.control-pill {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  padding: 0.55rem 0.9rem;
+  background: rgba(8, 18, 31, 0.72);
+  font-size: 0.92rem;
+}
+
+.tanker-canvas {
+  width: 100%;
+  height: auto;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: #081827;
+  display: block;
+}
+
+.tanker-sidebar,
+.tanker-leaderboard,
+.tanker-events,
+.tanker-metric-grid {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.tanker-metric-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 1rem;
+}
+
+.tanker-metric-card strong {
+  font-size: 1.8rem;
+}
+
+.tanker-faction-card {
+  border-left: 4px solid rgba(255, 255, 255, 0.18);
+}
+
+@media (max-width: 980px) {
+  .tanker-join-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .tanker-join-grid,
+  .tanker-metric-grid {
+    grid-template-columns: 1fr;
+  }
+}

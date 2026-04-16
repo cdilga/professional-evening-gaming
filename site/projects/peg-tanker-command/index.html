@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PEG Tanker Command | Professional Evening Gaming</title>
+    <meta
+      name="description"
+      content="Realtime multiplayer tanker convoy game with fictional factions, AI drone attacks, and a dashboard driven by live match events."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Kalam:wght@300;400;700&family=Patrick+Hand:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/assets/css/site.css" />
+  </head>
+  <body data-page="project-detail tanker-command-page">
+    <div class="page-aura page-aura-left"></div>
+    <div class="page-aura page-aura-right"></div>
+    <header class="site-header shell">
+      <a class="brand" href="/">
+        <span class="brand-kicker">PEG</span>
+        <span class="brand-name">Professional Evening Gaming (nah yeah)</span>
+      </a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="/">Home</a>
+        <a href="/projects/" aria-current="page">Projects</a>
+        <a href="/#platform">Platform</a>
+      </nav>
+    </header>
+
+    <main class="shell page-main project-detail-page">
+      <section class="panel detail-hero">
+        <div>
+          <p class="eyebrow">Realtime convoy game lane</p>
+          <h1>PEG Tanker Command</h1>
+          <p class="lede">
+            Pick a fictional faction, launch a tanker onto the shared war map, run cargo through the middle, and try not
+            to get smashed by AI drones. The dashboard below is not theatre. It moves because the live game state moves.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="/projects/">Back to all projects</a>
+            <a class="button button-secondary" href="https://github.com/cdilga/professional-evening-gaming/tree/main/projects/peg-tanker-command">Source</a>
+          </div>
+        </div>
+        <div class="panel inset-panel">
+          <p class="mini-label">What this lane proves</p>
+          <ul class="principle-list compact-list">
+            <li><strong>Gameplay:</strong> shared tanker movement and faction choice.</li>
+            <li><strong>Threat:</strong> server-side AI drones with ballistic dive behaviour.</li>
+            <li><strong>Dashboard:</strong> public metrics are derived from live match events.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="detail-grid tanker-layout">
+        <article class="panel demo-panel tanker-demo-panel" data-demo="tanker-command" data-api-base="https://peg-api.dilger.dev/tanker-command">
+          <div class="demo-panel-header">
+            <div>
+              <p class="eyebrow">Playable live prototype</p>
+              <h2>Run the convoy, mate</h2>
+            </div>
+            <span class="status-pill" data-demo-status>Checking service...</span>
+          </div>
+          <p class="demo-copy">
+            Join a fictional side, use <strong>W/S</strong> for thrust and reverse, <strong>A/D</strong> to steer, then touch the middle depot and bring cargo back to your base.
+          </p>
+
+          <form class="demo-form tanker-join-form" data-demo-form>
+            <div class="inline-form tanker-join-grid">
+              <label>
+                <span>Captain name</span>
+                <input name="player" type="text" maxlength="40" placeholder="Jazzclub" required />
+              </label>
+              <label>
+                <span>Faction</span>
+                <select name="faction_id" required>
+                  <option value="coral">Coral Nomads</option>
+                  <option value="mist">Mist Collective</option>
+                  <option value="ember">Ember Union</option>
+                  <option value="volt">Volt Syndicate</option>
+                </select>
+              </label>
+              <button class="button button-primary" type="submit">Launch tanker</button>
+              <button class="button button-secondary" type="button" data-demo-refresh>Refresh</button>
+            </div>
+          </form>
+
+          <div class="tanker-control-strip">
+            <div class="control-pill"><strong>Controls</strong> W/S thrust, A/D steer</div>
+            <div class="control-pill" data-player-status>Spectating</div>
+            <div class="control-pill" data-connection-status>Connecting...</div>
+          </div>
+
+          <canvas class="tanker-canvas" data-tanker-canvas width="1280" height="720" aria-label="Live tanker command map"></canvas>
+          <div class="demo-list tanker-sidebar" data-demo-list></div>
+        </article>
+
+        <article class="panel demo-side-panel tanker-dashboard-panel">
+          <p class="eyebrow">Public dashboard</p>
+          <h2>Downstream from the match</h2>
+          <div class="tanker-metric-grid" data-tanker-metrics>
+            <article class="demo-item"><strong>Loading metrics...</strong></article>
+          </div>
+          <div class="tanker-leaderboard" data-tanker-leaderboard></div>
+          <div class="tanker-events" data-tanker-events></div>
+        </article>
+      </section>
+    </main>
+
+    <footer class="site-footer shell">
+      <p>Professional Evening Gaming <span data-year></span></p>
+      <a href="/projects/">Project index</a>
+    </footer>
+
+    <script src="/assets/js/site.js" defer></script>
+  </body>
+</html>

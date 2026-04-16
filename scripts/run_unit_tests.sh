@@ -11,7 +11,9 @@ fi
 
 "$VENV_DIR/bin/python" -m pip install -q -r "$ROOT/projects/astacus-bot/api/requirements.txt" -r "$ROOT/projects/peg-session-hub/api/requirements.txt"
 npm --prefix "$ROOT/projects/peg-live-lobby/app" install --silent
+npm --prefix "$ROOT/projects/peg-tanker-command/app" install --silent
 
 PYTHONPATH="$ROOT/projects/astacus-bot/api" "$VENV_DIR/bin/python" -m pytest "$ROOT/projects/astacus-bot/api/tests"
 PYTHONPATH="$ROOT/projects/peg-session-hub/api" "$VENV_DIR/bin/python" -m pytest "$ROOT/projects/peg-session-hub/api/tests"
 npm --prefix "$ROOT/projects/peg-live-lobby/app" test
+npm --prefix "$ROOT/projects/peg-tanker-command/app" test

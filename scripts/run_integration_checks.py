@@ -31,7 +31,7 @@ def ensure_site_contracts() -> None:
         if not page_path.exists():
             fail(f"missing page for {project['slug']}: {page_path}")
 
-        if project["slug"] in {"astacus-bot", "peg-session-hub", "peg-live-lobby"}:
+        if project["slug"] in {"astacus-bot", "peg-session-hub", "peg-live-lobby", "peg-tanker-command"}:
             html = page_path.read_text()
             if 'data-demo=' not in html:
                 fail(f"project page for {project['slug']} is missing demo hooks")
@@ -42,6 +42,7 @@ def ensure_live_checks() -> None:
         "https://peg-api.dilger.dev/health",
         "https://peg-api.dilger.dev/session-hub/health",
         "https://peg-api.dilger.dev/live-lobby/health",
+        "https://peg-api.dilger.dev/tanker-command/health",
     ]
     for target in targets:
         try:

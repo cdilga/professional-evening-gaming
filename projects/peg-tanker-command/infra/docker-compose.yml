@@ -1,0 +1,36 @@
+services:
+  app:
+    image: ghcr.io/cdilga/professional-evening-gaming-tanker-command:${TANKER_COMMAND_IMAGE_TAG:-latest}
+    container_name: peg-tanker-command
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+    volumes:
+      - peg-tanker-command-state:/data
+    ports:
+      - "127.0.0.1:${TANKER_COMMAND_PORT:-8203}:3000"
+    networks:
+      - peg-tanker-command
+      - peg-services
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: peg-tanker-command-cloudflared
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - peg-tanker-command
+
+volumes:
+  peg-tanker-command-state:
+
+networks:
+  peg-tanker-command:
+    driver: bridge
+  peg-services:
+    external: true
+    name: peg-services

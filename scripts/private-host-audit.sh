@@ -16,6 +16,7 @@ declare -A DEPLOY_DIR=(
   [peg-nightly-landing]="professional-evening-gaming/peg-nightly-landing"
   [peg-session-hub]="professional-evening-gaming/peg-session-hub"
   [peg-live-lobby]="professional-evening-gaming/peg-live-lobby"
+  [peg-tanker-command]="professional-evening-gaming/peg-tanker-command"
 )
 
 declare -A CONTAINER_NAME=(
@@ -24,6 +25,7 @@ declare -A CONTAINER_NAME=(
   [peg-nightly-landing]="peg-nightly-landing"
   [peg-session-hub]="peg-session-hub-api"
   [peg-live-lobby]="peg-live-lobby"
+  [peg-tanker-command]="peg-tanker-command"
 )
 
 remote_exists() {
@@ -102,6 +104,12 @@ check_drift() {
       compare_file "projects/peg-live-lobby/infra/scripts/setup-target.sh" "$dir/setup-target.sh" || failed=1
       compare_file "projects/peg-live-lobby/infra/scripts/deploy.sh" "$dir/deploy.sh" || failed=1
       ;;
+    peg-tanker-command)
+      compare_file "projects/peg-tanker-command/infra/docker-compose.yml" "$dir/docker-compose.yml" || failed=1
+      compare_file "projects/peg-tanker-command/infra/.env.example" "$dir/.env.example" || failed=1
+      compare_file "projects/peg-tanker-command/infra/scripts/setup-target.sh" "$dir/setup-target.sh" || failed=1
+      compare_file "projects/peg-tanker-command/infra/scripts/deploy.sh" "$dir/deploy.sh" || failed=1
+      ;;
   esac
 
   if remote_exists "$dir/.deploy-state"; then
@@ -115,6 +123,7 @@ check_drift() {
         peg-nightly-landing) expected_image="ghcr.io/cdilga/professional-evening-gaming-nightly-landing:$image_tag" ;;
         peg-session-hub) expected_image="ghcr.io/cdilga/professional-evening-gaming-session-hub:$image_tag" ;;
         peg-live-lobby) expected_image="ghcr.io/cdilga/professional-evening-gaming-live-lobby:$image_tag" ;;
+        peg-tanker-command) expected_image="ghcr.io/cdilga/professional-evening-gaming-tanker-command:$image_tag" ;;
       esac
       actual_image="$(ssh -F "$SSH_CONFIG_FILE" "$SSH_TARGET" "docker inspect --format='{{.Config.Image}}' '$container' 2>/dev/null || true")"
       if [ "$actual_image" != "$expected_image" ]; then
@@ -152,12 +161,15 @@ check_health() {
     peg-live-lobby)
       ssh -F "$SSH_CONFIG_FILE" "$SSH_TARGET" "cd \"\$HOME/$dir\" && set -a && . ./.env && set +a && curl -sf http://127.0.0.1:\${LIVE_LOBBY_PORT:-8202}/health >/dev/null"
       ;;
+    peg-tanker-command)
+      ssh -F "$SSH_CONFIG_FILE" "$SSH_TARGET" "cd \"\$HOME/$dir\" && set -a && . ./.env && set +a && curl -sf http://127.0.0.1:\${TANKER_COMMAND_PORT:-8203}/health >/dev/null"
+      ;;
   esac
 }
 
 main() {
   local failed=0
-  local services=(shared-postgres astacus-bot peg-nightly-landing peg-session-hub peg-live-lobby)
+  local services=(shared-postgres astacus-bot peg-nightly-landing peg-session-hub peg-live-lobby peg-tanker-command)
 
   for service in "${services[@]}"; do
     echo "== $MODE: $service =="

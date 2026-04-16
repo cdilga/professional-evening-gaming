@@ -12,6 +12,7 @@ on:
           - peg-nightly-landing
           - peg-session-hub
           - peg-live-lobby
+          - peg-tanker-command
           - shared-postgres
       target:
         description: Deployment target
@@ -79,6 +80,14 @@ jobs:
               echo "setup_path=projects/peg-live-lobby/infra/scripts/setup-target.sh" >> $GITHUB_OUTPUT
               echo "deploy_path=projects/peg-live-lobby/infra/scripts/deploy.sh" >> $GITHUB_OUTPUT
               ;;
+            peg-tanker-command)
+              echo "deploy_dir=~/professional-evening-gaming/peg-tanker-command" >> $GITHUB_OUTPUT
+              echo "compose_path=projects/peg-tanker-command/infra/docker-compose.yml" >> $GITHUB_OUTPUT
+              echo "extra_compose_path=" >> $GITHUB_OUTPUT
+              echo "env_example=projects/peg-tanker-command/infra/.env.example" >> $GITHUB_OUTPUT
+              echo "setup_path=projects/peg-tanker-command/infra/scripts/setup-target.sh" >> $GITHUB_OUTPUT
+              echo "deploy_path=projects/peg-tanker-command/infra/scripts/deploy.sh" >> $GITHUB_OUTPUT
+              ;;
             shared-postgres)
               echo "deploy_dir=~/professional-evening-gaming/shared-postgres" >> $GITHUB_OUTPUT
               echo "compose_path=infra/shared-postgres/docker-compose.yml" >> $GITHUB_OUTPUT
@@ -107,6 +116,7 @@ jobs:
           PEG_NIGHTLY_LANDING_RUNTIME_ENV: ${{ secrets.PEG_NIGHTLY_LANDING_RUNTIME_ENV }}
           PEG_SESSION_HUB_RUNTIME_ENV: ${{ secrets.PEG_SESSION_HUB_RUNTIME_ENV }}
           PEG_LIVE_LOBBY_RUNTIME_ENV: ${{ secrets.PEG_LIVE_LOBBY_RUNTIME_ENV }}
+          PEG_TANKER_COMMAND_RUNTIME_ENV: ${{ secrets.PEG_TANKER_COMMAND_RUNTIME_ENV }}
           PEG_SHARED_POSTGRES_ENV: ${{ secrets.PEG_SHARED_POSTGRES_ENV }}
         run: |
           mkdir -p ~/.ssh
@@ -118,6 +128,7 @@ jobs:
             peg-nightly-landing) RUNTIME_ENV="$PEG_NIGHTLY_LANDING_RUNTIME_ENV" ;;
             peg-session-hub) RUNTIME_ENV="$PEG_SESSION_HUB_RUNTIME_ENV" ;;
             peg-live-lobby) RUNTIME_ENV="$PEG_LIVE_LOBBY_RUNTIME_ENV" ;;
+            peg-tanker-command) RUNTIME_ENV="$PEG_TANKER_COMMAND_RUNTIME_ENV" ;;
             shared-postgres) RUNTIME_ENV="$PEG_SHARED_POSTGRES_ENV" ;;
             *) RUNTIME_ENV="" ;;
           esac

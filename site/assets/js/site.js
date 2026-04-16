@@ -116,7 +116,7 @@ function setupBrowserSupportNotice() {
     <div class="browser-support-banner" data-support-banner ${supported ? "hidden" : ""}>
       <div>
         <strong>Unsupported browser, mate.</strong>
-        <span>This thing officially supports ${BROWSER_SUPPORT_RULES.join(", ")}. ${isIPhone ? "iPhone users are on the alpha." : ""}</span>
+        <span>This thing officially supports ${BROWSER_SUPPORT_RULES.join(", ")}. ${isIPhone ? "iPhone users are on the alpha." : ""} If you just want a proper destination, jump into <a href="/projects/peg-tanker-command/">PEG Tanker Command</a>.</span>
       </div>
     </div>
     <div class="browser-support-modal" data-support-modal ${supported ? "hidden" : ""}>
@@ -128,8 +128,11 @@ function setupBrowserSupportNotice() {
           ${BROWSER_SUPPORT_RULES.map((rule) => `<li>${rule}</li>`).join("")}
         </ul>
         <p class="browser-support-copy">${isIPhone ? "iPhone users are on the alpha." : "If you're not on that list, expect a bit of chaos."}</p>
-        <p class="browser-support-copy">Grab a supported browser for your platform:</p>
-        <ul class="principle-list compact-list browser-support-links">${upgradeLinks}</ul>
+        <p class="browser-support-copy">Grab a supported browser for your platform, or take the scenic PEG route into the live convoy prototype:</p>
+        <ul class="principle-list compact-list browser-support-links">
+          <li><a href="/projects/peg-tanker-command/">Open PEG Tanker Command</a></li>
+          ${upgradeLinks}
+        </ul>
         <button class="button button-primary" type="button" data-support-dismiss>Fair enough</button>
       </div>
     </div>
@@ -480,6 +483,305 @@ async function setupLiveLobbyDemo(root) {
   connectSocket();
 }
 
+function renderTankerDashboard(dashboard) {
+  const metrics = [
+    { label: "Active tankers", value: dashboard.activeTankers ?? 0 },
+    { label: "Drone hits", value: dashboard.droneHits ?? 0 },
+    { label: "Convoy losses", value: dashboard.convoyLosses ?? 0 },
+    { label: "Deliveries", value: dashboard.deliveries ?? 0 },
+  ];
+
+  return metrics.map((metric) => `
+    <article class="demo-item tanker-metric-card">
+      <strong>${escapeHtml(metric.value)}</strong>
+      <p>${escapeHtml(metric.label)}</p>
+    </article>
+  `).join("");
+}
+
+function renderFactionBoard(items) {
+  return (items || []).map((faction) => `
+    <article class="demo-item tanker-faction-card">
+      <strong>${escapeHtml(faction.name)}</strong>
+      <p>Control ${escapeHtml(faction.control)}% · Score ${escapeHtml(faction.score)}</p>
+      <span>${escapeHtml(faction.activeTankers)} active · ${escapeHtml(faction.deliveries)} deliveries · ${escapeHtml(faction.losses)} losses</span>
+    </article>
+  `).join("");
+}
+
+function renderTankerEvents(events) {
+  return (events || []).map((event) => `
+    <article class="demo-item">
+      <strong>${escapeHtml(event.type)}</strong>
+      <p>${escapeHtml(event.message)}</p>
+      <span>${escapeHtml(event.at || "now")}</span>
+    </article>
+  `).join("");
+}
+
+function drawTankerGame(canvas, state, localPlayerId) {
+  if (!canvas || !state?.world) {
+    return;
+  }
+  const ctx = canvas.getContext("2d");
+  const { width, height, depot, bases, tankerRadius, droneRadius } = state.world;
+  const sx = canvas.width / width;
+  const sy = canvas.height / height;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const water = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+  water.addColorStop(0, "#071827");
+  water.addColorStop(1, "#113153");
+  ctx.fillStyle = water;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.strokeStyle = "rgba(255,255,255,0.08)";
+  for (let x = 0; x <= width; x += 160) {
+    ctx.beginPath();
+    ctx.moveTo(x * sx, 0);
+    ctx.lineTo(x * sx, canvas.height);
+    ctx.stroke();
+  }
+  for (let y = 0; y <= height; y += 120) {
+    ctx.beginPath();
+    ctx.moveTo(0, y * sy);
+    ctx.lineTo(canvas.width, y * sy);
+    ctx.stroke();
+  }
+
+  ctx.fillStyle = "rgba(245, 216, 93, 0.2)";
+  ctx.beginPath();
+  ctx.arc(depot.x * sx, depot.y * sy, depot.radius * sx, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#f5d85d";
+  ctx.font = "600 14px IBM Plex Mono";
+  ctx.fillText("DEPOT", depot.x * sx - 28, depot.y * sy + 4);
+
+  (bases || []).forEach((base) => {
+    const faction = (state.factions || []).find((item) => item.id === base.factionId);
+    ctx.fillStyle = `${faction?.color || "#fff"}33`;
+    ctx.beginPath();
+    ctx.arc(base.x * sx, base.y * sy, base.radius * sx, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = faction?.color || "#fff";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = faction?.color || "#fff";
+    ctx.fillText((faction?.name || base.factionId).toUpperCase(), base.x * sx - 50, base.y * sy - 6);
+  });
+
+  (state.drones || []).forEach((drone) => {
+    ctx.fillStyle = "#ffd166";
+    ctx.beginPath();
+    ctx.arc(drone.x * sx, drone.y * sy, droneRadius * sx, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255, 209, 102, 0.3)";
+    ctx.beginPath();
+    ctx.moveTo(drone.x * sx, drone.y * sy);
+    ctx.lineTo((drone.x - drone.vx * 0.1) * sx, (drone.y - drone.vy * 0.1) * sy);
+    ctx.stroke();
+  });
+
+  (state.tankers || []).forEach((tanker) => {
+    const faction = (state.factions || []).find((item) => item.id === tanker.factionId);
+    const color = faction?.color || "#fff";
+    const x = tanker.x * sx;
+    const y = tanker.y * sy;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(tanker.heading);
+    ctx.fillStyle = tanker.alive ? color : "#555";
+    ctx.strokeStyle = tanker.playerId === localPlayerId ? "#fff" : "rgba(255,255,255,0.35)";
+    ctx.lineWidth = tanker.playerId === localPlayerId ? 3 : 1.5;
+    ctx.beginPath();
+    ctx.moveTo(tankerRadius * sx, 0);
+    ctx.lineTo(-tankerRadius * sx, -10 * sy);
+    ctx.lineTo(-10 * sx, 0);
+    ctx.lineTo(-tankerRadius * sx, 10 * sy);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    if (tanker.cargo) {
+      ctx.fillStyle = "#f5d85d";
+      ctx.fillRect(-2, -2, 12, 12);
+    }
+    ctx.restore();
+
+    ctx.fillStyle = tanker.playerId === localPlayerId ? "#ffffff" : "rgba(255,255,255,0.8)";
+    ctx.font = "500 12px IBM Plex Mono";
+    ctx.fillText(`${tanker.callsign} ${tanker.hp}hp`, x + 14, y - 14);
+  });
+}
+
+async function setupTankerCommandDemo(root) {
+  const apiBase = root.dataset.apiBase;
+  const form = root.querySelector("[data-demo-form]");
+  const list = root.querySelector("[data-demo-list]");
+  const refreshButton = root.querySelector("[data-demo-refresh]");
+  const canvas = root.querySelector("[data-tanker-canvas]");
+  const metricsRoot = document.querySelector("[data-tanker-metrics]");
+  const leaderboardRoot = document.querySelector("[data-tanker-leaderboard]");
+  const eventsRoot = document.querySelector("[data-tanker-events]");
+  const playerStatus = root.querySelector("[data-player-status]");
+  const connectionStatus = root.querySelector("[data-connection-status]");
+
+  let playerId = null;
+  let state = null;
+  let inputTimer = null;
+  let socket = null;
+  const controls = { thrust: 0, turn: 0 };
+
+  try {
+    playerId = localStorage.getItem("peg-tanker-command-player-id") || null;
+    form.querySelector('input[name="player"]').value = localStorage.getItem("peg-tanker-command-player-name") || "";
+    form.querySelector('select[name="faction_id"]').value = localStorage.getItem("peg-tanker-command-faction") || "coral";
+  } catch {
+    // ignore storage issues
+  }
+
+  function render(payloadState) {
+    state = payloadState;
+    const dashboard = payloadState?.dashboard || {};
+    metricsRoot.innerHTML = renderTankerDashboard(dashboard);
+    leaderboardRoot.innerHTML = `
+      <p class="eyebrow">Leaderboard + faction board</p>
+      ${renderFactionBoard(dashboard.factionControl || [])}
+      ${(dashboard.leaderboard || []).map((entry) => `<article class="demo-item"><strong>${escapeHtml(entry.playerName)}</strong><p>${escapeHtml(entry.score)} score · ${escapeHtml(entry.deliveries)} deliveries · ${escapeHtml(entry.droneHits)} drone hits</p><span>${escapeHtml(entry.factionId)}${entry.alive ? "" : " · sunk"}</span></article>`).join("")}
+    `;
+    eventsRoot.innerHTML = `<p class="eyebrow">Recent game events</p>${renderTankerEvents(dashboard.recentEvents || [])}`;
+    list.innerHTML = `<article class="demo-item"><strong>${escapeHtml(dashboard.connectedPlayers || 0)} captains online</strong><p>${escapeHtml(dashboard.activeTankers || 0)} active tankers on the water</p><span>Revision ${escapeHtml(payloadState?.meta?.revision || 0)}</span></article>`;
+    drawTankerGame(canvas, payloadState, playerId);
+
+    const myTanker = (payloadState?.tankers || []).find((tanker) => tanker.playerId === playerId);
+    playerStatus.textContent = myTanker ? `${myTanker.callsign} · ${myTanker.hp}hp · ${myTanker.cargo ? "cargo loaded" : "empty"}` : "Spectating";
+  }
+
+  async function refresh() {
+    const response = await fetch(`${apiBase}/v1/game`);
+    if (!response.ok) {
+      throw new Error(`Tanker Command fetch failed: ${response.status}`);
+    }
+    const payload = await response.json();
+    render(payload.state);
+    setDemoStatus(root, "Game state live", "ok");
+  }
+
+  async function sendInput() {
+    if (!playerId) {
+      return;
+    }
+    await fetch(`${apiBase}/v1/game/input`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ player_id: playerId, thrust: controls.thrust, turn: controls.turn }),
+    });
+  }
+
+  function setControl(key, active) {
+    const previous = { ...controls };
+    if (key === "w") controls.thrust = active ? 1 : controls.thrust === 1 ? 0 : controls.thrust;
+    if (key === "s") controls.thrust = active ? -1 : controls.thrust === -1 ? 0 : controls.thrust;
+    if (key === "a") controls.turn = active ? -1 : controls.turn === -1 ? 0 : controls.turn;
+    if (key === "d") controls.turn = active ? 1 : controls.turn === 1 ? 0 : controls.turn;
+    if (previous.thrust !== controls.thrust || previous.turn !== controls.turn) {
+      sendInput().catch(() => setDemoStatus(root, "Input send failed", "error"));
+    }
+  }
+
+  function connectSocket() {
+    const wsUrl = apiBase.replace(/^http/, "ws") + "/ws";
+    socket = new WebSocket(wsUrl);
+    connectionStatus.textContent = "Connecting WS...";
+
+    socket.addEventListener("open", () => {
+      connectionStatus.textContent = "WebSocket live";
+      setDemoStatus(root, "Realtime feed connected", "ok");
+    });
+
+    socket.addEventListener("message", (event) => {
+      try {
+        const payload = JSON.parse(event.data);
+        if (payload.state) {
+          render(payload.state);
+        }
+      } catch {
+        // ignore
+      }
+    });
+
+    socket.addEventListener("close", () => {
+      connectionStatus.textContent = "WS closed, retrying...";
+      setTimeout(connectSocket, 2500);
+    });
+
+    socket.addEventListener("error", () => {
+      connectionStatus.textContent = "WS error";
+    });
+  }
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const data = new FormData(form);
+    setDemoStatus(root, "Launching tanker...", "busy");
+    const response = await fetch(`${apiBase}/v1/game/join`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: data.get("player"), faction_id: data.get("faction_id") }),
+    });
+    if (!response.ok) {
+      setDemoStatus(root, "Join failed", "error");
+      return;
+    }
+    const payload = await response.json();
+    if (payload.error) {
+      setDemoStatus(root, payload.error, "error");
+      return;
+    }
+    playerId = payload.player.id;
+    try {
+      localStorage.setItem("peg-tanker-command-player-id", playerId);
+      localStorage.setItem("peg-tanker-command-player-name", String(data.get("player")));
+      localStorage.setItem("peg-tanker-command-faction", String(data.get("faction_id")));
+    } catch {
+      // ignore
+    }
+    render(payload.state);
+    setDemoStatus(root, "Tanker launched", "ok");
+  });
+
+  refreshButton?.addEventListener("click", refresh);
+
+  document.addEventListener("keydown", (event) => {
+    const key = event.key.toLowerCase();
+    if (["w", "a", "s", "d"].includes(key)) {
+      event.preventDefault();
+      setControl(key, true);
+    }
+  });
+
+  document.addEventListener("keyup", (event) => {
+    const key = event.key.toLowerCase();
+    if (["w", "a", "s", "d"].includes(key)) {
+      event.preventDefault();
+      setControl(key, false);
+    }
+  });
+
+  await refresh();
+  connectSocket();
+  inputTimer = setInterval(() => {
+    if (socket?.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({ type: "ping" }));
+    }
+  }, 12000);
+
+  window.addEventListener("beforeunload", () => {
+    if (inputTimer) {
+      clearInterval(inputTimer);
+    }
+  }, { once: true });
+}
+
 async function loadDemo() {
   if (!demoRoot) {
     return;
@@ -494,6 +796,9 @@ async function loadDemo() {
     }
     if (demoRoot.dataset.demo === "live-lobby") {
       await setupLiveLobbyDemo(demoRoot);
+    }
+    if (demoRoot.dataset.demo === "tanker-command") {
+      await setupTankerCommandDemo(demoRoot);
     }
   } catch (error) {
     console.error(error);

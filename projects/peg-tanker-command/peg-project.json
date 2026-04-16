@@ -1,0 +1,25 @@
+{
+  "slug": "peg-tanker-command",
+  "name": "PEG Tanker Command",
+  "summary": "Realtime multiplayer tanker convoy game with shared map state, AI drone attacks, faction control, and dashboard metrics sourced from live events.",
+  "tagline": "Pick a fictional side, steer an actual tanker, survive the drone chaos, and watch the dashboard move because of what the players do.",
+  "status": "live convoy prototype",
+  "featured": true,
+  "order": 35,
+  "links": {
+    "page": "/projects/peg-tanker-command/",
+    "repoPath": "projects/peg-tanker-command",
+    "apiBase": "https://peg-api.dilger.dev/tanker-command"
+  },
+  "stack": {
+    "frontend": "Static canvas client + live dashboard",
+    "api": "Node.js + Fastify + WebSocket",
+    "database": "File-persisted match state",
+    "deploy": "GitHub Actions -> GHCR -> cloudflared SSH -> docker compose"
+  },
+  "deployment": {
+    "workflow": ".github/workflows/deploy-peg-tanker-command.yml",
+    "composePath": "projects/peg-tanker-command/infra/docker-compose.yml",
+    "healthcheck": "/health"
+  }
+}

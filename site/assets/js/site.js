@@ -751,9 +751,24 @@ async function setupTankerCommandDemo(root) {
 
   refreshButton?.addEventListener("click", refresh);
 
+  function shouldCaptureGameKey(event) {
+    const target = event.target;
+    if (!target) {
+      return true;
+    }
+    const tagName = target.tagName?.toLowerCase?.() || "";
+    if (target.isContentEditable) {
+      return false;
+    }
+    if (["input", "textarea", "select", "button"].includes(tagName)) {
+      return false;
+    }
+    return true;
+  }
+
   document.addEventListener("keydown", (event) => {
     const key = event.key.toLowerCase();
-    if (["w", "a", "s", "d"].includes(key)) {
+    if (["w", "a", "s", "d"].includes(key) && shouldCaptureGameKey(event)) {
       event.preventDefault();
       setControl(key, true);
     }
@@ -761,7 +776,7 @@ async function setupTankerCommandDemo(root) {
 
   document.addEventListener("keyup", (event) => {
     const key = event.key.toLowerCase();
-    if (["w", "a", "s", "d"].includes(key)) {
+    if (["w", "a", "s", "d"].includes(key) && shouldCaptureGameKey(event)) {
       event.preventDefault();
       setControl(key, false);
     }

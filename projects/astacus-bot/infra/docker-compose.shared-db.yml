@@ -26,6 +26,7 @@ services:
 
           set $$upstream_session_hub http://peg-session-hub-api:8000;
           set $$upstream_live_lobby http://peg-live-lobby:3000;
+          set $$upstream_tanker_command http://peg-tanker-command:3000;
 
           location = /health {
             proxy_pass http://peg-astacus-api:8000/health;
@@ -61,6 +62,11 @@ services:
           location /live-lobby/ {
             rewrite ^/live-lobby/(.*)$ /$$1 break;
             proxy_pass $$upstream_live_lobby;
+          }
+
+          location /tanker-command/ {
+            rewrite ^/tanker-command/(.*)$ /$$1 break;
+            proxy_pass $$upstream_tanker_command;
           }
         }
         EOF

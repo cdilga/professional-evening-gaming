@@ -16,6 +16,7 @@ Secrets:
 - `PEG_SESSION_HUB_RUNTIME_ENV` for `projects/peg-session-hub/.env`
 - `PEG_NIGHTLY_LANDING_RUNTIME_ENV` for `projects/peg-nightly-landing/.env`
 - `PEG_LIVE_LOBBY_RUNTIME_ENV` for `projects/peg-live-lobby/.env`
+- `PEG_TANKER_COMMAND_RUNTIME_ENV` for `projects/peg-tanker-command/.env`
 
 Variables:
 
@@ -33,7 +34,7 @@ Typical value when TrueNAS is active:
 Suggested hostnames:
 
 - `ssh-deploy.professionaleveninggaming.com` -> `ssh://localhost:22`
-- `peg-api.dilger.dev` -> shared public API ingress for Astacus, Session Hub, and Live Lobby
+- `peg-api.dilger.dev` -> shared public API ingress for Astacus, Session Hub, Live Lobby, and Tanker Command
 - `nightly.professionaleveninggaming.com` -> PEG Nightly Landing
 - `lobby.professionaleveninggaming.com` -> PEG Live Lobby
 
@@ -44,6 +45,7 @@ Suggested hostnames:
 - `~/professional-evening-gaming/peg-nightly-landing`
 - `~/professional-evening-gaming/peg-session-hub`
 - `~/professional-evening-gaming/peg-live-lobby`
+- `~/professional-evening-gaming/peg-tanker-command`
 
 ## Shared Postgres first
 
@@ -123,6 +125,16 @@ GHCR_USERNAME=your-github-username
 GHCR_TOKEN=replace-with-ghcr-pat
 ```
 
+PEG Tanker Command:
+
+```env
+TANKER_COMMAND_PORT=8203
+TUNNEL_TOKEN=replace-with-cloudflare-token
+ENABLE_TUNNEL=false
+GHCR_USERNAME=your-github-username
+GHCR_TOKEN=replace-with-ghcr-pat
+```
+
 ## Deployment modes
 
 Normal mode:
@@ -140,6 +152,7 @@ Branch-targeted deploys:
 - `deploy/truenas/peg-session-hub`
 - `deploy/truenas/peg-nightly-landing`
 - `deploy/truenas/peg-live-lobby`
+- `deploy/truenas/peg-tanker-command`
 
 Use `triton` instead of `truenas` to target the other host.
 
@@ -168,6 +181,7 @@ Use `triton` instead of `truenas` to target the other host.
 - `curl http://127.0.0.1:8200/`
 - `curl http://127.0.0.1:8201/health`
 - `curl http://127.0.0.1:8202/health`
+- `curl http://127.0.0.1:8203/health`
 
 ## Important assumptions
 

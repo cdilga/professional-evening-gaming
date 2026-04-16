@@ -21,7 +21,7 @@ Professional Evening Gaming is not one app. It is a shared control plane for:
 - the first service-backed project is `projects/astacus-bot/`
 - the first API deploy workflow is `.github/workflows/deploy-astacus-api.yml`
 - reusable private-host service deploys go through `.github/workflows/deploy-private-service.yml`
-- additional examples now exist in `projects/peg-nightly-landing/`, `projects/peg-session-hub/`, and `projects/peg-live-lobby/`
+- additional examples now exist in `projects/peg-nightly-landing/`, `projects/peg-session-hub/`, `projects/peg-live-lobby/`, and `projects/peg-tanker-command/`
 - shared private Postgres lives in `infra/shared-postgres/`
 - targeted deploy workflows live in `.github/workflows/deploy-private-manual.yml` and `.github/workflows/deploy-private-branch.yml`
 - `docs/truenas-deploy-runbook.md` is the exact deployment runbook
@@ -56,6 +56,7 @@ Important rule: the root repo indexes projects, but does not force them into one
 - `peg-nightly-landing` - static-only nginx microsite, no database
 - `peg-session-hub` - FastAPI + Postgres with `session_hub` schema and migrations
 - `peg-live-lobby` - Node + Fastify + websocket service, no forced database
+- `peg-tanker-command` - Node canvas game service exposed through the shared PEG API gateway
 
 ## What must stay true
 
@@ -72,6 +73,7 @@ Important rule: the root repo indexes projects, but does not force them into one
 - `npm run test:unit`
 - `npm run test:integration`
 - `python3 -m compileall projects/astacus-bot/api/app`
+- `node --test projects/peg-tanker-command/app/test/server.test.js`
 
 ## Manual host assumptions
 

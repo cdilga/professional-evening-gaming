@@ -121,6 +121,8 @@ jobs:
             Port 2222
             User ${DEPLOY_USER}
             IdentityFile ~/.ssh/deploy_key
+            IdentitiesOnly yes
+            PreferredAuthentications publickey
             StrictHostKeyChecking no
           EOF
 

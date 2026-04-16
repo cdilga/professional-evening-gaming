@@ -172,6 +172,11 @@ function gameView(state) {
   };
 }
 
+function bumpRevision(state) {
+  state.meta.updatedAt = nowIso();
+  state.meta.revision += 1;
+}
+
 function tankerTemplate(state, player) {
   const base = baseForFaction(player.factionId);
   return {
@@ -236,8 +241,7 @@ export function joinPlayer(state, payload = {}) {
     pushEvent(state, "rejoin", `${name} rejoined on the ${FACTIONS.find((f) => f.id === factionId)?.name}.`, { playerId: player.id, factionId });
   }
 
-  state.meta.updatedAt = nowIso();
-  state.meta.revision += 1;
+  bumpRevision(state);
   return { player, tanker: state.tankers.find((item) => item.playerId === player.id), state: gameView(state) };
 }
 
@@ -251,15 +255,13 @@ export function applyPlayerInput(state, payload = {}) {
     thrust: clamp(Number(payload.thrust || 0), -1, 1),
     turn: clamp(Number(payload.turn || 0), -1, 1),
   };
-  state.meta.updatedAt = nowIso();
-  state.meta.revision += 1;
   return { ok: true, tankerId: tanker.id };
 }
 
 function spawnDrone(state) {
   const liveTankers = state.tankers.filter((tanker) => tanker.alive);
   if (!liveTankers.length) {
-    return;
+    return false;
   }
   const target = randomFrom(liveTankers);
   const side = randomFrom(["left", "top", "right"]);
@@ -290,6 +292,7 @@ function spawnDrone(state) {
   };
   state.drones.push(drone);
   pushEvent(state, "drone-spawn", `AI drones are diving on ${target.callsign}.`, { tankerId: target.id, factionId: target.factionId });
+  return true;
 }
 
 function respawnTanker(state, tanker) {
@@ -316,10 +319,11 @@ function sinkTanker(state, tanker) {
 
 export function stepGame(state, deltaMs = TICK_MS) {
   const dt = deltaMs / 1000;
+  let changed = false;
   state.meta.elapsedMs += deltaMs;
 
   if (state.meta.elapsedMs - state.meta.lastDroneSpawnAtMs >= DRONE_SPAWN_MS) {
-    spawnDrone(state);
+    changed = spawnDrone(state) || changed;
     state.meta.lastDroneSpawnAtMs = state.meta.elapsedMs;
   }
 
@@ -327,6 +331,7 @@ export function stepGame(state, deltaMs = TICK_MS) {
     if (!tanker.alive) {
       if (tanker.respawnAtMs && state.meta.elapsedMs >= tanker.respawnAtMs) {
         respawnTanker(state, tanker);
+        changed = true;
       }
       continue;
     }
@@ -352,6 +357,7 @@ export function stepGame(state, deltaMs = TICK_MS) {
       tanker.cargo = 1;
       tanker.score += 10;
       pushEvent(state, "cargo-load", `${tanker.callsign} loaded convoy cargo.`, { tankerId: tanker.id, factionId: tanker.factionId });
+      changed = true;
     }
 
     const base = baseForFaction(tanker.factionId);
@@ -360,9 +366,11 @@ export function stepGame(state, deltaMs = TICK_MS) {
       tanker.deliveries += 1;
       tanker.score += 100;
       pushEvent(state, "delivery", `${tanker.callsign} delivered a convoy run.`, { tankerId: tanker.id, factionId: tanker.factionId });
+      changed = true;
     }
   }
 
+  const activeDroneCount = state.drones.length;
   const survivors = [];
   for (const drone of state.drones) {
     drone.ttlMs -= deltaMs;
@@ -384,8 +392,10 @@ export function stepGame(state, deltaMs = TICK_MS) {
       target.droneHits += 1;
       target.score = Math.max(0, target.score - 15);
       pushEvent(state, "drone-hit", `${target.callsign} copped a drone hit.`, { tankerId: target.id, factionId: target.factionId });
+      changed = true;
       if (target.hp <= 0) {
         sinkTanker(state, target);
+        changed = true;
       }
       continue;
     }
@@ -396,10 +406,12 @@ export function stepGame(state, deltaMs = TICK_MS) {
     }
   }
   state.drones = survivors;
+  changed = changed || survivors.length !== activeDroneCount;
 
-  state.meta.updatedAt = nowIso();
-  state.meta.revision += 1;
-  return gameView(state);
+  if (changed) {
+    bumpRevision(state);
+  }
+  return { state: gameView(state), changed };
 }
 
 export function getDashboard(state) {

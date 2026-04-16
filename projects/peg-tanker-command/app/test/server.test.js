@@ -110,6 +110,28 @@ test("player input updates tanker controls", async () => {
   await app.close();
 });
 
+test("player input stays live-only and does not advance durable revision", async () => {
+  const app = await buildApp({ statePath: tmpStatePath(), startLoop: false, enableTestRoutes: true });
+  const join = await app.inject({
+    method: "POST",
+    url: "/v1/game/join",
+    payload: { name: "SoftWake", faction_id: FACTIONS[0].id },
+  });
+  const playerId = join.json().player.id;
+  const revisionAfterJoin = app.tankerState.meta.revision;
+
+  await app.inject({
+    method: "POST",
+    url: "/v1/game/input",
+    payload: { player_id: playerId, thrust: 1, turn: 1 },
+  });
+  await app.inject({ method: "POST", url: "/v1/game/tick", payload: { deltaMs: 100 } });
+
+  assert.equal(app.tankerState.meta.revision, revisionAfterJoin);
+
+  await app.close();
+});
+
 test("state persists across restart", async () => {
   const statePath = tmpStatePath();
 
@@ -129,6 +151,24 @@ test("state persists across restart", async () => {
   assert.equal(payload.players[0].name, "Persisto");
 
   await app2.close();
+});
+
+test("persisted state strips live revision counters from disk", async () => {
+  const statePath = tmpStatePath();
+  const app = await buildApp({ statePath, startLoop: false });
+
+  await app.inject({
+    method: "POST",
+    url: "/v1/game/join",
+    payload: { name: "Checkpoint", faction_id: FACTIONS[1].id },
+  });
+
+  assert.equal(app.tankerState.meta.revision, 1);
+
+  const saved = JSON.parse(fs.readFileSync(statePath, "utf8"));
+  assert.equal(saved.meta.revision, 0);
+
+  await app.close();
 });
 
 test("websocket route responds to ping", async () => {

@@ -814,6 +814,7 @@ h2 {
   position: relative;
   display: grid;
   gap: 1rem;
+  min-width: 0;
 }
 
 .tanker-join-grid {
@@ -886,6 +887,9 @@ h2 {
   width: 100%;
   height: auto;
   aspect-ratio: 16 / 9;
+  min-height: clamp(320px, 42vw, 720px);
+  max-width: 100%;
+  margin-inline: auto;
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: #081827;
@@ -900,6 +904,8 @@ body.tanker-fullscreen-active {
 .tanker-demo-panel[data-fullscreen="simulated"],
 .tanker-demo-panel:fullscreen {
   position: fixed;
+  display: grid;
+  align-content: start;
   inset: 0;
   z-index: 120;
   width: 100vw;
@@ -927,17 +933,29 @@ body.tanker-fullscreen-active {
 .tanker-demo-panel[data-fullscreen="native"] .tanker-canvas,
 .tanker-demo-panel[data-fullscreen="simulated"] .tanker-canvas,
 .tanker-demo-panel:fullscreen .tanker-canvas {
-  width: 100%;
-  min-height: min(60dvh, 520px);
-  max-height: min(62dvh, calc(100dvh - 260px));
+  width: min(100%, calc((100dvh - 240px) * 16 / 9));
+  min-height: clamp(360px, 72dvh, 840px);
+  max-height: calc(100dvh - 240px);
   border-radius: 28px;
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.26);
+}
+
+.tanker-demo-panel[data-fullscreen="native"] .tanker-join-form,
+.tanker-demo-panel[data-fullscreen="simulated"] .tanker-join-form,
+.tanker-demo-panel:fullscreen .tanker-join-form {
+  margin-top: 0.5rem;
+}
+
+.tanker-demo-panel[data-fullscreen="native"] .tanker-control-strip,
+.tanker-demo-panel[data-fullscreen="simulated"] .tanker-control-strip,
+.tanker-demo-panel:fullscreen .tanker-control-strip {
+  margin: 0 0 0.35rem;
 }
 
 .tanker-demo-panel[data-fullscreen="native"] .tanker-sidebar,
 .tanker-demo-panel[data-fullscreen="simulated"] .tanker-sidebar,
 .tanker-demo-panel:fullscreen .tanker-sidebar {
-  margin-top: 0.25rem;
+  margin-top: 0;
 }
 
 .tanker-demo-panel[data-fullscreen="native"] .control-pill,
@@ -991,6 +1009,14 @@ body.tanker-fullscreen-active {
   .tanker-demo-panel,
   .tanker-dashboard-panel {
     padding: 18px;
+  }
+
+  .tanker-demo-panel[data-fullscreen="native"] .tanker-canvas,
+  .tanker-demo-panel[data-fullscreen="simulated"] .tanker-canvas,
+  .tanker-demo-panel:fullscreen .tanker-canvas {
+    width: 100%;
+    min-height: min(54dvh, 520px);
+    max-height: min(56dvh, 520px);
   }
 }
 

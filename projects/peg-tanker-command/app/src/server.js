@@ -10,10 +10,41 @@ import { applyPlayerInput, createGameState, getDashboard, getGameView, getHealth
 const DEFAULT_STATE_PATH = "/data/state.json";
 const DEFAULT_TICK_MS = 100;
 
+function hydrateState(rawState) {
+  const baseline = createGameState();
+  if (!rawState || typeof rawState !== "object") {
+    return baseline;
+  }
+
+  return {
+    ...baseline,
+    ...rawState,
+    world: {
+      ...baseline.world,
+      ...(rawState.world && typeof rawState.world === "object" ? rawState.world : {}),
+      depot: {
+        ...baseline.world.depot,
+        ...(rawState.world?.depot && typeof rawState.world.depot === "object" ? rawState.world.depot : {}),
+      },
+      bases: Array.isArray(rawState.world?.bases) ? rawState.world.bases : baseline.world.bases,
+    },
+    meta: {
+      ...baseline.meta,
+      ...(rawState.meta && typeof rawState.meta === "object" ? rawState.meta : {}),
+      revision: 0,
+    },
+    factions: Array.isArray(rawState.factions) ? rawState.factions : baseline.factions,
+    players: Array.isArray(rawState.players) ? rawState.players : baseline.players,
+    tankers: Array.isArray(rawState.tankers) ? rawState.tankers : baseline.tankers,
+    drones: Array.isArray(rawState.drones) ? rawState.drones : baseline.drones,
+    events: Array.isArray(rawState.events) ? rawState.events : baseline.events,
+  };
+}
+
 function loadState(statePath) {
   try {
     const raw = fs.readFileSync(statePath, "utf8");
-    return JSON.parse(raw);
+    return hydrateState(JSON.parse(raw));
   } catch {
     return createGameState();
   }
@@ -22,7 +53,16 @@ function loadState(statePath) {
 function saveState(statePath, state) {
   const dir = path.dirname(statePath);
   fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+  fs.writeFileSync(
+    statePath,
+    JSON.stringify({
+      ...state,
+      meta: {
+        ...state.meta,
+        revision: 0,
+      },
+    }, null, 2),
+  );
 }
 
 export async function buildApp(opts = {}) {
@@ -51,10 +91,12 @@ export async function buildApp(opts = {}) {
     }
   }
 
-  function mutate(fn, { broadcastType = "update", persistAfter = true } = {}) {
+  function mutate(fn, { broadcastType = "update", persistAfter = true, markDirty = persistAfter } = {}) {
     const result = fn();
     if (!result?.error) {
-      dirty = true;
+      if (markDirty) {
+        dirty = true;
+      }
       if (persistAfter) {
         persist();
       }
@@ -76,15 +118,18 @@ export async function buildApp(opts = {}) {
     return result?.error ? result : { player: result.player, tanker: result.tanker, state: result.state };
   });
 
-  app.post("/v1/game/input", async (request) => mutate(() => applyPlayerInput(state, request.body || {}), { persistAfter: false }));
+  app.post("/v1/game/input", async (request) =>
+    mutate(() => applyPlayerInput(state, request.body || {}), { persistAfter: false, markDirty: false }));
 
   if (opts.enableTestRoutes) {
     app.post("/v1/game/tick", async (request) => {
       const deltaMs = Number(request.body?.deltaMs || tickMs);
       const result = stepGame(state, deltaMs);
-      persist();
+      if (result.changed) {
+        persist();
+      }
       broadcast("tick");
-      return { state: result };
+      return { state: result.state };
     });
   }
 
@@ -120,8 +165,8 @@ export async function buildApp(opts = {}) {
 
   if (startLoop) {
     interval = setInterval(() => {
-      stepGame(state, tickMs);
-      if (dirty || state.meta.revision % 10 === 0) {
+      const result = stepGame(state, tickMs);
+      if (dirty || result.changed) {
         persist();
       }
       broadcast("tick");
@@ -135,7 +180,9 @@ export async function buildApp(opts = {}) {
     if (interval) {
       clearInterval(interval);
     }
-    persist();
+    if (dirty) {
+      persist();
+    }
   });
 
   return app;

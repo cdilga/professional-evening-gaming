@@ -519,14 +519,41 @@ function renderTankerEvents(events) {
   `).join("");
 }
 
+function formatCheckpointTime(timestamp) {
+  if (!timestamp) {
+    return "pending";
+  }
+  const value = new Date(timestamp);
+  if (Number.isNaN(value.getTime())) {
+    return String(timestamp);
+  }
+  return value.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
+function resizeTankerCanvas(canvas) {
+  const rect = canvas?.getBoundingClientRect?.();
+  if (!rect?.width || !rect?.height) {
+    return false;
+  }
+  const devicePixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+  const width = Math.max(1, Math.round(rect.width * devicePixelRatio));
+  const height = Math.max(1, Math.round(rect.height * devicePixelRatio));
+  if (canvas.width !== width || canvas.height !== height) {
+    canvas.width = width;
+    canvas.height = height;
+  }
+  return true;
+}
+
 function drawTankerGame(canvas, state, localPlayerId) {
-  if (!canvas || !state?.world) {
+  if (!canvas || !state?.world || !resizeTankerCanvas(canvas)) {
     return;
   }
   const ctx = canvas.getContext("2d");
   const { width, height, depot, bases, tankerRadius, droneRadius } = state.world;
   const sx = canvas.width / width;
   const sy = canvas.height / height;
+  const unit = Math.min(sx, sy);
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   const water = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
@@ -536,6 +563,7 @@ function drawTankerGame(canvas, state, localPlayerId) {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   ctx.strokeStyle = "rgba(255,255,255,0.08)";
+  ctx.lineWidth = Math.max(1, unit);
   for (let x = 0; x <= width; x += 160) {
     ctx.beginPath();
     ctx.moveTo(x * sx, 0);
@@ -554,8 +582,8 @@ function drawTankerGame(canvas, state, localPlayerId) {
   ctx.arc(depot.x * sx, depot.y * sy, depot.radius * sx, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = "#f5d85d";
-  ctx.font = "600 14px IBM Plex Mono";
-  ctx.fillText("DEPOT", depot.x * sx - 28, depot.y * sy + 4);
+  ctx.font = `600 ${Math.max(14, Math.round(16 * unit))}px IBM Plex Mono`;
+  ctx.fillText("DEPOT", depot.x * sx - 34 * unit, depot.y * sy + 5 * unit);
 
   (bases || []).forEach((base) => {
     const faction = (state.factions || []).find((item) => item.id === base.factionId);
@@ -564,10 +592,11 @@ function drawTankerGame(canvas, state, localPlayerId) {
     ctx.arc(base.x * sx, base.y * sy, base.radius * sx, 0, Math.PI * 2);
     ctx.fill();
     ctx.strokeStyle = faction?.color || "#fff";
-    ctx.lineWidth = 2;
+    ctx.lineWidth = Math.max(1.5, 2.25 * unit);
     ctx.stroke();
     ctx.fillStyle = faction?.color || "#fff";
-    ctx.fillText((faction?.name || base.factionId).toUpperCase(), base.x * sx - 50, base.y * sy - 6);
+    ctx.font = `600 ${Math.max(13, Math.round(15 * unit))}px IBM Plex Mono`;
+    ctx.fillText((faction?.name || base.factionId).toUpperCase(), base.x * sx - 54 * unit, base.y * sy - 8 * unit);
   });
 
   (state.drones || []).forEach((drone) => {
@@ -576,6 +605,7 @@ function drawTankerGame(canvas, state, localPlayerId) {
     ctx.arc(drone.x * sx, drone.y * sy, droneRadius * sx, 0, Math.PI * 2);
     ctx.fill();
     ctx.strokeStyle = "rgba(255, 209, 102, 0.3)";
+    ctx.lineWidth = Math.max(1, 1.25 * unit);
     ctx.beginPath();
     ctx.moveTo(drone.x * sx, drone.y * sy);
     ctx.lineTo((drone.x - drone.vx * 0.1) * sx, (drone.y - drone.vy * 0.1) * sy);
@@ -592,7 +622,7 @@ function drawTankerGame(canvas, state, localPlayerId) {
     ctx.rotate(tanker.heading);
     ctx.fillStyle = tanker.alive ? color : "#555";
     ctx.strokeStyle = tanker.playerId === localPlayerId ? "#fff" : "rgba(255,255,255,0.35)";
-    ctx.lineWidth = tanker.playerId === localPlayerId ? 3 : 1.5;
+    ctx.lineWidth = tanker.playerId === localPlayerId ? Math.max(2.2, 3.2 * unit) : Math.max(1.2, 1.8 * unit);
     ctx.beginPath();
     ctx.moveTo(tankerRadius * sx, 0);
     ctx.lineTo(-tankerRadius * sx, -10 * sy);
@@ -603,13 +633,14 @@ function drawTankerGame(canvas, state, localPlayerId) {
     ctx.stroke();
     if (tanker.cargo) {
       ctx.fillStyle = "#f5d85d";
-      ctx.fillRect(-2, -2, 12, 12);
+      const cargoSize = 11 * unit;
+      ctx.fillRect(-cargoSize * 0.2, -cargoSize * 0.2, cargoSize, cargoSize);
     }
     ctx.restore();
 
     ctx.fillStyle = tanker.playerId === localPlayerId ? "#ffffff" : "rgba(255,255,255,0.8)";
-    ctx.font = "500 12px IBM Plex Mono";
-    ctx.fillText(`${tanker.callsign} ${tanker.hp}hp`, x + 14, y - 14);
+    ctx.font = `500 ${Math.max(12, Math.round(13 * unit))}px IBM Plex Mono`;
+    ctx.fillText(`${tanker.callsign} ${tanker.hp}hp`, x + 16 * unit, y - 15 * unit);
   });
 }
 
@@ -631,7 +662,24 @@ async function setupTankerCommandDemo(root) {
   let state = null;
   let inputTimer = null;
   let socket = null;
+  let redrawFrame = 0;
   const controls = { thrust: 0, turn: 0 };
+
+  function drawCurrentState() {
+    if (state) {
+      drawTankerGame(canvas, state, playerId);
+    }
+  }
+
+  function scheduleCanvasRedraw() {
+    if (redrawFrame) {
+      cancelAnimationFrame(redrawFrame);
+    }
+    redrawFrame = requestAnimationFrame(() => {
+      redrawFrame = 0;
+      drawCurrentState();
+    });
+  }
 
   function isNativeFullscreen() {
     return document.fullscreenElement === root;
@@ -674,6 +722,7 @@ async function setupTankerCommandDemo(root) {
     root.dataset.fullscreen = mode;
     document.body.classList.toggle("tanker-fullscreen-active", mode !== "off" || isNativeFullscreen());
     syncFullscreenButton();
+    scheduleCanvasRedraw();
   }
 
   async function enterFullscreen() {
@@ -728,8 +777,8 @@ async function setupTankerCommandDemo(root) {
       ${(dashboard.leaderboard || []).map((entry) => `<article class="demo-item"><strong>${escapeHtml(entry.playerName)}</strong><p>${escapeHtml(entry.score)} score · ${escapeHtml(entry.deliveries)} deliveries · ${escapeHtml(entry.droneHits)} drone hits</p><span>${escapeHtml(entry.factionId)}${entry.alive ? "" : " · sunk"}</span></article>`).join("")}
     `;
     eventsRoot.innerHTML = `<p class="eyebrow">Recent game events</p>${renderTankerEvents(dashboard.recentEvents || [])}`;
-    list.innerHTML = `<article class="demo-item"><strong>${escapeHtml(dashboard.connectedPlayers || 0)} captains online</strong><p>${escapeHtml(dashboard.activeTankers || 0)} active tankers on the water</p><span>Revision ${escapeHtml(payloadState?.meta?.revision || 0)}</span></article>`;
-    drawTankerGame(canvas, payloadState, playerId);
+    list.innerHTML = `<article class="demo-item"><strong>${escapeHtml(dashboard.connectedPlayers || 0)} captains online</strong><p>${escapeHtml(dashboard.activeTankers || 0)} active tankers on the water</p><span>Last durable checkpoint ${escapeHtml(formatCheckpointTime(payloadState?.meta?.updatedAt))}</span></article>`;
+    drawCurrentState();
 
     const myTanker = (payloadState?.tankers || []).find((tanker) => tanker.playerId === playerId);
     playerStatus.textContent = myTanker ? `${myTanker.callsign} · ${myTanker.hp}hp · ${myTanker.cargo ? "cargo loaded" : "empty"}` : "Spectating";
@@ -843,6 +892,12 @@ async function setupTankerCommandDemo(root) {
       unlockLandscape();
     }
   });
+
+  window.addEventListener("resize", scheduleCanvasRedraw);
+  window.visualViewport?.addEventListener("resize", scheduleCanvasRedraw);
+  if (typeof ResizeObserver === "function") {
+    new ResizeObserver(() => scheduleCanvasRedraw()).observe(canvas);
+  }
 
   touchButtons.forEach((button) => {
     const key = button.dataset.touchControl;

@@ -2,9 +2,101 @@ const yearTarget = document.querySelector("[data-year]");
 const projectGrids = document.querySelectorAll("[data-project-grid]");
 const demoRoot = document.querySelector("[data-demo]");
 
+const BROWSER_SUPPORT_RULES = [
+  "Brave (nightlies only)",
+  "IE 11",
+  "Netscape 3.2",
+  "Opera 2-120, 130+",
+  "Firefox (non-Chromium builds only)",
+  "Safari on any macOS version",
+];
+
 if (yearTarget) {
   yearTarget.textContent = new Date().getFullYear();
 }
+
+function detectBrowserSupport() {
+  const ua = navigator.userAgent || "";
+  const vendor = navigator.vendor || "";
+  const isIPhone = /iPhone/i.test(ua);
+  const isIE11 = /Trident\/7\.0|rv:11\.0/i.test(ua);
+  const isNetscape32 = /Netscape\/3\.2/i.test(ua);
+  const operaMatch = ua.match(/(?:Opera|OPR)\/(\d+)/i);
+  const operaVersion = operaMatch ? Number.parseInt(operaMatch[1], 10) : null;
+  const isOperaSupported = Number.isFinite(operaVersion) && (operaVersion <= 120 || operaVersion >= 130);
+  const isFirefox = /Firefox\/(\d+)/i.test(ua) && !/Edg\//i.test(ua) && !/OPR\//i.test(ua) && !/Brave/i.test(ua);
+  const isSafari = /Safari\//i.test(ua) && /Apple/i.test(vendor) && !/Chrome|CriOS|Edg|OPR|Firefox|FxiOS/i.test(ua);
+  const isMacSafari = isSafari && /Macintosh|Mac OS X/i.test(ua);
+  const isBraveNightly = navigator.brave && /Chrome\/([\d.]+)/i.test(ua) && /Mobile/i.test(ua) === false;
+  const supported = Boolean(isBraveNightly || isIE11 || isNetscape32 || isOperaSupported || isFirefox || isMacSafari);
+
+  return {
+    supported,
+    isIPhone,
+  };
+}
+
+function dismissSupportModal() {
+  const modal = document.querySelector("[data-support-modal]");
+  if (!modal) {
+    return;
+  }
+  modal.hidden = true;
+  document.body.classList.remove("has-support-modal");
+  try {
+    localStorage.setItem("peg-browser-support-dismissed", "true");
+  } catch {
+    // ignore storage issues
+  }
+}
+
+function setupBrowserSupportNotice() {
+  const { supported, isIPhone } = detectBrowserSupport();
+  document.body.dataset.browserSupport = supported ? "supported" : "unsupported";
+  document.body.dataset.iphoneAlpha = isIPhone ? "true" : "false";
+
+  const noticeHost = document.createElement("div");
+  noticeHost.innerHTML = `
+    <div class="browser-support-banner" data-support-banner ${supported ? "hidden" : ""}>
+      <div>
+        <strong>Unsupported browser, mate.</strong>
+        <span>This thing officially supports ${BROWSER_SUPPORT_RULES.join(", ")}. ${isIPhone ? "iPhone users are on the alpha." : ""}</span>
+      </div>
+    </div>
+    <div class="browser-support-modal" data-support-modal ${supported ? "hidden" : ""}>
+      <div class="browser-support-modal-card panel" role="dialog" aria-modal="true" aria-labelledby="browser-support-title">
+        <p class="eyebrow">Compatibility warning</p>
+        <h2 id="browser-support-title">Your browser is off the blessed list.</h2>
+        <p class="browser-support-copy">Supported browsers:</p>
+        <ul class="principle-list compact-list browser-support-list">
+          ${BROWSER_SUPPORT_RULES.map((rule) => `<li>${rule}</li>`).join("")}
+        </ul>
+        <p class="browser-support-copy">${isIPhone ? "iPhone users are on the alpha." : "If you're not on that list, expect a bit of chaos."}</p>
+        <button class="button button-primary" type="button" data-support-dismiss>Fair enough</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(noticeHost);
+
+  const dismiss = noticeHost.querySelector("[data-support-dismiss]");
+  dismiss?.addEventListener("click", dismissSupportModal);
+
+  if (!supported) {
+    let dismissed = false;
+    try {
+      dismissed = localStorage.getItem("peg-browser-support-dismissed") === "true";
+    } catch {
+      dismissed = false;
+    }
+    if (!dismissed) {
+      document.body.classList.add("has-support-modal");
+    } else {
+      dismissSupportModal();
+    }
+  }
+}
+
+setupBrowserSupportNotice();
 
 function escapeHtml(value) {
   return String(value)

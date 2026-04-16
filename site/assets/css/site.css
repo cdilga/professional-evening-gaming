@@ -12,6 +12,7 @@
   --mint: #266d3e;
   --shadow: rgba(92, 64, 51, 0.22);
   --shell: min(1160px, calc(100vw - 32px));
+  --unsupported-banner-height: 92px;
 }
 
 * {
@@ -31,6 +32,14 @@ body {
     radial-gradient(circle at top left, rgba(255, 140, 66, 0.18), transparent 24%),
     radial-gradient(circle at 80% 10%, rgba(38, 109, 62, 0.1), transparent 22%),
     linear-gradient(180deg, #faf7f0 0%, var(--bg) 40%, var(--bg-deep) 100%);
+}
+
+body[data-browser-support="unsupported"] {
+  padding-bottom: calc(var(--unsupported-banner-height) + env(safe-area-inset-bottom, 0px));
+}
+
+body.has-support-modal {
+  overflow: hidden;
 }
 
 a {
@@ -191,6 +200,15 @@ h1,
 h2,
 p {
   margin: 0;
+}
+
+p,
+li,
+strong,
+span,
+a {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 h1 {
@@ -448,6 +466,15 @@ h2 {
   background: rgba(255, 255, 255, 0.03);
 }
 
+.mono-list {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.mono-list li {
+  line-height: 1.5;
+}
+
 .page-intro h1,
 .detail-hero h1 {
   max-width: none;
@@ -629,6 +656,56 @@ h2 {
     rgba(255, 255, 255, 0.52);
 }
 
+.browser-support-banner {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--unsupported-banner-height);
+  padding: 14px 20px calc(14px + env(safe-area-inset-bottom, 0px));
+  border-top: 2px solid rgba(92, 64, 51, 0.28);
+  background: rgba(61, 43, 31, 0.94);
+  color: #fff6ec;
+  box-shadow: 0 -10px 26px rgba(61, 43, 31, 0.22);
+}
+
+.browser-support-banner strong,
+.browser-support-banner span {
+  display: block;
+}
+
+.browser-support-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(61, 43, 31, 0.55);
+}
+
+.browser-support-modal[hidden],
+.browser-support-banner[hidden] {
+  display: none;
+}
+
+.browser-support-modal-card {
+  width: min(100%, 560px);
+  padding: 28px;
+}
+
+.browser-support-copy {
+  margin-top: 14px;
+}
+
+.browser-support-list {
+  margin-top: 12px;
+}
+
 .site-footer {
   padding: 0 0 32px;
   color: var(--muted);
@@ -656,6 +733,10 @@ h2 {
 }
 
 @media (max-width: 720px) {
+  :root {
+    --unsupported-banner-height: 120px;
+  }
+
   .site-header,
   .site-footer,
   .avatar-card,
@@ -677,7 +758,8 @@ h2 {
   .page-intro,
   .detail-hero,
   .platform-panel,
-  .principles-panel {
+  .principles-panel,
+  .browser-support-modal-card {
     padding: 22px;
   }
 
@@ -695,5 +777,9 @@ h2 {
 
   .demo-form .inline-form {
     grid-template-columns: 1fr;
+  }
+
+  .browser-support-banner {
+    padding-inline: 16px;
   }
 }

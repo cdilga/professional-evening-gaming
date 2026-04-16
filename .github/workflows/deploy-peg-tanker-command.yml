@@ -6,28 +6,112 @@ on:
     paths:
       - "projects/peg-tanker-command/**"
       - ".github/workflows/deploy-peg-tanker-command.yml"
-      - ".github/workflows/deploy-private-service.yml"
   workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 permissions:
   contents: read
   packages: write
 
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Validate tanker site wiring
+        run: node scripts/build-site.mjs --validate-only
+
+      - name: Syntax check tanker service
+        run: |
+          node --check projects/peg-tanker-command/app/src/game.js
+          node --check projects/peg-tanker-command/app/src/server.js
+
+  build-and-push:
+    runs-on: ubuntu-latest
+    needs: validate
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./projects/peg-tanker-command/app
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/cdilga/professional-evening-gaming-tanker-command:latest
+            ${{ env.REGISTRY }}/cdilga/professional-evening-gaming-tanker-command:${{ github.sha }}
+
   deploy:
-    uses: ./.github/workflows/deploy-private-service.yml
-    with:
-      image_name: cdilga/professional-evening-gaming-tanker-command
-      docker_context: ./projects/peg-tanker-command/app
-      deploy_dir: ~/professional-evening-gaming/peg-tanker-command
-      compose_path: projects/peg-tanker-command/infra/docker-compose.yml
-      env_example_path: projects/peg-tanker-command/infra/.env.example
-      deploy_script_path: projects/peg-tanker-command/infra/scripts/deploy.sh
-      setup_target_path: projects/peg-tanker-command/infra/scripts/setup-target.sh
-    secrets:
-      runtime_env: ${{ secrets.PEG_TANKER_COMMAND_RUNTIME_ENV }}
-      CF_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
-      CF_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    env:
+      SSH_KEY: ${{ secrets[vars.ACTIVE_TARGET_KEY_SECRET] }}
       DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-      TRUENAS_SSH_KEY: ${{ secrets.TRUENAS_SSH_KEY }}
-      TRITON_SSH_KEY: ${{ secrets.TRITON_SSH_KEY }}
+      TUNNEL_HOSTNAME: ${{ vars.SSH_TUNNEL_HOSTNAME }}
+      TUNNEL_SERVICE_TOKEN_ID: ${{ secrets.CF_CLIENT_ID }}
+      TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+      CF_ACCESS_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
+      CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+      RUNTIME_ENV: ${{ secrets.PEG_TANKER_COMMAND_RUNTIME_ENV }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Require tanker runtime env
+        run: |
+          if [ -z "$RUNTIME_ENV" ]; then
+            echo "PEG_TANKER_COMMAND_RUNTIME_ENV is empty or missing." >&2
+            exit 1
+          fi
+
+      - name: Install cloudflared
+        run: |
+          curl -fsSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb -o cloudflared.deb
+          sudo dpkg -i cloudflared.deb
+
+      - name: Deploy tanker to active private host
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          cloudflared access tcp --hostname ${TUNNEL_HOSTNAME} --url localhost:2222 &
+          TUNNEL_PID=$!
+          sleep 3
+
+          cat >> ~/.ssh/config <<EOF
+          Host deploy-target
+            HostName localhost
+            Port 2222
+            User ${DEPLOY_USER}
+            IdentityFile ~/.ssh/deploy_key
+            StrictHostKeyChecking no
+          EOF
+
+          ssh -F ~/.ssh/config deploy-target "mkdir -p ~/professional-evening-gaming/peg-tanker-command"
+          scp -F ~/.ssh/config projects/peg-tanker-command/infra/docker-compose.yml deploy-target:~/professional-evening-gaming/peg-tanker-command/docker-compose.yml
+          scp -F ~/.ssh/config projects/peg-tanker-command/infra/.env.example deploy-target:~/professional-evening-gaming/peg-tanker-command/.env.example
+          scp -F ~/.ssh/config projects/peg-tanker-command/infra/scripts/deploy.sh deploy-target:~/professional-evening-gaming/peg-tanker-command/deploy.sh
+          scp -F ~/.ssh/config projects/peg-tanker-command/infra/scripts/setup-target.sh deploy-target:~/professional-evening-gaming/peg-tanker-command/setup-target.sh
+          printf '%s\n' "$RUNTIME_ENV" | ssh -F ~/.ssh/config deploy-target "cat > ~/professional-evening-gaming/peg-tanker-command/.env"
+          ssh -F ~/.ssh/config deploy-target "chmod +x ~/professional-evening-gaming/peg-tanker-command/deploy.sh ~/professional-evening-gaming/peg-tanker-command/setup-target.sh && ~/professional-evening-gaming/peg-tanker-command/setup-target.sh && ~/professional-evening-gaming/peg-tanker-command/deploy.sh ${{ github.sha }}"
+
+          kill $TUNNEL_PID 2>/dev/null || true

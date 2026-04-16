@@ -21,6 +21,8 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -28,6 +30,8 @@ body {
   min-height: 100vh;
   color: var(--text);
   font-family: "Kalam", cursive;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   background:
     radial-gradient(circle at top left, rgba(255, 140, 66, 0.18), transparent 24%),
     radial-gradient(circle at 80% 10%, rgba(38, 109, 62, 0.1), transparent 22%),
@@ -467,11 +471,13 @@ h2 {
 }
 
 .mono-list {
+  max-width: 100%;
   overflow-wrap: anywhere;
   word-break: break-word;
 }
 
 .mono-list li {
+  max-width: 100%;
   line-height: 1.5;
 }
 

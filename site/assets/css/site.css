@@ -702,8 +702,19 @@ h2 {
   margin-top: 14px;
 }
 
-.browser-support-list {
+.browser-support-list,
+.browser-support-links {
   margin-top: 12px;
+}
+
+.browser-support-links a {
+  color: var(--accent-soft);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+.browser-support-links a:hover {
+  color: var(--text);
 }
 
 .site-footer {

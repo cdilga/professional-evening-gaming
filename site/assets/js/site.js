@@ -11,6 +11,44 @@ const BROWSER_SUPPORT_RULES = [
   "Safari on any macOS version",
 ];
 
+const PLATFORM_UPGRADE_LINKS = {
+  iphone: [
+    { label: "Install Safari on macOS", href: "https://support.apple.com/downloads/safari" },
+    { label: "Get Firefox for iPhone", href: "https://apps.apple.com/app/firefox-private-safe-browser/id989804926" },
+    { label: "Get Opera for iPhone", href: "https://apps.apple.com/app/opera-browser-web-browser/id1411869974" },
+  ],
+  ipad: [
+    { label: "Install Safari on macOS", href: "https://support.apple.com/downloads/safari" },
+    { label: "Get Firefox for iPad", href: "https://apps.apple.com/app/firefox-private-safe-browser/id989804926" },
+    { label: "Get Opera for iPad", href: "https://apps.apple.com/app/opera-browser-web-browser/id1411869974" },
+  ],
+  android: [
+    { label: "Get Firefox for Android", href: "https://play.google.com/store/apps/details?id=org.mozilla.firefox" },
+    { label: "Get Opera for Android", href: "https://play.google.com/store/apps/details?id=com.opera.browser" },
+    { label: "Brave releases", href: "https://brave.com/download-nightly/" },
+  ],
+  mac: [
+    { label: "Install Safari", href: "https://support.apple.com/downloads/safari" },
+    { label: "Get Firefox", href: "https://www.mozilla.org/firefox/new/" },
+    { label: "Brave nightly builds", href: "https://brave.com/download-nightly/" },
+  ],
+  windows: [
+    { label: "Install Firefox", href: "https://www.mozilla.org/firefox/new/" },
+    { label: "Install Opera", href: "https://www.opera.com/download" },
+    { label: "Brave nightly builds", href: "https://brave.com/download-nightly/" },
+  ],
+  linux: [
+    { label: "Install Firefox", href: "https://www.mozilla.org/firefox/new/" },
+    { label: "Install Opera", href: "https://www.opera.com/download" },
+    { label: "Brave nightly builds", href: "https://brave.com/download-nightly/" },
+  ],
+  other: [
+    { label: "Install Firefox", href: "https://www.mozilla.org/firefox/new/" },
+    { label: "Install Opera", href: "https://www.opera.com/download" },
+    { label: "Brave nightly builds", href: "https://brave.com/download-nightly/" },
+  ],
+};
+
 if (yearTarget) {
   yearTarget.textContent = new Date().getFullYear();
 }
@@ -19,6 +57,11 @@ function detectBrowserSupport() {
   const ua = navigator.userAgent || "";
   const vendor = navigator.vendor || "";
   const isIPhone = /iPhone/i.test(ua);
+  const isIPad = /iPad/i.test(ua);
+  const isAndroid = /Android/i.test(ua);
+  const isMac = /Macintosh|Mac OS X/i.test(ua);
+  const isWindows = /Windows/i.test(ua);
+  const isLinux = /Linux|X11/i.test(ua);
   const isIE11 = /Trident\/7\.0|rv:11\.0/i.test(ua);
   const isNetscape32 = /Netscape\/3\.2/i.test(ua);
   const operaMatch = ua.match(/(?:Opera|OPR)\/(\d+)/i);
@@ -26,13 +69,22 @@ function detectBrowserSupport() {
   const isOperaSupported = Number.isFinite(operaVersion) && (operaVersion <= 120 || operaVersion >= 130);
   const isFirefox = /Firefox\/(\d+)/i.test(ua) && !/Edg\//i.test(ua) && !/OPR\//i.test(ua) && !/Brave/i.test(ua);
   const isSafari = /Safari\//i.test(ua) && /Apple/i.test(vendor) && !/Chrome|CriOS|Edg|OPR|Firefox|FxiOS/i.test(ua);
-  const isMacSafari = isSafari && /Macintosh|Mac OS X/i.test(ua);
+  const isMacSafari = isSafari && isMac;
   const isBraveNightly = navigator.brave && /Chrome\/([\d.]+)/i.test(ua) && /Mobile/i.test(ua) === false;
   const supported = Boolean(isBraveNightly || isIE11 || isNetscape32 || isOperaSupported || isFirefox || isMacSafari);
+
+  let platform = "other";
+  if (isIPhone) platform = "iphone";
+  else if (isIPad) platform = "ipad";
+  else if (isAndroid) platform = "android";
+  else if (isMac) platform = "mac";
+  else if (isWindows) platform = "windows";
+  else if (isLinux) platform = "linux";
 
   return {
     supported,
     isIPhone,
+    platform,
   };
 }
 
@@ -51,9 +103,13 @@ function dismissSupportModal() {
 }
 
 function setupBrowserSupportNotice() {
-  const { supported, isIPhone } = detectBrowserSupport();
+  const { supported, isIPhone, platform } = detectBrowserSupport();
   document.body.dataset.browserSupport = supported ? "supported" : "unsupported";
   document.body.dataset.iphoneAlpha = isIPhone ? "true" : "false";
+
+  const upgradeLinks = (PLATFORM_UPGRADE_LINKS[platform] || PLATFORM_UPGRADE_LINKS.other)
+    .map((link) => `<li><a href="${link.href}" target="_blank" rel="noreferrer">${link.label}</a></li>`)
+    .join("");
 
   const noticeHost = document.createElement("div");
   noticeHost.innerHTML = `
@@ -72,6 +128,8 @@ function setupBrowserSupportNotice() {
           ${BROWSER_SUPPORT_RULES.map((rule) => `<li>${rule}</li>`).join("")}
         </ul>
         <p class="browser-support-copy">${isIPhone ? "iPhone users are on the alpha." : "If you're not on that list, expect a bit of chaos."}</p>
+        <p class="browser-support-copy">Grab a supported browser for your platform:</p>
+        <ul class="principle-list compact-list browser-support-links">${upgradeLinks}</ul>
         <button class="button button-primary" type="button" data-support-dismiss>Fair enough</button>
       </div>
     </div>

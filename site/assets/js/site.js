@@ -624,6 +624,7 @@ async function setupTankerCommandDemo(root) {
   const eventsRoot = document.querySelector("[data-tanker-events]");
   const playerStatus = root.querySelector("[data-player-status]");
   const connectionStatus = root.querySelector("[data-connection-status]");
+  const touchButtons = Array.from(root.querySelectorAll("[data-touch-control]"));
 
   let playerId = null;
   let state = null;
@@ -751,6 +752,24 @@ async function setupTankerCommandDemo(root) {
 
   refreshButton?.addEventListener("click", refresh);
 
+  touchButtons.forEach((button) => {
+    const key = button.dataset.touchControl;
+    const activate = (event) => {
+      event.preventDefault();
+      setControl(key, true);
+    };
+    const deactivate = (event) => {
+      event.preventDefault();
+      setControl(key, false);
+    };
+    button.addEventListener("touchstart", activate, { passive: false });
+    button.addEventListener("touchend", deactivate, { passive: false });
+    button.addEventListener("touchcancel", deactivate, { passive: false });
+    button.addEventListener("mousedown", activate);
+    button.addEventListener("mouseup", deactivate);
+    button.addEventListener("mouseleave", deactivate);
+  });
+
   function shouldCaptureGameKey(event) {
     const target = event.target;
     if (!target) {
@@ -820,7 +839,7 @@ async function loadDemo() {
     setDemoStatus(demoRoot, "Live demo unavailable", "error");
     const list = demoRoot.querySelector("[data-demo-list]");
     if (list) {
-      list.innerHTML = '<article class="demo-item"><p>The service is not answering right now. Check the deploy lane.</p></article>';
+      list.innerHTML = '<article class="demo-item"><p>The live tanker service is offline right now, so the realtime game will not load yet. The page itself is up, mobile controls are visible, and the backend deploy lane still needs attention.</p></article>';
     }
   }
 }

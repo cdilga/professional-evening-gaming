@@ -42,6 +42,36 @@ test("join creates player and tanker on valid faction", async () => {
   await app.close();
 });
 
+test("mike names get a secret tanker speed multiplier from digits", async () => {
+  const app = await buildApp({ statePath: tmpStatePath(), startLoop: false });
+  const response = await app.inject({
+    method: "POST",
+    url: "/v1/game/join",
+    payload: { name: "1mike2", faction_id: FACTIONS[0].id },
+  });
+  const payload = response.json();
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(payload.tanker.speedMultiplier, 1.2);
+
+  await app.close();
+});
+
+test("mike speed multiplier is capped at 9x", async () => {
+  const app = await buildApp({ statePath: tmpStatePath(), startLoop: false });
+  const response = await app.inject({
+    method: "POST",
+    url: "/v1/game/join",
+    payload: { name: "mike99", faction_id: FACTIONS[0].id },
+  });
+  const payload = response.json();
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(payload.tanker.speedMultiplier, 9);
+
+  await app.close();
+});
+
 test("join accepts player as a legacy name alias", async () => {
   const app = await buildApp({ statePath: tmpStatePath(), startLoop: false });
   const response = await app.inject({
@@ -132,6 +162,34 @@ test("player input stays live-only and does not advance durable revision", async
   await app.close();
 });
 
+test("mike tankers actually move faster", async () => {
+  const app = await buildApp({ statePath: tmpStatePath(), startLoop: false, enableTestRoutes: true });
+  const mikeJoin = await app.inject({
+    method: "POST",
+    url: "/v1/game/join",
+    payload: { name: "mike34", faction_id: FACTIONS[0].id },
+  });
+  const plainJoin = await app.inject({
+    method: "POST",
+    url: "/v1/game/join",
+    payload: { name: "PlainSailor", faction_id: FACTIONS[0].id },
+  });
+
+  const mikeTanker = app.tankerState.tankers.find((item) => item.id === mikeJoin.json().tanker.id);
+  const plainTanker = app.tankerState.tankers.find((item) => item.id === plainJoin.json().tanker.id);
+
+  mikeTanker.heading = 0;
+  plainTanker.heading = 0;
+  mikeTanker.controls = { thrust: 1, turn: 0 };
+  plainTanker.controls = { thrust: 1, turn: 0 };
+
+  stepGame(app.tankerState, 1000);
+
+  assert.ok(Math.hypot(mikeTanker.vx, mikeTanker.vy) > Math.hypot(plainTanker.vx, plainTanker.vy));
+
+  await app.close();
+});
+
 test("state persists across restart", async () => {
   const statePath = tmpStatePath();
 
@@ -214,12 +272,12 @@ test("delivery telemetry tracks cumulative barrels over time", async () => {
 
   app.tankerState.meta.elapsedMs += 1000;
   app.tankerState.meta.updatedAt = new Date().toISOString();
-  const state = stepGame(app.tankerState, 100);
+  const result = stepGame(app.tankerState, 100);
 
-  assert.equal(state.telemetry.totalBarrelsDelivered, 1);
-  assert.equal(state.dashboard.telemetry.totalBarrelsDelivered, 1);
-  assert.ok(Array.isArray(state.telemetry.deliveryHistory));
-  assert.equal(state.telemetry.deliveryHistory.at(-1).delivered, 1);
+  assert.equal(result.state.telemetry.totalBarrelsDelivered, 1);
+  assert.equal(result.state.dashboard.telemetry.totalBarrelsDelivered, 1);
+  assert.ok(Array.isArray(result.state.telemetry.deliveryHistory));
+  assert.equal(result.state.telemetry.deliveryHistory.at(-1).delivered, 1);
 
   await app.close();
 });

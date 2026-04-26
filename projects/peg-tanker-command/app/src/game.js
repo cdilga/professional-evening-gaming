@@ -43,6 +43,22 @@ function baseForFaction(factionId) {
   return FACTIONS.find((f) => f.id === factionId)?.base || { x: WORLD_WIDTH / 2, y: WORLD_HEIGHT / 2 };
 }
 
+function tankerSpeedMultiplierForName(name) {
+  const normalized = String(name || "").toLowerCase();
+  if (!normalized.includes("mike")) {
+    return 1;
+  }
+
+  const digits = normalized.match(/\d/g) || [];
+  if (!digits.length) {
+    return 1;
+  }
+
+  const whole = Number(digits[0] || 1);
+  const tenth = Number(digits[1] || 0) / 10;
+  return clamp(whole + tenth, 1, 9);
+}
+
 function factionStatsTemplate(faction) {
   return {
     id: faction.id,
@@ -243,6 +259,7 @@ function tankerTemplate(state, player) {
     id: nextId(state, "tanker"),
     playerId: player.id,
     factionId: player.factionId,
+    speedMultiplier: tankerSpeedMultiplierForName(player.name),
     callsign: `${player.factionId.toUpperCase()}-${Math.floor(Math.random() * 90 + 10)}`,
     x: base.x + (Math.random() * 80 - 40),
     y: base.y + (Math.random() * 80 - 40),
@@ -294,6 +311,7 @@ export function joinPlayer(state, payload = {}) {
       state.tankers.push(tanker);
     } else {
       tanker.factionId = factionId;
+      tanker.speedMultiplier = tankerSpeedMultiplierForName(player.name);
       const base = baseForFaction(factionId);
       tanker.x = base.x;
       tanker.y = base.y;
@@ -398,16 +416,18 @@ export function stepGame(state, deltaMs = TICK_MS) {
     }
 
     tanker.heading = wrapAngle(tanker.heading + tanker.controls.turn * 1.8 * dt);
-    const accel = tanker.controls.thrust * 90;
+    const speedMultiplier = clamp(Number(tanker.speedMultiplier || 1), 1, 9);
+    const accel = tanker.controls.thrust * 90 * speedMultiplier;
     tanker.vx += Math.cos(tanker.heading) * accel * dt;
     tanker.vy += Math.sin(tanker.heading) * accel * dt;
     tanker.vx *= 0.985;
     tanker.vy *= 0.985;
 
     const speed = Math.hypot(tanker.vx, tanker.vy);
-    if (speed > 190) {
-      tanker.vx = (tanker.vx / speed) * 190;
-      tanker.vy = (tanker.vy / speed) * 190;
+    const maxSpeed = 190 * speedMultiplier;
+    if (speed > maxSpeed) {
+      tanker.vx = (tanker.vx / speed) * maxSpeed;
+      tanker.vy = (tanker.vy / speed) * maxSpeed;
     }
 
     tanker.x = clamp(tanker.x + tanker.vx * dt, TANKER_RADIUS, WORLD_WIDTH - TANKER_RADIUS);

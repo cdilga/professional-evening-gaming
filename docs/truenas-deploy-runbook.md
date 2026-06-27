@@ -159,8 +159,8 @@ Use `triton` instead of `truenas` to target the other host.
 ## Ongoing automation
 
 - push/manual/branch deploys rewrite remote `.env` from the matching GitHub secret when that secret is set
-- `.github/workflows/service-healthcheck.yml` runs every 30 minutes against the active host
-- `.github/workflows/deployment-drift.yml` runs nightly and checks remote deployment files against repo copies
+- `.github/workflows/service-healthcheck.yml` is disabled in GitHub Actions; if re-enabled, it is manual-only against the active host
+- `.github/workflows/deployment-drift.yml` is disabled in GitHub Actions; if re-enabled, it is manual-only for checking remote deployment files against repo copies
 - service deploy scripts write `.deploy-state` so drift checks can compare the recorded tag to the running container image
 - current repo secrets were synced from the live `truenas` host, so cross-target deploys presently assume `triton` can share the same runtime env
 - if `triton` needs different values, introduce target-specific runtime secrets before relying on it as an independent deployment target

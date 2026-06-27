@@ -1,8 +1,6 @@
 name: Service Healthcheck
 
 on:
-  schedule:
-    - cron: "*/30 * * * *"
   workflow_dispatch:
 
 env:
